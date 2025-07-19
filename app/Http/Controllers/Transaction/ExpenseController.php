@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Transaction;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ExpenseController extends Controller
 {
@@ -13,7 +14,11 @@ class ExpenseController extends Controller
      */
     public function index()
     {
-        //
+        $expenses = auth()->user()->expenses()->with('expenseCategory')->get();
+
+        return Inertia::render('Dashboard/User/Expense/Index', [
+            'expenses' => $expenses,
+        ]);
     }
 
     /**

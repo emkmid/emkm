@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('debts', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->string('party_name');
+            $table->bigInteger('amount');
+            $table->date('loan_date');
+            $table->date('due_date')->nullable();
+            $table->text('note')->nullable();
+            $table->enum('status', ['Paid', 'Unpaid'])->default('Unpaid');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
