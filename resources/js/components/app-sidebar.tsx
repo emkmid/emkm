@@ -19,6 +19,20 @@ const mainNavItems: MainNavItem[] = [
         ],
     },
     {
+        title: 'Product',
+        icon: LayoutGrid,
+        subItems: [
+            {
+                title: 'lihat produk',
+                href: '/products',
+            },
+            {
+                title: 'tambah produk',
+                href: '/products/create',
+            },
+        ],
+    },
+    {
         title: 'Test',
         icon: Folder,
     },
