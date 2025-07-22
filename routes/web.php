@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Transaction\ExpenseController;
+use App\Http\Controllers\Transaction\IncomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,7 +16,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return Inertia::render('dashboard');
         })->name('dashboard');
 
-        Route::resource('expense', ExpenseController::class);
+        Route::resource('expenses', ExpenseController::class);
+        Route::resource('incomes', IncomeController::class);
+        Route::resource('products', ProductController::class);
     });
 });
 
