@@ -26,6 +26,7 @@ export interface MainNavItem {
     title: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    href?: string;
     subItems?: SubItems[];
 }
 

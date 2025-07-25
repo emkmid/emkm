@@ -4,19 +4,14 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, NotebookText } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: MainNavItem[] = [
     {
         title: 'Dashboard',
         icon: LayoutGrid,
-        subItems: [
-            {
-                title: 'Dashboard',
-                href: '/dashboard',
-            },
-        ],
+        href: '/dashboard',
     },
     {
         title: 'Product',
@@ -29,6 +24,28 @@ const mainNavItems: MainNavItem[] = [
             {
                 title: 'tambah produk',
                 href: '/products/create',
+            },
+        ],
+    },
+    {
+        title: 'Transaction',
+        icon: NotebookText,
+        subItems: [
+            {
+                title: 'Pengeluaran',
+                href: '/dashboard/expenses',
+            },
+            {
+                title: 'Pemasukan',
+                href: '/dashboard/incomes',
+            },
+            {
+                title: 'Hutang',
+                href: '/dashboard/incomes',
+            },
+            {
+                title: 'Piutang',
+                href: '/dashboard/incomes',
             },
         ],
     },
