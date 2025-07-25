@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, NotebookText } from 'lucide-react';
+import { BookOpen, Calculator, Folder, LayoutGrid, NotebookText } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: MainNavItem[] = [
@@ -50,8 +50,9 @@ const mainNavItems: MainNavItem[] = [
         ],
     },
     {
-        title: 'Test',
-        icon: Folder,
+        title: 'Hitung HPP',
+        icon: Calculator,
+        href: '/dashboard/hpp',
     },
 ];
 
