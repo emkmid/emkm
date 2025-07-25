@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class ExpenseController extends Controller
@@ -64,6 +65,8 @@ class ExpenseController extends Controller
      */
     public function edit(Expense $expense)
     {
+        Gate::authorize('update', $expense);
+
         $categories = ExpenseCategory::whereNull('user_id')
             ->orWhere('user_id', auth()->id())
             ->get();
@@ -79,6 +82,8 @@ class ExpenseController extends Controller
      */
     public function update(Request $request, Expense $expense)
     {
+        Gate::authorize('update', $expense);
+
         $validated = $request->validate([
             'expense_category_id' => 'required|exists:expense_categories,id',
             'description' => 'nullable|string|max:255',
@@ -98,6 +103,8 @@ class ExpenseController extends Controller
      */
     public function destroy(Expense $expense)
     {
+        Gate::authorize('destroy', $expense);
+
         $expense->delete();
         return redirect()
             ->route('expenses.index')

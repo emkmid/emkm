@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
 import { CheckCircleIcon } from 'lucide-react';
 import React from 'react';
@@ -49,6 +49,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 const MyExpenses: React.FC = () => {
     const { expenses, flash } = usePage<PageProps>().props;
     const [localFlash, setLocalFlash] = React.useState(flash);
+
+    const { processing, delete: destroy } = useForm();
 
     React.useEffect(() => {
         if (flash?.success || flash?.error) {
@@ -102,7 +104,7 @@ const MyExpenses: React.FC = () => {
                                     <TableHead>Deskripsi</TableHead>
                                     <TableHead>Jumlah</TableHead>
                                     <TableHead>Tanggal</TableHead>
-                                    <TableHead>Aksi</TableHead>
+                                    <TableHead style={{ width: '1%' }}>Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -114,12 +116,14 @@ const MyExpenses: React.FC = () => {
                                             <TableCell>Rp{Number(expense.amount).toLocaleString('id-ID')}</TableCell>
                                             <TableCell>{expense.date}</TableCell>
                                             <TableCell>
-                                                <Button asChild>
+                                                <Button asChild className="me-2 w-fit">
                                                     <Link href={route('expenses.edit', { expense: expense.id })}>Edit</Link>
                                                 </Button>
                                                 <AlertDialog>
                                                     <AlertDialogTrigger asChild>
-                                                        <Button variant="destructive">Hapus</Button>
+                                                        <Button variant="destructive" className="w-fit">
+                                                            Hapus
+                                                        </Button>
                                                     </AlertDialogTrigger>
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
@@ -131,7 +135,12 @@ const MyExpenses: React.FC = () => {
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Batal</AlertDialogCancel>
                                                             <AlertDialogAction asChild>
-                                                                
+                                                                <Button
+                                                                    disabled={processing}
+                                                                    onClick={() => destroy(route('expenses.destroy', { expense: expense.id }))}
+                                                                >
+                                                                    {processing ? 'Menghapus...' : 'Ya, hapus'}
+                                                                </Button>
                                                             </AlertDialogAction>
                                                         </AlertDialogFooter>
                                                     </AlertDialogContent>
