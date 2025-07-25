@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -24,7 +25,13 @@ class ExpenseController extends Controller
      */
     public function create()
     {
-        //
+        $categories = ExpenseCategory::whereNull('user_id')
+            ->orWhere('user_id', auth()->id())
+            ->get();
+
+        return Inertia::render('dashboard/user/expense/create', [
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -32,7 +39,16 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'expense_category_id' => 'required|exists:expense_categories,id',
+            'description' => 'nullable|string|max:255',
+            'amount' => 'required|integer|min:0',
+            'date' => 'required|date',
+        ]);
+
+        Auth::user()->expenses()->create($validated);
+
+        return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil ditambahkan.');
     }
 
     /**
@@ -40,7 +56,7 @@ class ExpenseController extends Controller
      */
     public function show(Expense $expense)
     {
-        //
+        
     }
 
     /**
@@ -48,7 +64,14 @@ class ExpenseController extends Controller
      */
     public function edit(Expense $expense)
     {
-        //
+        $categories = ExpenseCategory::whereNull('user_id')
+            ->orWhere('user_id', auth()->id())
+            ->get();
+
+        return Inertia::render('dashboard/user/expense/edit', [
+            'categories' => $categories,
+            'expense' => $expense
+        ]);
     }
 
     /**
@@ -56,7 +79,18 @@ class ExpenseController extends Controller
      */
     public function update(Request $request, Expense $expense)
     {
-        //
+        $validated = $request->validate([
+            'expense_category_id' => 'required|exists:expense_categories,id',
+            'description' => 'nullable|string|max:255',
+            'amount' => 'required|integer|min:0',
+            'date' => 'required|date',
+        ]);
+
+        $expense->update($validated);
+
+        return redirect()
+            ->route('expenses.index')
+            ->with('success', 'Data pengeluaran berhasil diperbarui.');
     }
 
     /**
@@ -64,6 +98,9 @@ class ExpenseController extends Controller
      */
     public function destroy(Expense $expense)
     {
-        //
+        $expense->delete();
+        return redirect()
+            ->route('expenses.index')
+            ->with('success', 'Pengeluaran berhasil dihapus.');
     }
 }

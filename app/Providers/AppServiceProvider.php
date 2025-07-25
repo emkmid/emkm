@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Expense;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Vinkla\Hashids\Facades\Hashids;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        
     }
 }

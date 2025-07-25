@@ -1,9 +1,23 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+
+import { CheckCircleIcon } from 'lucide-react';
 import React from 'react';
 
 interface Expense {
@@ -18,23 +32,60 @@ interface Expense {
 
 interface PageProps {
     expenses: Expense[];
+    flash?: {
+        success?: string;
+        error?: string;
+    };
     [key: string]: unknown;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
+        title: 'Pengeluaran',
+        href: '/dashboard/expenses',
     },
 ];
 
 const MyExpenses: React.FC = () => {
-    const { expenses } = usePage<PageProps>().props;
+    const { expenses, flash } = usePage<PageProps>().props;
+    const [localFlash, setLocalFlash] = React.useState(flash);
+
+    React.useEffect(() => {
+        if (flash?.success || flash?.error) {
+            const timeout = setTimeout(() => {
+                setLocalFlash({});
+            }, 3000);
+            return () => clearTimeout(timeout);
+        }
+    }, [flash]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title="Pengeluaran" />
+
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                {flash?.success && (
+                    <Alert
+                        variant="default"
+                        className="border-green-300 bg-green-100 text-green-700 dark:border-green-600 dark:bg-green-900/20 dark:text-green-200"
+                    >
+                        <CheckCircleIcon className="h-4 w-4" />
+                        <AlertTitle>Berhasil</AlertTitle>
+                        <AlertDescription>{flash.success}</AlertDescription>
+                    </Alert>
+                )}
+
+                {flash?.error && (
+                    <Alert
+                        variant="destructive"
+                        className="border-red-300 bg-red-100 text-red-700 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200"
+                    >
+                        <CheckCircleIcon className="h-4 w-4" />
+                        <AlertTitle>Gagal</AlertTitle>
+                        <AlertDescription>{flash.error}</AlertDescription>
+                    </Alert>
+                )}
+
                 <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Pengeluaran Saya</h3>
                     <Button asChild>
@@ -64,8 +115,27 @@ const MyExpenses: React.FC = () => {
                                             <TableCell>{expense.date}</TableCell>
                                             <TableCell>
                                                 <Button asChild>
-                                                    <Link href={route('expenses.create')}>Tambah Pengeluaran</Link>
+                                                    <Link href={route('expenses.edit', { expense: expense.id })}>Edit</Link>
                                                 </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="destructive">Hapus</Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Yakin ingin menghapus?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Data akan dihapus secara permanen dan tidak bisa dikembalikan.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                                                            <AlertDialogAction asChild>
+                                                                
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </TableCell>
                                         </TableRow>
                                     ))

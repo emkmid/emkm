@@ -8,11 +8,13 @@ trait HasHashid
 {
     public function getRouteKey()
     {
-        return Hashids::encode($this->id);
+        return Hashids::encode($this->getKey());
     }
 
-    public function getHashidAttribute()
+    public function resolveRouteBinding($value, $field = null)
     {
-        return Hashids::encode($this->id);
+        $decoded = Hashids::decode($value);
+        if (count($decoded) === 0) return null;
+        return $this->where('id', $decoded[0])->firstOrFail();
     }
 }
