@@ -16,7 +16,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return Inertia::render('dashboard');
         })->name('dashboard');
 
-        Route::get('/hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index');
+        Route::get('hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index');
+        Route::get('hpp/hasil', fn () => Inertia::render('dashboard/user/hpp/result'))->name('hpp.hasil');
 
         Route::resource('expenses', ExpenseController::class)->except('show');
         Route::resource('incomes', IncomeController::class)->except('show');

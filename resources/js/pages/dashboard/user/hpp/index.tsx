@@ -1,173 +1,222 @@
+import InputRupiah from '@/components/input-rupiah';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import React, { useEffect, useState } from 'react';
+import AppLayout from '@/layouts/app-layout';
+import { Head, router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
-type Item = {
+const komponen = ['Bahan Baku', 'Tenaga Kerja Langsung', 'Overhead Pabrik'];
+const satuan = ['pcs', 'kg', 'liter', 'meter', 'bungkus', 'unit'];
+const MAX_ITEM = 30;
+
+interface Item {
     name: string;
     qty: number;
     unit: string;
     price: number;
-};
+}
 
-type Komponen = 'Bahan Baku' | 'Tenaga Kerja Langsung' | 'Overhead Pabrik';
+interface KomponenForm {
+    [key: string]: Item[];
+}
 
-const satuanUmum = ['pcs', 'kg', 'liter', 'meter', 'bungkus', 'unit'];
-
-const HPPForm: React.FC = () => {
-    const [jumlahProduksi, setJumlahProduksi] = useState(1);
+export default function HppForm() {
+    const [jumlahProduksi, setJumlahProduksi] = useState<string>('1');
     const [kategori, setKategori] = useState('');
     const [markup, setMarkup] = useState(30);
-    const [rekomendasi, setRekomendasi] = useState('');
-    const [data, setData] = useState<Record<Komponen, Item[]>>({
-        'Bahan Baku': [],
-        'Tenaga Kerja Langsung': [],
-        'Overhead Pabrik': [],
-    });
-
-    const kategoriMap: Record<string, { rekom: string; markup: number }> = {
-        makanan_berat: { rekom: '100% – 200%', markup: 150 },
-        camilan: { rekom: '150% – 300%', markup: 200 },
-        minuman: { rekom: '200% – 400%', markup: 250 },
-        frozen: { rekom: '30% – 100%', markup: 50 },
-        roti: { rekom: '100% – 250%', markup: 150 },
-        catering: { rekom: '50% – 150%', markup: 100 },
-    };
+    const [markupInfo, setMarkupInfo] = useState('');
+    const [formData, setFormData] = useState<KomponenForm>({});
 
     useEffect(() => {
-        if (kategori && kategoriMap[kategori]) {
-            setRekomendasi(kategoriMap[kategori].rekom);
-            setMarkup(kategoriMap[kategori].markup);
+        const initialForm: KomponenForm = {};
+        komponen.forEach((k) => {
+            initialForm[k] = k === 'Bahan Baku' ? [{ name: '', qty: 0, unit: 'pcs', price: 0 }] : [];
+        });
+        setFormData(initialForm);
+    }, []);
+
+    useEffect(() => {
+        const rekomendasi: Record<string, { info: string; value: number }> = {
+            makanan_berat: { info: 'Rekomendasi: 100% – 200%', value: 150 },
+            camilan: { info: 'Rekomendasi: 150% – 300%', value: 200 },
+            minuman: { info: 'Rekomendasi: 200% – 400%', value: 250 },
+            frozen: { info: 'Rekomendasi: 30% – 100%', value: 50 },
+            roti: { info: 'Rekomendasi: 100% – 250%', value: 150 },
+            catering: { info: 'Rekomendasi: 50% – 150%', value: 100 },
+        };
+        const data = rekomendasi[kategori];
+        if (data) {
+            setMarkupInfo(data.info);
+            setMarkup(data.value);
         }
     }, [kategori]);
 
-    const tambahItem = (komponen: Komponen) => {
-        setData((prev) => ({
-            ...prev,
-            [komponen]: [...prev[komponen], { name: '', qty: 1, unit: '', price: 0 }],
-        }));
+    const handleItemChange = (komp: string, index: number, field: keyof Item, value: string | number) => {
+        const updated = [...formData[komp]];
+        updated[index] = {
+            ...updated[index],
+            [field]: field === 'price' || field === 'qty' ? Number(value) : value,
+        };
+        setFormData({ ...formData, [komp]: updated });
     };
 
-    const hapusItem = (komponen: Komponen, index: number) => {
-        setData((prev) => ({
-            ...prev,
-            [komponen]: prev[komponen].filter((_, i) => i !== index),
-        }));
-    };
-
-    const updateItem = (komponen: Komponen, index: number, field: keyof Item, value: any) => {
-        setData((prev) => {
-            const updated = [...prev[komponen]];
-            updated[index] = { ...updated[index], [field]: field === 'price' || field === 'qty' ? Number(value) : value };
-            return { ...prev, [komponen]: updated };
+    const addItem = (komp: string) => {
+        if (formData[komp].length >= MAX_ITEM) return alert(`Maksimal ${MAX_ITEM} item untuk ${komp}`);
+        const unit = komp === 'Bahan Baku' ? 'pcs' : komp === 'Tenaga Kerja Langsung' ? 'orang' : 'buah';
+        setFormData({
+            ...formData,
+            [komp]: [...formData[komp], { name: '', qty: 0, unit, price: 0 }],
         });
     };
 
-    const formatRupiah = (value: number): string => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+    const removeItem = (komp: string, index: number) => {
+        const updated = [...formData[komp]];
+        updated.splice(index, 1);
+        setFormData({ ...formData, [komp]: updated });
+    };
 
-    const hitungHPP = () => {
-        if (jumlahProduksi <= 0 || jumlahProduksi > 500) {
-            alert('Jumlah produksi harus antara 1 - 500');
-            return;
+    const handleHitung = () => {
+        if (!jumlahProduksi || Number(jumlahProduksi) <= 0) return alert('Jumlah produksi harus diisi dan lebih dari 0');
+        if (!kategori) return alert('Kategori harus dipilih');
+
+        for (const komp of komponen) {
+            for (let i = 0; i < formData[komp].length; i++) {
+                const item = formData[komp][i];
+                if (!item.name.trim()) return alert(`Nama item pada ${komp} ke-${i + 1} harus diisi`);
+                if (!item.qty || item.qty <= 0) return alert(`Qty pada ${komp} ke-${i + 1} harus lebih dari 0`);
+                if (!item.price || item.price <= 0) return alert(`Harga pada ${komp} ke-${i + 1} harus lebih dari 0`);
+                if (komp === 'Bahan Baku' && !item.unit) return alert(`Satuan pada ${komp} ke-${i + 1} harus dipilih`);
+            }
         }
 
+        const produksi = Number(jumlahProduksi);
+        if (isNaN(produksi) || produksi <= 0 || produksi > 500) return alert('Jumlah produksi tidak valid (maks 500)');
+        if (!formData['Bahan Baku'] || formData['Bahan Baku'].length === 0) return alert('Mohon isi setidaknya satu bahan baku');
+
         let total = 0;
-        Object.values(data).forEach((items) => {
-            items.forEach((item) => {
-                total += item.qty * item.price;
-            });
-        });
+        const ringkasan: Record<string, number> = {};
+        for (const komp of komponen) {
+            const subtotal = formData[komp].reduce((sum, item) => sum + item.qty * item.price, 0);
+            ringkasan[komp] = subtotal;
+            total += subtotal;
+        }
 
-        const hpp = total / jumlahProduksi;
-        const hargaJual = hpp * (1 + markup / 100);
+        const hppSatuan = total / produksi;
+        const hargaJual = hppSatuan * (1 + markup / 100);
 
-        alert(`Total Biaya: ${formatRupiah(total)}\nHPP Satuan: ${formatRupiah(hpp)}\nHarga Jual: ${formatRupiah(hargaJual)}`);
+        localStorage.setItem('hpp_result', JSON.stringify({ total, hppSatuan, hargaJual, ringkasan, jumlahProduksi: produksi }));
+
+        router.visit('/dashboard/hpp/hasil');
     };
 
-    return (
-        <div className="mx-auto max-w-4xl space-y-8">
-            <h1 className="text-center text-2xl font-bold">Form Perhitungan HPP</h1>
+    const renderInputProduksi = () => (
+        <div className="mb-6">
+            <Label htmlFor="jumlahProduksi">Jumlah Unit Produksi (maksimal 500):</Label>
+            <Input
+                id="jumlahProduksi"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={jumlahProduksi}
+                onChange={(e) => setJumlahProduksi(e.target.value.replace(/\D/g, ''))}
+            />
+        </div>
+    );
 
-            <div>
-                <Label>Jumlah Produksi (maks 500)</Label>
-                <Input type="number" min={1} max={500} value={jumlahProduksi} onChange={(e) => setJumlahProduksi(Number(e.target.value))} />
-            </div>
-
-            <div>
-                <Label>Kategori Produk</Label>
-                <Select onValueChange={(v) => setKategori(v)}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="-- Pilih Kategori --" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.keys(kategoriMap).map((key) => (
-                            <SelectItem key={key} value={key}>
-                                {key.replace('_', ' ').toUpperCase()}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                {rekomendasi && <p className="mt-1 text-sm text-gray-500">Rekomendasi: {rekomendasi}</p>}
-            </div>
-
-            <div>
-                <Label>Markup (%)</Label>
-                <Input type="number" min={0} value={markup} onChange={(e) => setMarkup(Number(e.target.value))} />
-            </div>
-
-            {(['Bahan Baku', 'Tenaga Kerja Langsung', 'Overhead Pabrik'] as Komponen[]).map((komponen) => (
-                <div key={komponen} className="border-t pt-4">
-                    <h2 className="mb-2 font-semibold">{komponen}</h2>
-                    {data[komponen].map((item, i) => (
-                        <div key={i} className="mb-2 flex flex-wrap items-end gap-2">
-                            <Input placeholder="Nama" value={item.name} onChange={(e) => updateItem(komponen, i, 'name', e.target.value)} />
+    const renderKomponenSection = () =>
+        komponen.map((komp) => (
+            <div className="mb-6" key={komp}>
+                <h2 className="form-label">{komp}</h2>
+                <div className="mb-2 space-y-2">
+                    {formData[komp]?.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                            <Input
+                                placeholder="Nama Item"
+                                value={item.name}
+                                onChange={(e) => handleItemChange(komp, idx, 'name', e.target.value)}
+                                className="w-48"
+                            />
                             <Input
                                 type="number"
                                 placeholder="Qty"
+                                min={0}
+                                value={item.qty === 0 ? '' : item.qty}
+                                onChange={(e) => handleItemChange(komp, idx, 'qty', e.target.value)}
                                 className="w-24"
-                                value={item.qty}
-                                onChange={(e) => updateItem(komponen, i, 'qty', e.target.value)}
                             />
-                            {komponen === 'Bahan Baku' ? (
-                                <select
-                                    className="rounded border px-2 py-1"
-                                    value={item.unit}
-                                    onChange={(e) => updateItem(komponen, i, 'unit', e.target.value)}
-                                >
-                                    <option value="">Pilih Satuan</option>
-                                    {satuanUmum.map((s) => (
-                                        <option key={s} value={s}>
-                                            {s}
-                                        </option>
-                                    ))}
-                                </select>
+                            {komp === 'Bahan Baku' ? (
+                                <Select value={item.unit} onValueChange={(val) => handleItemChange(komp, idx, 'unit', val)}>
+                                    <SelectTrigger className="w-36">
+                                        <SelectValue placeholder="Satuan" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {satuan.map((s) => (
+                                            <SelectItem key={s} value={s}>
+                                                {s}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             ) : (
-                                <span className="text-sm text-gray-500">{komponen === 'Tenaga Kerja Langsung' ? '/ orang' : '/ buah'}</span>
+                                <span className="text-sm text-gray-500">/ {komp === 'Tenaga Kerja Langsung' ? 'orang' : 'buah'}</span>
                             )}
-                            <Input
-                                type="number"
-                                placeholder="Harga Satuan"
-                                className="w-36"
-                                value={item.price}
-                                onChange={(e) => updateItem(komponen, i, 'price', e.target.value)}
-                            />
-                            <Button variant="destructive" onClick={() => hapusItem(komponen, i)}>
+                            <InputRupiah value={item.price} onChange={(val) => handleItemChange(komp, idx, 'price', val)} className="w-36" />
+                            <Button type="button" onClick={() => removeItem(komp, idx)} variant="destructive">
                                 Hapus
                             </Button>
                         </div>
                     ))}
-                    <Button variant="secondary" size="sm" onClick={() => tambahItem(komponen)}>
-                        + Tambah {komponen}
-                    </Button>
                 </div>
-            ))}
+                <Button type="button" onClick={() => addItem(komp)}>
+                    + Tambah Item
+                </Button>
+            </div>
+        ));
 
-            <Button className="w-full bg-blue-600 text-white hover:bg-blue-700" onClick={hitungHPP}>
-                Hitung HPP & Harga Jual
-            </Button>
+    const renderKategoriSection = () => (
+        <div className="mb-6">
+            <Label>Kategori Produk:</Label>
+            <Select value={kategori} onValueChange={setKategori}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Pilih Kategori" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="makanan_berat">Makanan Berat</SelectItem>
+                    <SelectItem value="camilan">Camilan / Snack</SelectItem>
+                    <SelectItem value="minuman">Minuman</SelectItem>
+                    <SelectItem value="frozen">Frozen Food</SelectItem>
+                    <SelectItem value="roti">Roti / Kue</SelectItem>
+                    <SelectItem value="catering">Catering / Pesanan Khusus</SelectItem>
+                </SelectContent>
+            </Select>
+            {markupInfo && <p className="mt-1 text-sm text-gray-500">{markupInfo}</p>}
         </div>
     );
-};
 
-export default HPPForm;
+    const renderMarkupSection = () => (
+        <div className="mb-6">
+            <Label>Markup (%):</Label>
+            <Input type="number" value={markup} onChange={(e) => setMarkup(Number(e.target.value))} />
+        </div>
+    );
+
+    return (
+        <AppLayout>
+            <Head title="HPP" />
+            <div className="mx-auto max-w-5xl p-6">
+                <div className="card">
+                    <h1 className="mb-6 text-center text-2xl font-bold">Form Perhitungan HPP Produk</h1>
+                    {renderInputProduksi()}
+                    {renderKomponenSection()}
+                    {renderKategoriSection()}
+                    {renderMarkupSection()}
+                    <Button onClick={handleHitung} className="bg-blue-500 text-white hover:bg-blue-600">
+                        Hitung HPP & Harga Jual
+                    </Button>
+                </div>
+            </div>
+        </AppLayout>
+    );
+}
