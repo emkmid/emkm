@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Transaction\Category\ExpenseCategoryController;
+use App\Http\Controllers\Transaction\Category\IncomeCategoryController;
+use App\Http\Controllers\Transaction\DebtController;
 use App\Http\Controllers\Transaction\ExpenseController;
 use App\Http\Controllers\Transaction\IncomeController;
 use Illuminate\Support\Facades\Route;
@@ -19,8 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index');
         Route::get('hpp/hasil', fn () => Inertia::render('dashboard/user/hpp/result'))->name('hpp.hasil');
 
-        Route::resource('expense', ExpenseController::class);
-        Route::resource('income', IncomeController::class);
+        Route::resource('expenses', ExpenseController::class);
+        Route::resource('incomes', IncomeController::class);
         Route::resource('debt', DebtController::class);
 
         Route::resource('expense-category', ExpenseCategoryController::class);

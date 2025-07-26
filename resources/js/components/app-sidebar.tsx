@@ -15,7 +15,7 @@ const mainNavItems: MainNavItem[] = [
     },
     {
         title: 'Product',
-        icon: LayoutGrid, // Anda bisa mengganti ikonnya
+        icon: LayoutGrid,
         subItems: [
             {
                 title: 'Lihat Produk',
