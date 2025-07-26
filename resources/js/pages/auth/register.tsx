@@ -1,119 +1,151 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { useEffect, type FormEventHandler } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowRight, AtSign, Lock, User } from 'lucide-react';
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
+// Import komponen UI yang sudah ada
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-
-type RegisterForm = {
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-};
+import InputError from '@/components/input-error';
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
+    const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
     });
 
+    useEffect(() => {
+        return () => {
+            reset('password', 'password_confirmation');
+        };
+    }, []);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+        post(route('register'));
     };
 
     return (
-        <AuthLayout title="Create an account" description="Enter your details below to create your account">
-            <Head title="Register" />
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                            id="name"
-                            type="text"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            disabled={processing}
-                            placeholder="Full name"
-                        />
-                        <InputError message={errors.name} className="mt-2" />
-                    </div>
+        <div className="flex min-h-screen w-full flex-wrap bg-gray-100 dark:bg-gray-900">
+            <Head title="Daftar Akun Baru" />
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            tabIndex={2}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            disabled={processing}
-                            placeholder="email@example.com"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={3}
-                            autoComplete="new-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            disabled={processing}
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password_confirmation">Confirm password</Label>
-                        <Input
-                            id="password_confirmation"
-                            type="password"
-                            required
-                            tabIndex={4}
-                            autoComplete="new-password"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            disabled={processing}
-                            placeholder="Confirm password"
-                        />
-                        <InputError message={errors.password_confirmation} />
-                    </div>
-
-                    <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Create account
-                    </Button>
+            {/* Panel Kiri - Branding */}
+            <div className="relative hidden w-1/2 flex-col items-center justify-center bg-primary/90 text-white lg:flex">
+                <div className="absolute inset-0 bg-primary opacity-50"></div>
+                <div className="z-10 text-center">
+                    <h1 className="text-4xl font-bold">Mulai Transformasi Bisnis Anda</h1>
+                    <p className="mt-4 max-w-md text-lg opacity-90">
+                        Bergabunglah dengan EMKM dan ambil langkah pertama menuju manajemen keuangan yang lebih baik dan
+                        terorganisir.
+                    </p>
                 </div>
+            </div>
 
-                <div className="text-center text-sm text-muted-foreground">
-                    Already have an account?{' '}
-                    <TextLink href={route('login')} tabIndex={6}>
-                        Log in
-                    </TextLink>
+            {/* Panel Kanan - Form Pendaftaran */}
+            <div className="flex w-full items-center justify-center p-6 lg:w-1/2">
+                <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg transition-opacity duration-700 ease-in animate-fade-in dark:bg-gray-800">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Buat Akun Baru</h2>
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            Isi data di bawah untuk memulai.
+                        </p>
+                    </div>
+
+                    <form onSubmit={submit} className="space-y-6">
+                        {/* Nama */}
+                        <div>
+                            <Label htmlFor="name">Nama Lengkap</Label>
+                            <div className="relative mt-2">
+                                <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    value={data.name}
+                                    className="pl-10"
+                                    autoComplete="name"
+                                    autoFocus
+                                    onChange={(e) => setData('name', e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <InputError message={errors.name} className="mt-2" />
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                            <Label htmlFor="email">Alamat Email</Label>
+                            <div className="relative mt-2">
+                                <AtSign className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    value={data.email}
+                                    className="pl-10"
+                                    autoComplete="username"
+                                    onChange={(e) => setData('email', e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <InputError message={errors.email} className="mt-2" />
+                        </div>
+
+                        {/* Password */}
+                        <div>
+                            <Label htmlFor="password">Password</Label>
+                            <div className="relative mt-2">
+                                <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    name="password"
+                                    value={data.password}
+                                    className="pl-10"
+                                    autoComplete="new-password"
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <InputError message={errors.password} className="mt-2" />
+                        </div>
+
+                        {/* Konfirmasi Password */}
+                        <div>
+                            <Label htmlFor="password_confirmation">Konfirmasi Password</Label>
+                            <div className="relative mt-2">
+                                <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                <Input
+                                    id="password_confirmation"
+                                    type="password"
+                                    name="password_confirmation"
+                                    value={data.password_confirmation}
+                                    className="pl-10"
+                                    autoComplete="new-password"
+                                    onChange={(e) => setData('password_confirmation', e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <InputError message={errors.password_confirmation} className="mt-2" />
+                        </div>
+
+                        <div className="flex flex-col items-center space-y-4">
+                            <Button className="w-full" disabled={processing}>
+                                {processing ? 'Memproses...' : 'Daftar'}
+                            </Button>
+
+                            <Link
+                                href={route('login')}
+                                className="group inline-flex items-center text-sm font-medium text-primary hover:underline"
+                            >
+                                Sudah punya akun? Masuk
+                                <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </AuthLayout>
+            </div>
+        </div>
     );
 }
