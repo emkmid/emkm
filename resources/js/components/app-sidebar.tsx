@@ -15,15 +15,15 @@ const mainNavItems: MainNavItem[] = [
     },
     {
         title: 'Product',
-        icon: LayoutGrid,
+        icon: LayoutGrid, // Anda bisa mengganti ikonnya
         subItems: [
             {
-                title: 'lihat produk',
-                href: '/products',
+                title: 'Lihat Produk',
+                href: '/dashboard/products',
             },
             {
-                title: 'tambah produk',
-                href: '/products/create',
+                title: 'Tambah Produk',
+                href: '/dashboard/products/create',
             },
         ],
     },
