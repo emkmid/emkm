@@ -5,62 +5,94 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ProductController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar produk milik pengguna.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $products = auth()->user()->products()->with('product_category')->latest()->paginate(10);
+
+        return Inertia::render('Dashboard/User/Product/Index', [
+            'products' => $products,
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form untuk membuat produk baru.
      */
-    public function create()
+    public function create(): Response
     {
-        //
+        return Inertia::render('Dashboard/User/Product/Create', [
+            'categories' => auth()->user()->productCategories()->get(['id', 'name']),
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan produk baru ke dalam database.
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'product_category_id' => 'required|exists:product_categories,id',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'description' => 'nullable|string',
+        ]);
+
+        auth()->user()->products()->create($validated);
+
+        return redirect()->route('product.index')->with('success', 'Product created successfully.');
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan form untuk mengedit produk.
      */
-    public function show(Product $product)
+    public function edit(Product $product): Response
     {
-        //
+        Gate::authorize('update', $product);
+
+        return Inertia::render('Dashboard/User/Product/Edit', [
+            'product' => $product,
+            'categories' => auth()->user()->productCategories()->get(['id', 'name']),
+        ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Memperbarui data produk di database.
      */
     public function update(Request $request, Product $product)
     {
-        //
+        Gate::authorize('update', $product);
+
+        $validated = $request->validate([
+            'product_category_id' => 'required|exists:product_categories,id',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'description' => 'nullable|string',
+        ]);
+
+        $product->update($validated);
+
+        return redirect()->route('product.index')->with('success', 'Product updated successfully.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus produk dari database.
      */
     public function destroy(Product $product)
     {
-        //
+        Gate::authorize('delete', $product);
+
+        $product->delete();
+
+        return redirect()->route('product.index')->with('success', 'Product deleted successfully.');
     }
 }

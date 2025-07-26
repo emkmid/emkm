@@ -5,62 +5,36 @@ namespace App\Http\Controllers\Transaction\Category;
 use App\Http\Controllers\Controller;
 use App\Models\IncomeCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
 
 class IncomeCategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $categories = auth()->user()->incomeCategories()->latest()->paginate(10);
+        return Inertia::render('Dashboard/User/IncomeCategory/Index', ['categories' => $categories]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate(['name' => 'required|string|max:255']);
+        auth()->user()->incomeCategories()->create($validated);
+        return redirect()->route('income-category.index')->with('success', 'Category created.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(IncomeCategory $incomeCategory)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(IncomeCategory $incomeCategory)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, IncomeCategory $incomeCategory)
     {
-        //
+        Gate::authorize('update', $incomeCategory);
+        $validated = $request->validate(['name' => 'required|string|max:255']);
+        $incomeCategory->update($validated);
+        return redirect()->route('income-category.index')->with('success', 'Category updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(IncomeCategory $incomeCategory)
     {
-        //
+        Gate::authorize('delete', $incomeCategory);
+        $incomeCategory->delete();
+        return redirect()->route('income-category.index')->with('success', 'Category deleted.');
     }
 }
