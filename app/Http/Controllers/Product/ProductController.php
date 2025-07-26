@@ -16,9 +16,10 @@ class ProductController extends Controller
      */
     public function index(): Response
     {
+
         $products = auth()->user()->products()->with('product_category')->latest()->paginate(10);
 
-        return Inertia::render('Dashboard/User/Product/Index', [
+        return Inertia::render('dashboard/user/product/index', [
             'products' => $products,
         ]);
     }
@@ -28,7 +29,7 @@ class ProductController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Dashboard/User/Product/Create', [
+        return Inertia::render('dashboard/user/product/create', [
             'categories' => auth()->user()->productCategories()->get(['id', 'name']),
         ]);
     }

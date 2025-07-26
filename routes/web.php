@@ -18,9 +18,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index');
 
-        Route::resource('expenses', ExpenseController::class)->except('show');
-        Route::resource('incomes', IncomeController::class)->except('show');
+        Route::resource('expense', ExpenseController::class);
+        Route::resource('income', IncomeController::class);
+        Route::resource('debt', DebtController::class);
+
+        Route::resource('expense-category', ExpenseCategoryController::class);
+        Route::resource('income-category', IncomeCategoryController::class);
+
         Route::resource('products', ProductController::class);
+        Route::resource('product-category', ProductCategoryController::class);
+
+        // Route::get('/product', fn () => Inertia::render('dashboard/user/product/Index'))->name('product.index');
     });
 });
 
