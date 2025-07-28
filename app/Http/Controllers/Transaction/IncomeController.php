@@ -22,7 +22,7 @@ class IncomeController extends Controller
         $incomes = auth()->user()->incomes()->with('income_category')->latest()->paginate(10);
 
         // Render halaman Inertia dengan data pemasukan
-        return Inertia::render('Dashboard/User/Income/Index', [
+        return Inertia::render('dashboard/user/income/index', [
             'incomes' => $incomes,
         ]);
     }
@@ -33,7 +33,7 @@ class IncomeController extends Controller
     public function create(): Response
     {
         // Render halaman Inertia dengan data kategori pemasukan milik pengguna
-        return Inertia::render('Dashboard/User/Income/Create', [
+        return Inertia::render('dashboard/user/income/create', [
             'categories' => auth()->user()->incomeCategories()->get(['id', 'name']),
         ]);
     }
@@ -67,7 +67,7 @@ class IncomeController extends Controller
         Gate::authorize('update', $income);
 
         // Render halaman Inertia dengan data pemasukan dan kategori
-        return Inertia::render('Dashboard/User/Income/Edit', [
+        return Inertia::render('dashboard/user/income/edit', [
             'income' => $income,
             'categories' => auth()->user()->incomeCategories()->get(['id', 'name']),
         ]);
