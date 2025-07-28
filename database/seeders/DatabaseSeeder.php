@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            ExpenseCagtegorySeeder::class
+            ExpenseCagtegorySeeder::class,
+            ProductCategorySeeder::class,
         ]);
     }
 }

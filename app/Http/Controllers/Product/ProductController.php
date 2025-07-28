@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -16,8 +17,7 @@ class ProductController extends Controller
      */
     public function index(): Response
     {
-
-        $products = auth()->user()->products()->with('product_category')->latest()->paginate(10);
+        $products = auth()->user()->products()->with('product_category')->latest()->get();
 
         return Inertia::render('dashboard/user/product/index', [
             'products' => $products,
@@ -30,7 +30,7 @@ class ProductController extends Controller
     public function create(): Response
     {
         return Inertia::render('dashboard/user/product/create', [
-            'categories' => auth()->user()->productCategories()->get(['id', 'name']),
+            'categories' => ProductCategory::whereNull('user_id')->orWhere('user_id', auth()->id())->get(['id', 'name']),
         ]);
     }
 
@@ -44,12 +44,11 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'description' => 'nullable|string',
         ]);
 
         auth()->user()->products()->create($validated);
 
-        return redirect()->route('product.index')->with('success', 'Product created successfully.');
+        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
     /**
@@ -59,9 +58,9 @@ class ProductController extends Controller
     {
         Gate::authorize('update', $product);
 
-        return Inertia::render('Dashboard/User/Product/Edit', [
+        return Inertia::render('dashboard/user/product/edit', [
             'product' => $product,
-            'categories' => auth()->user()->productCategories()->get(['id', 'name']),
+            'categories' => ProductCategory::whereNull('user_id')->orWhere('user_id', auth()->id())->get(['id', 'name']),
         ]);
     }
 
@@ -77,12 +76,11 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'description' => 'nullable|string',
         ]);
 
         $product->update($validated);
 
-        return redirect()->route('product.index')->with('success', 'Product updated successfully.');
+        return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
     }
 
     /**
@@ -94,6 +92,6 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('product.index')->with('success', 'Product deleted successfully.');
+        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');
     }
 }
