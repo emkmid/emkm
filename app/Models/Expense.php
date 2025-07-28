@@ -2,33 +2,43 @@
 
 namespace App\Models;
 
-use App\Traits\HasHashid;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Vinkla\Hashids\Facades\Hashids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Expense extends Model
 {
-    use HasHashid;
-    protected $guarded = ['id'];
+    use HasFactory;
 
-    public function user()
+    /**
+     * Atribut yang dapat diisi secara massal.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'expense_category_id',
+        'description',
+        'amount',
+        'date',
+    ];
+
+    /**
+     * Tipe data asli untuk atribut.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'date' => 'date',
+    ];
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function expenseCategory()
+    public function expense_category(): BelongsTo
     {
         return $this->belongsTo(ExpenseCategory::class);
-    }
-
-    public function getIdAttribute($value)
-    {
-        // Jika kamu tetap ingin bisa akses ID asli (misal id_raw), bisa buat accessor lain juga
-        return Hashids::encode($this->attributes['id']);
-    }
-
-    public function getIdRawAttribute()
-    {
-        return $this->attributes['id'];
     }
 }

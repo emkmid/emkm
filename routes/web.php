@@ -7,6 +7,7 @@ use App\Http\Controllers\Transaction\Category\IncomeCategoryController;
 use App\Http\Controllers\Transaction\DebtController;
 use App\Http\Controllers\Transaction\ExpenseController;
 use App\Http\Controllers\Transaction\IncomeController;
+use App\Http\Controllers\Transaction\ReceivableController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,6 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('expense-category', ExpenseCategoryController::class);
         Route::resource('income-category', IncomeCategoryController::class);
+
+        Route::resource('receivables', ReceivableController::class);
 
         Route::resource('products', ProductController::class);
         Route::resource('product-category', ProductCategoryController::class);
