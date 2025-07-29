@@ -6,11 +6,9 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\ExpenseCategory;
 
-class ExpenseCagtegorySeeder extends Seeder
+class ExpenseCategorySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+
     public function run(): void
     {
         $globalCategories = ['Makanan', 'Transportasi', 'Listrik', 'Internet', 'Kesehatan'];

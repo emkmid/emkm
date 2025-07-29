@@ -10,6 +10,17 @@ export interface BreadcrumbItem {
     href: string;
 }
 
+export interface PageProps {
+    auth: {
+        user: User;
+    };
+    flash: {
+        success?: string;
+        error?: string;
+    };
+    [key: string]: any;
+}
+
 export interface NavGroup {
     title: string;
     items: NavItem[];
