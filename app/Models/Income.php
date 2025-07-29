@@ -2,34 +2,45 @@
 
 namespace App\Models;
 
+use App\Traits\HasHashid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Income extends Model
 {
-    use HasFactory;
+    use HasFactory, HasHashid;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'user_id',
         'income_category_id',
-        'description',
-        'amount',
         'date',
+        'amount',
+        'description',
     ];
 
-    protected $casts = [
-        'date' => 'date',
-    ];
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    // Relasi yang dibutuhkan oleh controller
+    /**
+     * Get the income_category that owns the Income
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function income_category(): BelongsTo
     {
         return $this->belongsTo(IncomeCategory::class);
+    }
+
+    /**
+     * Get the user that owns the Income
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

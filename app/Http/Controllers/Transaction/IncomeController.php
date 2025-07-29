@@ -5,109 +5,113 @@ namespace App\Http\Controllers\Transaction;
 use App\Http\Controllers\Controller;
 use App\Models\Income;
 use App\Models\IncomeCategory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class IncomeController extends Controller
 {
     /**
-     * Menampilkan daftar pemasukan milik pengguna.
+     * Display a listing of the resource.
      */
     public function index(): Response
     {
-        // Ambil data pemasukan milik pengguna yang sedang login
-        // beserta relasi kategori, urutkan dari yang terbaru, dan paginasi.
-        $incomes = auth()->user()->incomes()->with('income_category')->latest()->paginate(10);
+        $incomes = Income::with('income_category')
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->paginate(10);
 
-        // Render halaman Inertia dengan data pemasukan
         return Inertia::render('dashboard/user/income/index', [
             'incomes' => $incomes,
         ]);
     }
 
     /**
-     * Menampilkan form untuk membuat pemasukan baru.
+     * Show the form for creating a new resource.
      */
     public function create(): Response
     {
-        // Render halaman Inertia dengan data kategori pemasukan milik pengguna
+        $categories = IncomeCategory::where('user_id', Auth::id())->get();
+
         return Inertia::render('dashboard/user/income/create', [
-            'categories' => auth()->user()->incomeCategories()->get(['id', 'name']),
+            'categories' => $categories,
         ]);
     }
 
     /**
-     * Menyimpan pemasukan baru ke dalam database.
+     * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        // Validasi data yang diinput dari form
         $validated = $request->validate([
-            'income_category_id' => 'required|exists:income_categories,id',
             'date' => 'required|date',
-            'amount' => 'required|numeric|min:0',
-            'description' => 'nullable|string|max:255',
+            'income_category_id' => 'required|exists:income_categories,id',
+            'amount' => 'required|numeric',
+            'description' => 'nullable|string',
         ]);
 
-        // Buat data pemasukan baru yang berelasi dengan pengguna
-        auth()->user()->incomes()->create($validated);
+        // PERBAIKAN: Tambahkan ID pengguna ke data yang divalidasi sebelum disimpan.
+        $validated['user_id'] = Auth::id();
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('income.index')->with('success', 'Income created successfully.');
+        // Buat data pemasukan baru menggunakan data yang sudah lengkap.
+        Income::create($validated);
+
+        return redirect(route('incomes.index'));
     }
 
     /**
-     * Menampilkan form untuk mengedit pemasukan.
+     * Display the specified resource.
+     */
+    public function show(Income $income)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
      */
     public function edit(Income $income): Response
     {
-        // Otorisasi: pastikan pengguna yang login berhak mengedit pemasukan ini
-        Gate::authorize('update', $income);
+        $this->authorize('update', $income);
 
-        // Render halaman Inertia dengan data pemasukan dan kategori
+        $categories = IncomeCategory::where('user_id', Auth::id())->get();
+
         return Inertia::render('dashboard/user/income/edit', [
             'income' => $income,
-            'categories' => auth()->user()->incomeCategories()->get(['id', 'name']),
+            'categories' => $categories,
         ]);
     }
 
     /**
-     * Memperbarui data pemasukan di database.
+     * Update the specified resource in storage.
      */
-    public function update(Request $request, Income $income)
+    public function update(Request $request, Income $income): RedirectResponse
     {
-        // Otorisasi: pastikan pengguna yang login berhak memperbarui pemasukan ini
-        Gate::authorize('update', $income);
+        $this->authorize('update', $income);
 
-        // Validasi data yang diinput dari form
         $validated = $request->validate([
-            'income_category_id' => 'required|exists:income_categories,id',
             'date' => 'required|date',
-            'amount' => 'required|numeric|min:0',
-            'description' => 'nullable|string|max:255',
+            'income_category_id' => 'required|exists:income_categories,id',
+            'amount' => 'required|numeric',
+            'description' => 'nullable|string',
         ]);
 
-        // Perbarui data pemasukan
         $income->update($validated);
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('income.index')->with('success', 'Income updated successfully.');
+        return redirect(route('incomes.index'));
     }
 
     /**
-     * Menghapus data pemasukan dari database.
+     * Remove the specified resource from storage.
      */
-    public function destroy(Income $income)
+    public function destroy(Income $income): RedirectResponse
     {
-        // Otorisasi: pastikan pengguna yang login berhak menghapus pemasukan ini
-        Gate::authorize('delete', $income);
+        $this->authorize('delete', $income);
 
-        // Hapus data pemasukan
         $income->delete();
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('income.index')->with('success', 'Income deleted successfully.');
+        return redirect(route('incomes.index'));
     }
 }

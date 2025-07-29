@@ -1,71 +1,76 @@
-import HeadingSmall from '@/components/heading-small';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, PageProps } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
-import React from 'react';
+    import AppLayout from '@/layouts/app-layout';
+    import { Breadcrumbs, BreadcrumbItemType } from '@/components/breadcrumbs';
+    import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+    import { Head, useForm } from '@inertiajs/react';
+    import { Label } from '@/components/ui/label';
+    import { Input } from '@/components/ui/input';
+    import InputError from '@/components/input-error';
+    import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+    import { Button } from '@/components/ui/button';
+    import { FormEventHandler } from 'react';
+    import { IncomeCategory } from '@/types';
+    import InputRupiah from '@/components/input-rupiah';
 
-// Definisikan tipe untuk kategori pemasukan
-interface IncomeCategory {
-    id: number;
-    name: string;
-}
+    export default function Create({ categories }: { categories: IncomeCategory[] }) {
+        const { data, setData, post, errors, processing } = useForm({
+            date: new Date().toISOString().slice(0, 10),
+            income_category_id: '',
+            amount: 0,
+            description: '',
+        });
 
-// Definisikan tipe untuk props halaman ini
-interface CreateIncomePageProps extends PageProps {
-    categories: IncomeCategory[];
-}
+        const submit: FormEventHandler = (e) => {
+            e.preventDefault();
+            // PERBAIKAN: Gunakan nama rute yang benar 'incomes.store' (tanpa 'user.')
+            post(route('incomes.store'));
+        };
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Pemasukan',
-        href: '/dashboard/incomes',
-    },
-    {
-        title: 'Tambah',
-        href: '/dashboard/incomes/create',
-    },
-];
+        const breadcrumbItems: BreadcrumbItemType[] = [
+            {
+                label: 'Dashboard',
+                url: route('dashboard'),
+            },
+            {
+                label: 'Pemasukan',
+                // PERBAIKAN: Gunakan nama rute yang benar 'incomes.index' (tanpa 'user.')
+                url: route('incomes.index'),
+            },
+            {
+                label: 'Tambah Pemasukan',
+            },
+        ];
 
-export default function CreateIncome({ categories }: CreateIncomePageProps) {
-    // Inisialisasi form dengan useForm dari Inertia
-    const { data, setData, post, processing, errors } = useForm({
-        income_category_id: '',
-        description: '',
-        amount: '',
-        date: '',
-    });
-
-    // Fungsi untuk menangani submit form
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post(route('incomes.store'));
-    };
-
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Tambah Pemasukan" />
-
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <HeadingSmall title="Tambah Pemasukan Baru" description="Isi form di bawah untuk mencatat pemasukan." />
+        return (
+            <>
+                <Head title='Tambah Pemasukan' />
+                <Breadcrumbs breadcrumbs={breadcrumbItems} />
 
                 <Card>
-                    <CardContent className="p-6">
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* Input Kategori */}
-                            <div>
-                                <Label htmlFor="income_category_id">Kategori Pemasukan</Label>
-                                {/* PERBAIKAN DI SINI:
-                                    Gunakan onValueChange untuk memanggil setData dan memperbarui state 'income_category_id'.
-                                    Setiap kali user memilih opsi, 'value' yang berisi ID kategori akan disimpan ke dalam state 'data'.
-                                */}
-                                <Select onValueChange={(value) => setData('income_category_id', value)}>
-                                    <SelectTrigger id="income_category_id">
-                                        <SelectValue placeholder="Pilih kategori" />
+                    <CardHeader>
+                        <CardTitle>Tambah Pemasukan</CardTitle>
+                        <CardDescription>Tambah data pemasukan anda.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={submit} className='flex flex-col gap-4'>
+                            <div className='flex flex-col gap-2'>
+                                <Label htmlFor='date'>Tanggal</Label>
+                                <Input
+                                    type='date'
+                                    id='date'
+                                    value={data.date}
+                                    onChange={(e) => setData('date', e.target.value)}
+                                />
+                                <InputError message={errors.date} />
+                            </div>
+
+                            <div className='flex flex-col gap-2'>
+                                <Label htmlFor='income_category_id'>Kategori</Label>
+                                <Select
+                                    value={data.income_category_id}
+                                    onValueChange={(value) => setData('income_category_id', value)}
+                                >
+                                    <SelectTrigger id='income_category_id'>
+                                        <SelectValue placeholder='Pilih kategori' />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {categories.map((cat) => (
@@ -75,51 +80,42 @@ export default function CreateIncome({ categories }: CreateIncomePageProps) {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {errors.income_category_id && <p className="mt-1 text-sm text-red-500">{errors.income_category_id}</p>}
+                                <InputError message={errors.income_category_id} />
                             </div>
 
-                            {/* Input Deskripsi */}
-                            <div>
-                                <Label htmlFor="description">Deskripsi</Label>
+                            <div className='flex flex-col gap-2'>
+                                <Label htmlFor='amount'>Jumlah</Label>
+                                <InputRupiah
+                                    id='amount'
+                                    value={data.amount}
+                                    onChange={(value: number) => {
+                                        setData('amount', value);
+                                    }}
+                                />
+                                <InputError message={errors.amount} />
+                            </div>
+
+                            <div className='flex flex-col gap-2'>
+                                <Label htmlFor='description'>Deskripsi</Label>
                                 <Input
-                                    id="description"
+                                    id='description'
                                     value={data.description}
                                     onChange={(e) => setData('description', e.target.value)}
-                                    placeholder="Contoh: Penjualan produk A"
                                 />
-                                {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
+                                <InputError message={errors.description} />
                             </div>
 
-                            {/* Input Jumlah */}
-                            <div>
-                                <Label htmlFor="amount">Jumlah (Rp)</Label>
-                                <Input
-                                    id="amount"
-                                    type="number"
-                                    value={data.amount}
-                                    onChange={(e) => setData('amount', e.target.value)}
-                                    placeholder="Contoh: 50000"
-                                />
-                                {errors.amount && <p className="mt-1 text-sm text-red-500">{errors.amount}</p>}
-                            </div>
-
-                            {/* Input Tanggal */}
-                            <div>
-                                <Label htmlFor="date">Tanggal</Label>
-                                <Input id="date" type="date" value={data.date} onChange={(e) => setData('date', e.target.value)} />
-                                {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date}</p>}
-                            </div>
-
-                            {/* Tombol Simpan */}
-                            <div className="flex justify-end">
-                                <Button type="submit" disabled={processing}>
-                                    {processing ? 'Menyimpan...' : 'Simpan Pemasukan'}
+                            <div className='flex flex-col gap-2'>
+                                <Button type='submit' disabled={processing}>
+                                    {processing ? 'Menyimpan...' : 'Simpan'}
                                 </Button>
                             </div>
                         </form>
                     </CardContent>
                 </Card>
-            </div>
-        </AppLayout>
-    );
-}
+            </>
+        );
+    }
+
+    Create.layout = (page: any) => <AppLayout children={page} />;
+    

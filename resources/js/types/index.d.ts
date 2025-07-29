@@ -21,6 +21,16 @@ export interface PageProps {
     [key: string]: any;
 }
 
+export type IncomeCategory = {
+    id: number;
+    name: string;
+};
+
+export type ExpenseCategory = {
+    id: number;
+    name: string;
+};
+
 export interface NavGroup {
     title: string;
     items: NavItem[];

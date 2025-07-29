@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\IncomeCategory;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\IncomeCategory;
 
 class IncomeCategorySeeder extends Seeder
 {
@@ -13,23 +14,23 @@ class IncomeCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        // Daftar kategori pemasukan default yang akan dimasukkan
-        $categories = [
-            'Gaji',
-            'Penjualan Produk',
-            'Jasa',
-            'Bonus',
-            'Sewa',
-            'Investasi',
-            'Pendapatan Lain-lain',
-        ];
+        // PERBAIKAN: Cari pengguna 'Test User' yang dibuat oleh DatabaseSeeder
+        $user = User::where('email', 'test@example.com')->first();
 
-        // Looping untuk memasukkan setiap kategori ke dalam tabel 'income_categories'
-        foreach ($categories as $name) {
-            IncomeCategory::create([
-                'name' => $name,
-                'user_id' => null, // Kategori ini bersifat global (bisa dipakai semua user)
-            ]);
+        // Jika pengguna ditemukan, buat kategori untuknya
+        if ($user) {
+            $categories = [
+                ['name' => 'Gaji', 'user_id' => $user->id],
+                ['name' => 'Penjualan Produk', 'user_id' => $user->id],
+                ['name' => 'Bonus', 'user_id' => $user->id],
+                ['name' => 'Freelance', 'user_id' => $user->id],
+                ['name' => 'Lainnya', 'user_id' => $user->id],
+            ];
+
+            // Masukkan data kategori ke dalam database
+            foreach ($categories as $category) {
+                IncomeCategory::create($category);
+            }
         }
     }
 }
