@@ -9,7 +9,7 @@ import {
     SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { type MainNavItem } from '@/types';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react'; // Pastikan Link sudah diimpor
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/react-collapsible';
 import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
@@ -44,9 +44,10 @@ export function NavMain({ items = [] }: { items: MainNavItem[] }) {
                                             return (
                                                 <SidebarMenuSubItem key={subItem.title}>
                                                     <SidebarMenuSubButton asChild className={clsx({ 'bg-muted font-semibold': isSubActive })}>
-                                                        <a href={subItem.href}>
+                                                        {/* Menggunakan Link dari Inertia */}
+                                                        <Link href={subItem.href}>
                                                             <span>{subItem.title}</span>
-                                                        </a>
+                                                        </Link>
                                                     </SidebarMenuSubButton>
                                                 </SidebarMenuSubItem>
                                             );
@@ -58,10 +59,10 @@ export function NavMain({ items = [] }: { items: MainNavItem[] }) {
                     ) : (
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton asChild tooltip={item.title} className={clsx({ 'bg-muted font-semibold': isParentActive })}>
-                                <a href={item.href}>
+                                <Link href={item.href || ''}>
                                     {item.icon && <item.icon />}
                                     <span>{item.title}</span>
-                                </a>
+                                </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     );
