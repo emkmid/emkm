@@ -1,11 +1,14 @@
+import { Breadcrumbs } from '@/components/breadcrumbs';
 import HeadingSmall from '@/components/heading-small';
+import InputError from '@/components/input-error';
+import InputRupiah from '@/components/input-rupiah';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, BreadcrumbItemType } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
 
@@ -27,13 +30,29 @@ interface PageProps {
     product: Product;
 }
 
+const breadcrumbItems: BreadcrumbItemType[] = [
+    {
+        title: 'Produk',
+        href: route('products.index'),
+    },
+    {
+        title: 'Edit Produk',
+        href: '',
+    },
+];
+
 export default function EditProduct({ categories, product }: PageProps) {
-    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Edit Produk', href: `/dashboard/products/${product.id}/edit` }];
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Edit Produk',
+            href: route('products.edit', { product: product.id }),
+        },
+    ];
 
     const { data, setData, put, processing, errors } = useForm({
         product_category_id: String(product.product_category_id),
         name: product.name,
-        price: String(product.price),
+        price: product.price,
         stock: String(product.stock),
     });
 
@@ -47,6 +66,8 @@ export default function EditProduct({ categories, product }: PageProps) {
             <Head title="Edit Produk" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <Breadcrumbs breadcrumbs={breadcrumbItems} />
+
                 <HeadingSmall title="Edit Produk" description="Perbarui data produk yang sudah ada" />
 
                 <Card>
@@ -66,25 +87,25 @@ export default function EditProduct({ categories, product }: PageProps) {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {errors.product_category_id && <p className="text-sm text-red-500">{errors.product_category_id}</p>}
+                                <InputError message={errors.product_category_id} />
                             </div>
 
                             <div>
                                 <Label htmlFor="name">Nama Produk</Label>
                                 <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
-                                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                                <InputError message={errors.name} />
                             </div>
 
                             <div>
                                 <Label htmlFor="price">Harga</Label>
-                                <Input id="price" type="number" value={data.price} onChange={(e) => setData('price', e.target.value)} />
-                                {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+                                <InputRupiah id="price" value={data.price} onChange={(val) => setData('price', val)} />
+                                <InputError message={errors.price} />
                             </div>
 
                             <div>
                                 <Label htmlFor="stock">Stok</Label>
                                 <Input id="stock" type="number" value={data.stock} onChange={(e) => setData('stock', e.target.value)} />
-                                {errors.stock && <p className="text-sm text-red-500">{errors.stock}</p>}
+                                <InputError message={errors.stock} />
                             </div>
 
                             <div className="flex justify-end">

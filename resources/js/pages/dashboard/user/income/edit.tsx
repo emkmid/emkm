@@ -1,11 +1,13 @@
+import { Breadcrumbs } from '@/components/breadcrumbs';
 import HeadingSmall from '@/components/heading-small';
+import InputRupiah from '@/components/input-rupiah';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, PageProps } from '@/types';
+import { BreadcrumbItem, BreadcrumbItemType, PageProps } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
 
@@ -29,21 +31,30 @@ interface EditIncomePageProps extends PageProps {
     income: Income;
 }
 
+const breadcrumbItems: BreadcrumbItemType[] = [
+    {
+        title: 'Pemasukan',
+        href: route('incomes.index'),
+    },
+    {
+        title: 'Edit Pemasukan',
+        href: '',
+    },
+];
+
 export default function EditIncome({ categories, income }: EditIncomePageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Pemasukan', href: '/dashboard/incomes' },
         { title: 'Edit', href: `/dashboard/incomes/${income.id}/edit` },
     ];
 
-    // Inisialisasi form dengan data yang sudah ada
     const { data, setData, put, processing, errors } = useForm({
         income_category_id: String(income.income_category_id),
         description: income.description,
-        amount: String(income.amount),
+        amount: income.amount,
         date: income.date,
     });
 
-    // Fungsi untuk menangani submit form
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         put(route('incomes.update', income.id));
@@ -54,10 +65,12 @@ export default function EditIncome({ categories, income }: EditIncomePageProps) 
             <Head title="Edit Pemasukan" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <Breadcrumbs breadcrumbs={breadcrumbItems} />
+
                 <HeadingSmall title="Edit Pemasukan" description="Perbarui data pemasukan yang sudah ada." />
 
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Input Kategori */}
                             <div>
@@ -80,23 +93,14 @@ export default function EditIncome({ categories, income }: EditIncomePageProps) 
                             {/* Input Deskripsi */}
                             <div>
                                 <Label htmlFor="description">Deskripsi</Label>
-                                <Input
-                                    id="description"
-                                    value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                />
+                                <Input id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} />
                                 {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
                             </div>
 
                             {/* Input Jumlah */}
                             <div>
                                 <Label htmlFor="amount">Jumlah (Rp)</Label>
-                                <Input
-                                    id="amount"
-                                    type="number"
-                                    value={data.amount}
-                                    onChange={(e) => setData('amount', e.target.value)}
-                                />
+                                <InputRupiah id="amount" value={data.amount} onChange={(val) => setData('amount', val)} />
                                 {errors.amount && <p className="mt-1 text-sm text-red-500">{errors.amount}</p>}
                             </div>
 

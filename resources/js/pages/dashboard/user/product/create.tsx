@@ -1,11 +1,14 @@
+import { Breadcrumbs } from '@/components/breadcrumbs';
 import HeadingSmall from '@/components/heading-small';
+import InputError from '@/components/input-error';
+import InputRupiah from '@/components/input-rupiah';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, BreadcrumbItemType } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
 
@@ -25,11 +28,22 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+const breadcrumbItems: BreadcrumbItemType[] = [
+    {
+        title: 'Produk',
+        href: route('products.index'),
+    },
+    {
+        title: 'Tambah Produk',
+        href: '',
+    },
+];
+
 export default function CreateProduct({ categories }: PageProps) {
     const { data, setData, post, processing, errors } = useForm({
         product_category_id: '',
         name: '',
-        price: '',
+        price: 0,
         stock: '',
     });
 
@@ -43,6 +57,8 @@ export default function CreateProduct({ categories }: PageProps) {
             <Head title="Tambah Produk" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <Breadcrumbs breadcrumbs={breadcrumbItems} />
+
                 <HeadingSmall title="Tambah Produk" description="Form untuk menambah produk baru" />
 
                 <Card>
@@ -62,25 +78,25 @@ export default function CreateProduct({ categories }: PageProps) {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {errors.product_category_id && <p className="text-sm text-red-500">{errors.product_category_id}</p>}
+                                <InputError message={errors.product_category_id} />
                             </div>
 
                             <div>
                                 <Label htmlFor="name">Nama Produk</Label>
                                 <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
-                                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                                <InputError message={errors.name} />
                             </div>
 
                             <div>
                                 <Label htmlFor="price">Harga</Label>
-                                <Input id="price" type="number" value={data.price} onChange={(e) => setData('price', e.target.value)} />
-                                {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+                                <InputRupiah id="price" value={data.price} onChange={(val) => setData('price', val)} />
+                                <InputError message={errors.price} />
                             </div>
 
                             <div>
                                 <Label htmlFor="stock">Stok</Label>
                                 <Input id="stock" type="number" value={data.stock} onChange={(e) => setData('stock', e.target.value)} />
-                                {errors.stock && <p className="text-sm text-red-500">{errors.stock}</p>}
+                                <InputError message={errors.stock} />
                             </div>
 
                             <div className="flex justify-end">

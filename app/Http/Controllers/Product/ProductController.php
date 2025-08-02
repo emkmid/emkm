@@ -17,7 +17,7 @@ class ProductController extends Controller
      */
     public function index(): Response
     {
-        $products = auth()->user()->products()->with('product_category')->latest()->get();
+        $products = auth()->user()->products()->with('product_category')->latest()->paginate(5);
 
         return Inertia::render('dashboard/user/product/index', [
             'products' => $products,
