@@ -17,7 +17,7 @@ class ExpenseController extends Controller
      */
     public function index()
     {
-        $expenses = Auth::user()->expenses()->with('expense_category')->get();
+        $expenses = Auth::user()->expenses()->with('expense_category')->latest()->paginate(5);
         return Inertia::render('dashboard/user/expense/index', compact('expenses'));
     }
 

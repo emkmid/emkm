@@ -1,3 +1,5 @@
+import { Breadcrumbs } from '@/components/breadcrumbs';
+import HeadingSmall from '@/components/heading-small';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
     AlertDialog,
@@ -12,9 +14,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, BreadcrumbItemType } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { CheckCircleIcon } from 'lucide-react';
 import React from 'react';
@@ -30,7 +33,10 @@ interface Income {
 }
 
 interface PageProps {
-    incomes: Income[];
+    incomes: {
+        data: Income[];
+        [key: string]: any;
+    };
     flash?: {
         success?: string;
     };
@@ -44,6 +50,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+const breadcrumbItems: BreadcrumbItemType[] = [
+    {
+        title: 'Pemasukan',
+        href: '',
+    },
+];
+
 const MyIncomes: React.FC = () => {
     const { incomes, flash } = usePage<PageProps>().props;
     const { processing, delete: destroy } = useForm();
@@ -53,6 +66,8 @@ const MyIncomes: React.FC = () => {
             <Head title="Pemasukan" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <Breadcrumbs breadcrumbs={breadcrumbItems} />
+
                 {flash?.success && (
                     <Alert
                         variant="default"
@@ -65,7 +80,7 @@ const MyIncomes: React.FC = () => {
                 )}
 
                 <div className="mb-3 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Data Pemasukan</h3>
+                    <HeadingSmall title="Pemasukan" description="Daftar semua transaksi pemasukan yang telah dicatat." />
                     <Button asChild>
                         <Link href={route('incomes.create')}>Tambah Pemasukan</Link>
                     </Button>
@@ -84,10 +99,16 @@ const MyIncomes: React.FC = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {incomes.length > 0 ? (
-                                    incomes.map((income) => (
+                                {incomes.data.length > 0 ? (
+                                    incomes.data.map((income: any) => (
                                         <TableRow key={income.id}>
-                                            <TableCell>{new Date(income.date).toLocaleDateString('id-ID')}</TableCell>
+                                            <TableCell>
+                                                {new Date(income.date).toLocaleDateString('id-ID', {
+                                                    day: '2-digit',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })}
+                                            </TableCell>
                                             <TableCell>{income.income_category.name}</TableCell>
                                             <TableCell>{income.description}</TableCell>
                                             <TableCell>Rp{Number(income.amount).toLocaleString('id-ID')}</TableCell>
@@ -104,9 +125,7 @@ const MyIncomes: React.FC = () => {
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Yakin ingin menghapus?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                Data akan dihapus secara permanen.
-                                                            </AlertDialogDescription>
+                                                            <AlertDialogDescription>Data akan dihapus secara permanen.</AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -135,6 +154,49 @@ const MyIncomes: React.FC = () => {
                         </Table>
                     </CardContent>
                 </Card>
+
+                {incomes.links.length > 1 && (
+                    <Pagination className="mt-2 justify-end">
+                        <PaginationContent>
+                            {incomes.links.map((link: any, i: number) => {
+                                const isPrev = link.label.includes('Previous');
+                                const isNext = link.label.includes('Next');
+                                const isActive = link.active;
+
+                                if (isPrev) {
+                                    return (
+                                        <PaginationItem key={i}>
+                                            <PaginationPrevious
+                                                href={link.url ?? '#'}
+                                                className={!link.url ? 'pointer-events-none opacity-50' : ''}
+                                            />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                if (isNext) {
+                                    return (
+                                        <PaginationItem key={i}>
+                                            <PaginationNext href={link.url ?? '#'} className={!link.url ? 'pointer-events-none opacity-50' : ''} />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                return (
+                                    <PaginationItem key={i}>
+                                        <PaginationLink
+                                            href={link.url ?? '#'}
+                                            isActive={isActive}
+                                            className={!link.url ? 'pointer-events-none opacity-50' : ''}
+                                        >
+                                            {link.label}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                );
+                            })}
+                        </PaginationContent>
+                    </Pagination>
+                )}
             </div>
         </AppLayout>
     );

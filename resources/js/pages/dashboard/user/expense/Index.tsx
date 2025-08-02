@@ -1,3 +1,5 @@
+import { Breadcrumbs } from '@/components/breadcrumbs';
+import HeadingSmall from '@/components/heading-small';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
     AlertDialog,
@@ -12,9 +14,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, BreadcrumbItemType } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
 import { CheckCircleIcon } from 'lucide-react';
@@ -31,7 +34,10 @@ interface Expense {
 }
 
 interface PageProps {
-    expenses: Expense[];
+    expenses: {
+        data: Expense[];
+        [key: string]: any;
+    };
     flash?: {
         success?: string;
         error?: string;
@@ -43,6 +49,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Pengeluaran',
         href: '/dashboard/expenses',
+    },
+];
+
+const breadcrumbItems: BreadcrumbItemType[] = [
+    {
+        title: 'Pengeluaran',
+        href: '',
     },
 ];
 
@@ -66,6 +79,8 @@ const MyExpenses: React.FC = () => {
             <Head title="Pengeluaran" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <Breadcrumbs breadcrumbs={breadcrumbItems} />
+
                 {flash?.success && (
                     <Alert
                         variant="default"
@@ -89,7 +104,7 @@ const MyExpenses: React.FC = () => {
                 )}
 
                 <div className="mb-3 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Pengeluaran Saya</h3>
+                    <HeadingSmall title="Pengeluaran" description="Daftar semua transaksi pengeluaran yang telah dicatat." />
                     <Button asChild>
                         <Link href={route('expenses.create')}>Tambah Pengeluaran</Link>
                     </Button>
@@ -100,21 +115,27 @@ const MyExpenses: React.FC = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>Tanggal</TableHead>
                                     <TableHead>Kategori</TableHead>
                                     <TableHead>Deskripsi</TableHead>
                                     <TableHead>Jumlah</TableHead>
-                                    <TableHead>Tanggal</TableHead>
                                     <TableHead style={{ width: '1%' }}>Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {expenses.length > 0 ? (
-                                    expenses.map((expense) => (
-                                        <TableRow>
+                                {expenses.data.length > 0 ? (
+                                    expenses.data.map((expense) => (
+                                        <TableRow key={expense.id}>
+                                            <TableCell>
+                                                {new Date(expense.date).toLocaleDateString('id-ID', {
+                                                    day: '2-digit',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })}
+                                            </TableCell>
                                             <TableCell>{expense.expense_category.name}</TableCell>
                                             <TableCell>{expense.description}</TableCell>
                                             <TableCell>Rp{Number(expense.amount).toLocaleString('id-ID')}</TableCell>
-                                            <TableCell>{expense.date}</TableCell>
                                             <TableCell>
                                                 <Button asChild className="me-2 w-fit">
                                                     <Link href={route('expenses.edit', { expense: expense.id })}>Edit</Link>
@@ -159,6 +180,49 @@ const MyExpenses: React.FC = () => {
                         </Table>
                     </CardContent>
                 </Card>
+
+                {expenses.links.length > 1 && (
+                    <Pagination className="mt-2 justify-end">
+                        <PaginationContent>
+                            {expenses.links.map((link: any, i: number) => {
+                                const isPrev = link.label.includes('Previous');
+                                const isNext = link.label.includes('Next');
+                                const isActive = link.active;
+
+                                if (isPrev) {
+                                    return (
+                                        <PaginationItem key={i}>
+                                            <PaginationPrevious
+                                                href={link.url ?? '#'}
+                                                className={!link.url ? 'pointer-events-none opacity-50' : ''}
+                                            />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                if (isNext) {
+                                    return (
+                                        <PaginationItem key={i}>
+                                            <PaginationNext href={link.url ?? '#'} className={!link.url ? 'pointer-events-none opacity-50' : ''} />
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                return (
+                                    <PaginationItem key={i}>
+                                        <PaginationLink
+                                            href={link.url ?? '#'}
+                                            isActive={isActive}
+                                            className={!link.url ? 'pointer-events-none opacity-50' : ''}
+                                        >
+                                            {link.label}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                );
+                            })}
+                        </PaginationContent>
+                    </Pagination>
+                )}
             </div>
         </AppLayout>
     );

@@ -41,11 +41,11 @@ const mainNavItems: MainNavItem[] = [
             },
             {
                 title: 'Hutang',
-                href: '/dashboard/incomes',
+                href: '/dashboard/debts',
             },
             {
                 title: 'Piutang',
-                href: '/dashboard/incomes',
+                href: '/dashboard/receivables',
             },
         ],
     },

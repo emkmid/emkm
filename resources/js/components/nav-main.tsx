@@ -9,25 +9,25 @@ import {
     SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { type MainNavItem } from '@/types';
-import { Link, usePage } from '@inertiajs/react'; // Pastikan Link sudah diimpor
+import { Link, usePage } from '@inertiajs/react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/react-collapsible';
 import clsx from 'clsx';
 import { ChevronRight } from 'lucide-react';
 
 export function NavMain({ items = [] }: { items: MainNavItem[] }) {
     const page = usePage();
-    const currentUrl = page.url;
+    const currentPath = page.url;
 
     return (
         <SidebarGroup className="px-2 py-0">
             <SidebarGroupLabel>Platform</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => {
-                    const isParentActive = item.href
-                        ? currentUrl.startsWith(item.href)
-                        : item.subItems?.some((sub) => currentUrl.startsWith(sub.href));
+                    const hasSubItems = item.subItems && item.subItems.length > 0;
 
-                    return item.subItems && item.subItems.length > 0 ? (
+                    const isParentActive = hasSubItems ? item.subItems.some((sub) => currentPath.startsWith(sub.href)) : currentPath === item.href;
+
+                    return hasSubItems ? (
                         <Collapsible key={item.title} asChild defaultOpen={isParentActive} className="group/collapsible">
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
@@ -40,11 +40,10 @@ export function NavMain({ items = [] }: { items: MainNavItem[] }) {
                                 <CollapsibleContent>
                                     <SidebarMenuSub>
                                         {item.subItems.map((subItem) => {
-                                            const isSubActive = currentUrl === subItem.href;
+                                            const isSubActive = currentPath.startsWith(subItem.href);
                                             return (
                                                 <SidebarMenuSubItem key={subItem.title}>
                                                     <SidebarMenuSubButton asChild className={clsx({ 'bg-muted font-semibold': isSubActive })}>
-                                                        {/* Menggunakan Link dari Inertia */}
                                                         <Link href={subItem.href}>
                                                             <span>{subItem.title}</span>
                                                         </Link>

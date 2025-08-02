@@ -10,8 +10,7 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class Expense extends Model
 {
-    use HasFactory;
-    use HasHashid;
+    use HasFactory, HasHashid;
 
     /**
      * Atribut yang dapat diisi secara massal.

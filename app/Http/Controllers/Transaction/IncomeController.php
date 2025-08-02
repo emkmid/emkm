@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Gate;
 
 class IncomeController extends Controller
 {
@@ -18,10 +19,7 @@ class IncomeController extends Controller
      */
     public function index(): Response
     {
-        $incomes = Income::with('income_category')
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->paginate(10);
+        $incomes = Auth::user()->incomes()->with('income_category')->latest()->paginate(5);
 
         return Inertia::render('dashboard/user/income/index', [
             'incomes' => $incomes,
@@ -33,7 +31,9 @@ class IncomeController extends Controller
      */
     public function create(): Response
     {
-        $categories = IncomeCategory::where('user_id', Auth::id())->get();
+        $categories = IncomeCategory::whereNull('user_id')
+            ->orWhere('user_id', auth()->id())
+            ->get();
 
         return Inertia::render('dashboard/user/income/create', [
             'categories' => $categories,
@@ -58,7 +58,7 @@ class IncomeController extends Controller
         // Buat data pemasukan baru menggunakan data yang sudah lengkap.
         Income::create($validated);
 
-        return redirect(route('incomes.index'));
+        return redirect()->route('incomes.index')->with('success', 'Pengeluaran berhasil ditambahkan.');
     }
 
     /**
@@ -74,9 +74,11 @@ class IncomeController extends Controller
      */
     public function edit(Income $income): Response
     {
-        $this->authorize('update', $income);
+        Gate::authorize('update', $income);
 
-        $categories = IncomeCategory::where('user_id', Auth::id())->get();
+        $categories = IncomeCategory::whereNull('user_id')
+            ->orWhere('user_id', auth()->id())
+            ->get();
 
         return Inertia::render('dashboard/user/income/edit', [
             'income' => $income,
@@ -89,7 +91,7 @@ class IncomeController extends Controller
      */
     public function update(Request $request, Income $income): RedirectResponse
     {
-        $this->authorize('update', $income);
+        Gate::authorize('update', $income);
 
         $validated = $request->validate([
             'date' => 'required|date',
@@ -100,7 +102,9 @@ class IncomeController extends Controller
 
         $income->update($validated);
 
-        return redirect(route('incomes.index'));
+        return redirect()
+            ->route('incomes.index')
+            ->with('success', 'Data pengeluaran berhasil diperbarui.');
     }
 
     /**
@@ -108,10 +112,12 @@ class IncomeController extends Controller
      */
     public function destroy(Income $income): RedirectResponse
     {
-        $this->authorize('delete', $income);
+        Gate::authorize('destroy', $income);
 
         $income->delete();
 
-        return redirect(route('incomes.index'));
+        return redirect()
+            ->route('incomes.index')
+            ->with('success', 'Pengeluaran berhasil dihapus.');
     }
 }

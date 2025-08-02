@@ -31,7 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('expense-category', ExpenseCategoryController::class);
         Route::resource('income-category', IncomeCategoryController::class);
 
-        Route::resource('receivables', ReceivableController::class);
+        // Route::resource('receivables', ReceivableController::class);
 
         Route::resource('products', ProductController::class);
         Route::resource('product-category', ProductCategoryController::class);

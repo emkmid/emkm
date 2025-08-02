@@ -6,6 +6,7 @@ use App\Traits\HasHashid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Vinkla\Hashids\Facades\Hashids;
 
 class Income extends Model
 {
@@ -42,5 +43,15 @@ class Income extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getIdAttribute($value)
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
+
+    public function getIdRawAttribute()
+    {
+        return $this->attributes['id'];
     }
 }

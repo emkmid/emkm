@@ -25,7 +25,7 @@ class ProductCategorySeeder extends Seeder
         foreach ($categories as $name) {
             ProductCategory::create([
                 'name' => $name,
-                'user_id' => null, // Kategori global
+                'user_id' => null,
             ]);
         }
     }

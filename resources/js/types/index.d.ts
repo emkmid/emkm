@@ -10,6 +10,11 @@ export interface BreadcrumbItem {
     href: string;
 }
 
+export interface BreadcrumbItemType {
+    title: string;
+    href: string;
+}
+
 export interface PageProps {
     auth: {
         user: User;
