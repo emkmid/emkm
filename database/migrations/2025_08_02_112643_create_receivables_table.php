@@ -11,17 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('debts', function (Blueprint $table) {
+        Schema::create('receivables', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->string('creditor'); // nama pemberi hutang
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('debtor'); // Nama pihak
             $table->decimal('amount', 15, 2);
             $table->decimal('paid_amount', 15, 2)->default(0);
             $table->date('due_date')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('debts');
+        Schema::dropIfExists('receivables');
     }
 };

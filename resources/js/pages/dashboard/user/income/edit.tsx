@@ -43,10 +43,7 @@ const breadcrumbItems: BreadcrumbItemType[] = [
 ];
 
 export default function EditIncome({ categories, income }: EditIncomePageProps) {
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Pemasukan', href: '/dashboard/incomes' },
-        { title: 'Edit', href: `/dashboard/incomes/${income.id}/edit` },
-    ];
+    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Edit Pemasukan', href: `/dashboard/incomes/${income.id}/edit` }];
 
     const { data, setData, put, processing, errors } = useForm({
         income_category_id: String(income.income_category_id),

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Auth;
 
 class DebtController extends Controller
 {
@@ -16,11 +17,9 @@ class DebtController extends Controller
      */
     public function index(): Response
     {
-        $debts = auth()->user()->debts()->latest()->paginate(10);
+        $debts = Auth::user()->debts()->latest()->paginate(10);
 
-        return Inertia::render('Dashboard/User/Debt/Index', [
-            'debts' => $debts,
-        ]);
+    return Inertia::render('dashboard/user/debt/index', compact('debts'));
     }
 
     /**
@@ -28,7 +27,7 @@ class DebtController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Dashboard/User/Debt/Create');
+        return Inertia::render('dashboard/user/debt/create');
     }
 
     /**
@@ -37,17 +36,16 @@ class DebtController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:receivable,payable', // receivable = piutang, payable = hutang
+            'creditor' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
             'due_date' => 'nullable|date',
             'description' => 'nullable|string',
-            'is_paid' => 'sometimes|boolean',
         ]);
 
-        auth()->user()->debts()->create($validated);
+        Auth::user()->debts()->create($validated);
 
-        return redirect()->route('debt.index')->with('success', 'Debt record created successfully.');
+        return redirect()->route('debts.index')->with('success', 'Hutang berhasil ditambahkan!');
     }
 
     /**
@@ -57,9 +55,7 @@ class DebtController extends Controller
     {
         Gate::authorize('update', $debt);
 
-        return Inertia::render('Dashboard/User/Debt/Edit', [
-            'debt' => $debt,
-        ]);
+        return Inertia::render('dashboard/user/debt/edit', compact('debt'));
     }
 
     /**
@@ -70,17 +66,16 @@ class DebtController extends Controller
         Gate::authorize('update', $debt);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:receivable,payable',
+            'creditor' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
             'due_date' => 'nullable|date',
             'description' => 'nullable|string',
-            'is_paid' => 'sometimes|boolean',
         ]);
 
         $debt->update($validated);
 
-        return redirect()->route('debt.index')->with('success', 'Debt record updated successfully.');
+        return redirect()->route('debts.index')->with('success', 'Hutang berhasil diperbarui!');
     }
 
     /**
@@ -92,6 +87,6 @@ class DebtController extends Controller
 
         $debt->delete();
 
-        return redirect()->route('debt.index')->with('success', 'Debt record deleted successfully.');
+        return redirect()->route('debts.index')->with('success', 'Hutang berhasil dihapus!');
     }
 }

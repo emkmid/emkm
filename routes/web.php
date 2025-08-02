@@ -26,7 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('expenses', ExpenseController::class);
         Route::resource('incomes', IncomeController::class);
-        Route::resource('debt', DebtController::class);
+        Route::resource('debts', DebtController::class);
 
         Route::resource('expense-category', ExpenseCategoryController::class);
         Route::resource('income-category', IncomeCategoryController::class);
