@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\HasHashid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Vinkla\Hashids\Facades\Hashids;
 
 class Expense extends Model
 {
     use HasFactory;
+    use HasHashid;
 
     /**
      * Atribut yang dapat diisi secara massal.
@@ -40,5 +43,15 @@ class Expense extends Model
     public function expense_category(): BelongsTo
     {
         return $this->belongsTo(ExpenseCategory::class);
+    }
+
+    public function getIdAttribute($value)
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
+
+    public function getIdRawAttribute()
+    {
+        return $this->attributes['id'];
     }
 }

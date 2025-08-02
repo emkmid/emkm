@@ -1,42 +1,34 @@
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import { Link } from '@inertiajs/react';
-import React from 'react'; // Impor React
+import { Fragment } from 'react';
 
-export type BreadcrumbItemType = {
-    label: string;
-    url?: string;
-};
-
-type BreadcrumbsProps = {
-    breadcrumbs: BreadcrumbItemType[];
-};
-
-export function Breadcrumbs({ breadcrumbs }: BreadcrumbsProps) {
+export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[] }) {
     return (
-        <Breadcrumb className='mb-4'>
-            <BreadcrumbList>
-                {breadcrumbs.map((breadcrumb, index) => (
-                    // PERBAIKAN: Tambahkan 'key' unik ke elemen terluar di dalam map.
-                    <React.Fragment key={breadcrumb.label}>
-                        <BreadcrumbItem>
-                            {breadcrumb.url ? (
-                                <BreadcrumbLink asChild>
-                                    <Link href={breadcrumb.url}>{breadcrumb.label}</Link>
-                                </BreadcrumbLink>
-                            ) : (
-                                breadcrumb.label
-                            )}
-                        </BreadcrumbItem>
-                        {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-                    </React.Fragment>
-                ))}
-            </BreadcrumbList>
-        </Breadcrumb>
+        <>
+            {breadcrumbs.length > 0 && (
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        {breadcrumbs.map((item, index) => {
+                            const isLast = index === breadcrumbs.length - 1;
+                            return (
+                                <Fragment key={index}>
+                                    <BreadcrumbItem>
+                                        {isLast ? (
+                                            <BreadcrumbPage>{item.title}</BreadcrumbPage>
+                                        ) : (
+                                            <BreadcrumbLink asChild>
+                                                <Link href={item.href}>{item.title}</Link>
+                                            </BreadcrumbLink>
+                                        )}
+                                    </BreadcrumbItem>
+                                    {!isLast && <BreadcrumbSeparator />}
+                                </Fragment>
+                            );
+                        })}
+                    </BreadcrumbList>
+                </Breadcrumb>
+            )}
+        </>
     );
 }
