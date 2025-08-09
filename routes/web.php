@@ -40,5 +40,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
+Route::get('education', function () {
+    return Inertia::render('education');
+})->name('education');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

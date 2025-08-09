@@ -1,19 +1,18 @@
-import { useEffect, type FormEventHandler } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowRight, AtSign, Lock } from 'lucide-react';
+import { useEffect, type FormEventHandler } from 'react';
 
-// Import komponen UI yang sudah ada
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import InputError from '@/components/input-error';
 
 export default function Login({ status }: { status?: string }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
-        remember: false,
+        remember: false as boolean,
     });
 
     useEffect(() => {
@@ -28,13 +27,13 @@ export default function Login({ status }: { status?: string }) {
     };
 
     return (
-        <div className="flex min-h-screen w-full flex-wrap bg-gray-100 dark:bg-gray-900">
+        <div className="flex min-h-screen w-full flex-wrap bg-background text-foreground transition-colors duration-500">
             <Head title="Masuk ke Akun Anda" />
 
             {/* Panel Kiri - Branding */}
-            <div className="relative hidden w-1/2 flex-col items-center justify-center bg-primary text-white lg:flex">
-                <div className="absolute inset-0 bg-primary/90 opacity-75"></div>
-                <div className="z-10 text-center">
+            <div className="relative hidden w-1/2 flex-col items-center justify-center bg-primary text-primary-foreground lg:flex">
+                <div className="absolute inset-0 bg-primary/90"></div>
+                <div className="z-10 px-8 text-center">
                     <h1 className="text-4xl font-bold">Selamat Datang Kembali!</h1>
                     <p className="mt-4 max-w-md text-lg opacity-90">
                         Masuk untuk melanjutkan pengelolaan keuangan dan membawa bisnis Anda ke level berikutnya.
@@ -44,23 +43,22 @@ export default function Login({ status }: { status?: string }) {
 
             {/* Panel Kanan - Form Login */}
             <div className="flex w-full items-center justify-center p-6 lg:w-1/2">
-                <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg transition-opacity duration-700 ease-in animate-fade-in dark:bg-gray-800">
+                <div className="animate-fade-in w-full max-w-md space-y-6 rounded-xl bg-card p-8 shadow-lg transition-opacity duration-700 ease-in">
                     <div className="text-center">
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Masuk ke Akun</h2>
-                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                            Gunakan kredensial Anda untuk masuk.
-                        </p>
+                        <h2 className="text-3xl font-bold">Masuk ke Akun</h2>
+                        <p className="mt-2 text-sm text-muted-foreground">Gunakan kredensial Anda untuk masuk.</p>
                     </div>
 
-                    {status && <div className="mb-4 text-sm font-medium text-green-600">{status}</div>}
+                    {status && <div className="mb-4 text-sm font-medium text-green-600 dark:text-green-400">{status}</div>}
 
                     <form onSubmit={submit} className="space-y-6">
                         <InputError message={errors.email} className="text-center" />
 
+                        {/* Email */}
                         <div>
                             <Label htmlFor="email">Alamat Email</Label>
                             <div className="relative mt-2">
-                                <AtSign className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                <AtSign className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                                 <Input
                                     id="email"
                                     type="email"
@@ -75,18 +73,16 @@ export default function Login({ status }: { status?: string }) {
                             </div>
                         </div>
 
+                        {/* Password */}
                         <div>
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
-                                <Link
-                                    href={route('password.request')}
-                                    className="text-sm font-medium text-primary hover:underline"
-                                >
+                                <Link href={route('password.request')} className="text-sm font-medium text-primary hover:underline">
                                     Lupa password?
                                 </Link>
                             </div>
                             <div className="relative mt-2">
-                                <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                                <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                                 <Input
                                     id="password"
                                     type="password"
@@ -101,6 +97,7 @@ export default function Login({ status }: { status?: string }) {
                             <InputError message={errors.password} className="mt-2" />
                         </div>
 
+                        {/* Remember Me */}
                         <div className="flex items-center">
                             <Checkbox
                                 id="remember"
@@ -108,13 +105,14 @@ export default function Login({ status }: { status?: string }) {
                                 checked={data.remember}
                                 onCheckedChange={(checked) => setData('remember', checked === true)}
                             />
-                            <Label htmlFor="remember" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                            <Label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">
                                 Ingat saya
                             </Label>
                         </div>
 
+                        {/* Tombol & Link */}
                         <div className="flex flex-col items-center space-y-4">
-                            <Button className="w-full" disabled={processing}>
+                            <Button className="w-full" variant="blue" disabled={processing}>
                                 {processing ? 'Memproses...' : 'Masuk'}
                             </Button>
 
