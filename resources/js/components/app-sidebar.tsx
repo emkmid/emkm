@@ -76,8 +76,8 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
-                                <AppLogo />
+                            <Link href="/dashboard" prefetch className="flex justify-center items-center">
+                                <img src="/images/emkm.png" className="h-7 w-auto" alt="E-MKM" />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

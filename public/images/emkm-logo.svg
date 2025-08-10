@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Background transparent -->
+  <rect width="100%" height="100%" fill="none"/>
+  <!-- Main bar group positioned roughly like the PNG -->
+  <g transform="translate(160,360)">
+    <!-- Left teal block with slightly irregular right edge (polygon) -->
+    <polygon points="0,0 240,0 230,120 0,120" fill="#19B4AD"/>
+    <!-- Small orange underline under the teal block -->
+    <rect x="0" y="120" width="120" height="12" rx="6" fill="#FF9B2B"/>
+    <!-- Right light blue rectangle -->
+    <rect x="240" y="0" width="640" height="132" fill="#D6EFFC"/>
+  </g>
+</svg>

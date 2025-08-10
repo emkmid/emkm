@@ -3,6 +3,7 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { ReactNode } from 'react';
+import AppLogo from './app-logo';
 
 interface NavbarProps {
     auth?: any;
@@ -16,7 +17,7 @@ export function Navbar({ auth, className, children }: NavbarProps) {
             <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
                 {/* Logo */}
                 <Link href="/" className="text-xl font-bold text-primary">
-                    EMKM
+                    <img src="/images/emkm.png" className="h-7 w-auto" alt="E-MKM" />
                 </Link>
 
                 {/* Menu + Actions */}
