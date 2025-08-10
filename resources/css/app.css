@@ -81,6 +81,95 @@
 }
 
 :root {
+    /* Warna utama */
+    --background: #ffffff;
+    --foreground: #0f172a; /* teks gelap */
+
+    /* Card / Popover */
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
+
+    /* Warna utama sesuai var */
+    --primary: #23bbb7; /* primary */
+    --primary-foreground: #ffffff;
+    --secondary: #d3edff; /* softBlue */
+    --secondary-foreground: #23627c; /* darkBlue */
+    --muted: #d3edff;
+    --muted-foreground: #23627c;
+    --accent: #d3edff;
+    --accent-foreground: #23627c;
+
+    /* Warna destruktif dan border */
+    --destructive: #ffa14a; /* orange */
+    --destructive-foreground: #ffffff;
+    --border: #d3edff;
+    --input: #d3edff;
+    --ring: #23bbb7;
+
+    /* Chart */
+    --chart-1: #23bbb7;
+    --chart-2: #23627c;
+    --chart-3: #d3edff;
+    --chart-4: #ffa14a;
+    --chart-5: #ff6b6b;
+
+    /* Sidebar */
+    --sidebar: #ffffff;
+    --sidebar-foreground: #0f172a;
+    --sidebar-primary: #23bbb7;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #d3edff;
+    --sidebar-accent-foreground: #23627c;
+    --sidebar-border: #d3edff;
+    --sidebar-ring: #23bbb7;
+
+    /* Radius */
+    --radius: 0.625rem;
+}
+
+.dark {
+    --background: #0f172a;
+    --foreground: #ffffff;
+
+    --card: #1e293b;
+    --card-foreground: #ffffff;
+    --popover: #1e293b;
+    --popover-foreground: #ffffff;
+
+    --primary: #23bbb7;
+    --primary-foreground: #0f172a;
+    --secondary: #23627c;
+    --secondary-foreground: #ffffff;
+    --muted: #23627c;
+    --muted-foreground: #d3edff;
+    --accent: #23627c;
+    --accent-foreground: #d3edff;
+
+    --destructive: #ffa14a;
+    --destructive-foreground: #ffffff;
+    --border: #23627c;
+    --input: #23627c;
+    --ring: #23bbb7;
+
+    --chart-1: #23bbb7;
+    --chart-2: #23627c;
+    --chart-3: #d3edff;
+    --chart-4: #ffa14a;
+    --chart-5: #ff6b6b;
+
+    --sidebar: #1e293b;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #23bbb7;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #23627c;
+    --sidebar-accent-foreground: #d3edff;
+    --sidebar-border: #23627c;
+    --sidebar-ring: #23bbb7;
+}
+
+/* :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
@@ -149,7 +238,7 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
-}
+} */
 
 @layer base {
     * {
