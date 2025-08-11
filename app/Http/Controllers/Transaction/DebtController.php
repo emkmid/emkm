@@ -18,8 +18,7 @@ class DebtController extends Controller
     public function index(): Response
     {
         $debts = Auth::user()->debts()->latest()->paginate(10);
-
-    return Inertia::render('dashboard/user/debt/index', compact('debts'));
+        return Inertia::render('dashboard/user/debt/index', compact('debts'));
     }
 
     /**

@@ -27,16 +27,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('expenses', ExpenseController::class);
         Route::resource('incomes', IncomeController::class);
         Route::resource('debts', DebtController::class);
+        Route::resource('receivables', ReceivableController::class);
 
         Route::resource('expense-category', ExpenseCategoryController::class);
         Route::resource('income-category', IncomeCategoryController::class);
 
-        // Route::resource('receivables', ReceivableController::class);
-
         Route::resource('products', ProductController::class);
         Route::resource('product-category', ProductCategoryController::class);
-
-        // Route::get('/product', fn () => Inertia::render('dashboard/user/product/Index'))->name('product.index');
     });
 });
 

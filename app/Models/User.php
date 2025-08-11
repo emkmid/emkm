@@ -80,4 +80,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Debt::class);
     }
+    public function receivables()
+    {
+        return $this->hasMany(Receivable::class);
+    }
 }

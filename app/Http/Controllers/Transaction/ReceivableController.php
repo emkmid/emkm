@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Transaction;
 use App\Http\Controllers\Controller;
 use App\Models\Receivable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class ReceivableController extends Controller
 {
@@ -13,7 +15,8 @@ class ReceivableController extends Controller
      */
     public function index()
     {
-        //
+        $receivables = Auth::user()->receivables()->latest()->paginate(10);
+        return Inertia::render('dashboard/user/receivable/index', compact('receivables'));
     }
 
     /**
@@ -21,7 +24,7 @@ class ReceivableController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('dashboard/user/receivable/create');
     }
 
     /**
@@ -29,7 +32,17 @@ class ReceivableController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'debtor' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'due_date' => 'nullable|date',
+            'description' => 'nullable|string',
+        ]);
+
+        Auth::user()->receivables()->create($validated);
+
+        return redirect()->route('receivables.index')->with('success', 'Piutang berhasil ditambahkan!');
     }
 
     /**
@@ -45,7 +58,7 @@ class ReceivableController extends Controller
      */
     public function edit(Receivable $receivable)
     {
-        //
+        return Inertia::render('dashboard/user/receivable/edit', compact('receivable'));
     }
 
     /**
@@ -53,7 +66,17 @@ class ReceivableController extends Controller
      */
     public function update(Request $request, Receivable $receivable)
     {
-        //
+        $validated = $request->validate([
+            'debtor' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'due_date' => 'nullable|date',
+            'description' => 'nullable|string',
+        ]);
+
+        $receivable->update($validated);
+
+        return redirect()->route('receivables.index')->with('success', 'Piutang berhasil diperbarui!');
     }
 
     /**
@@ -61,6 +84,8 @@ class ReceivableController extends Controller
      */
     public function destroy(Receivable $receivable)
     {
-        //
+        $receivable->delete();
+
+        return redirect()->route('receivables.index')->with('success', 'Piutang berhasil dihapus!');
     }
 }
