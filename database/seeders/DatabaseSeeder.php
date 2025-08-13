@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             ExpenseCategorySeeder::class,
             ProductCategorySeeder::class,
             IncomeCategorySeeder::class,
+            ChartOfAccountSeeder::class
         ]);
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Report\JournalController;
 use App\Http\Controllers\Transaction\Category\ExpenseCategoryController;
 use App\Http\Controllers\Transaction\Category\IncomeCategoryController;
 use App\Http\Controllers\Transaction\DebtController;
@@ -34,6 +35,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('products', ProductController::class);
         Route::resource('product-category', ProductCategoryController::class);
+
+        Route::prefix('reports')->group(function () {
+            Route::get('journal', [JournalController::class, 'index'])->name('journal.index');
+        });
     });
 });
 

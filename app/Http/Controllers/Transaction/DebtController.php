@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
 use App\Models\Debt;
+use App\Services\JournalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -30,7 +31,7 @@ class DebtController extends Controller
     }
 
     /**
-     * Menyimpan data hutang/piutang baru ke dalam database.
+     * Menyimpan data hutang/piutang baru ke dalam database. 
      */
     public function store(Request $request)
     {
@@ -43,6 +44,16 @@ class DebtController extends Controller
         ]);
 
         Auth::user()->debts()->create($validated);
+
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Hutang dari ' . $request->creditor,
+            [
+                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => 3, 'type' => 'credit', 'amount' => $request->amount],
+            ]
+        );
 
         return redirect()->route('debts.index')->with('success', 'Hutang berhasil ditambahkan!');
     }
@@ -72,7 +83,28 @@ class DebtController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        // Reverse jurnal lama (Hutang bertambah = Kredit Hutang, Debit Kas/Barang)
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Pembatalan Hutang #' . $debt->id,
+            [
+                ['account_id' => 1, 'type' => 'credit', 'amount' => $debt->amount], // Kas keluar
+                ['account_id' => 2, 'type' => 'debit',  'amount' => $debt->amount], // Hutang berkurang
+            ]
+        );
+
         $debt->update($validated);
+
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Hutang (Update): ' . $request->creditor,
+            [
+                ['account_id' => 2, 'type' => 'credit', 'amount' => $request->amount], // Hutang bertambah
+                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount], // Kas masuk
+            ]
+        );
 
         return redirect()->route('debts.index')->with('success', 'Hutang berhasil diperbarui!');
     }

@@ -5,7 +5,6 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { type MainNavItem, NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Calculator, Folder, LayoutGrid, NotebookText, Package } from 'lucide-react';
-import AppLogo from './app-logo';
 
 const mainNavItems: MainNavItem[] = [
     {
@@ -50,6 +49,16 @@ const mainNavItems: MainNavItem[] = [
         ],
     },
     {
+        title: 'Report',
+        icon: BookOpen,
+        subItems: [
+            { title: 'Jurnal Umum', href: '/dashboard/reports/journal' },
+            { title: 'Buku Besar', href: '/dashboard/reports/ledger' },
+            { title: 'Laba Rugi', href: '/dashboard/reports/profit-loss' },
+            { title: 'Neraca', href: '/dashboard/reports/balance-sheet' },
+        ],
+    },
+    {
         title: 'Hitung HPP',
         icon: Calculator,
         href: '/dashboard/hpp',
@@ -76,7 +85,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch className="flex justify-center items-center">
+                            <Link href="/dashboard" prefetch className="flex items-center justify-center">
                                 <img src="/images/emkm.png" className="h-7 w-auto" alt="E-MKM" />
                             </Link>
                         </SidebarMenuButton>

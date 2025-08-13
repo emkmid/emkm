@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Transaction;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Services\JournalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -49,6 +50,16 @@ class ExpenseController extends Controller
 
         Auth::user()->expenses()->create($validated);
 
+        JournalService::add(
+            Auth::id(),
+            $request->date,
+            'Pengeluaran: ' . ($request->description ?? 'Tanpa deskripsi'),
+            [
+                ['account_id' => 6, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => 1, 'type' => 'credit', 'amount' => $request->amount],
+            ]
+        );
+
         return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil ditambahkan.');
     }
 
@@ -91,7 +102,29 @@ class ExpenseController extends Controller
             'date' => 'required|date',
         ]);
 
+        // 1. Jurnal pembalik (reverse)
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Pembatalan Pengeluaran #' . $expense->id,
+            [
+                ['account_id' => 6, 'type' => 'credit', 'amount' => $expense->amount],
+                ['account_id' => 1, 'type' => 'debit',  'amount' => $expense->amount],
+            ]
+        );
+
         $expense->update($validated);
+
+        // 3. Jurnal baru sesuai update
+        JournalService::add(
+            Auth::id(),
+            $request->date,
+            'Pengeluaran (Update): ' . ($request->description ?? 'Tanpa deskripsi'),
+            [
+                ['account_id' => 6, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => 1, 'type' => 'credit', 'amount' => $request->amount],
+            ]
+        );
 
         return redirect()
             ->route('expenses.index')

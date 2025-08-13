@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Transaction;
 use App\Http\Controllers\Controller;
 use App\Models\Income;
 use App\Models\IncomeCategory;
+use App\Services\JournalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,13 +53,21 @@ class IncomeController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // PERBAIKAN: Tambahkan ID pengguna ke data yang divalidasi sebelum disimpan.
         $validated['user_id'] = Auth::id();
 
-        // Buat data pemasukan baru menggunakan data yang sudah lengkap.
         Income::create($validated);
 
-        return redirect()->route('incomes.index')->with('success', 'Pengeluaran berhasil ditambahkan.');
+        JournalService::add(
+            Auth::id(),
+            $request->date,
+            'Pemasukan: ' . ($request->description ?? 'Tanpa deskripsi'),
+            [
+                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => 5, 'type' => 'credit', 'amount' => $request->amount],
+            ]
+        );
+
+        return redirect()->route('incomes.index')->with('success', 'Pemasukan berhasil ditambahkan.');
     }
 
     /**
@@ -100,7 +109,29 @@ class IncomeController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        // Reverse jurnal lama
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Pembatalan Pemasukan #' . $income->id,
+            [
+                ['account_id' => 1, 'type' => 'credit', 'amount' => $income->amount], // Kas
+                ['account_id' => 4, 'type' => 'debit',  'amount' => $income->amount], // Pendapatan
+            ]
+        );
+
         $income->update($validated);
+
+        // Jurnal baru
+        JournalService::add(
+            Auth::id(),
+            $request->date,
+            'Pemasukan (Update): ' . ($request->description ?? 'Tanpa deskripsi'),
+            [
+                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => 4, 'type' => 'credit', 'amount' => $request->amount],
+            ]
+        );
 
         return redirect()
             ->route('incomes.index')
