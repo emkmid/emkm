@@ -1,25 +1,14 @@
 import { Navbar } from '@/components/navbar';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import SplitText from '@/textAnimations/SplitText/SplitText';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import {
-    BarChart3,
-    BookOpen,
-    Calculator,
-    Check,
-    DollarSign,
-    FolderKanban,
-    LineChart,
-    NotebookPen,
-    UserPlus,
-    Users,
-    Wallet,
-} from 'lucide-react';
-import { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { BarChart3, BookOpen, Calculator, Check, DollarSign, FolderKanban, LineChart, NotebookPen, UserPlus, Users, Wallet } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -28,6 +17,10 @@ export default function Welcome() {
     const darkBlueColor = '#23627C';
     const softBlueColor = '#D3EDFF';
     const orangeColor = '#FFA14A';
+
+    const handleAnimationComplete = () => {
+        console.log('All letters have animated!');
+    };
 
     useEffect(() => {
         AOS.init({
@@ -149,21 +142,44 @@ export default function Welcome() {
             <Head title="Solusi Digital untuk UMKM Indonesia" />
             <div className="min-h-screen bg-white text-gray-800">
                 <Navbar auth={auth} className="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-md">
-                    <Link href="#fitur" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">Fitur</Link>
-                    <Link href="#harga" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">Harga</Link>
-                    <Link href="#faq" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">FAQ</Link>
-                    <Link href="/education" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">Edukasi</Link>
+                    <Link href="#fitur" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">
+                        Fitur
+                    </Link>
+                    <Link href="#harga" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">
+                        Harga
+                    </Link>
+                    <Link href="#faq" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">
+                        FAQ
+                    </Link>
+                    <Link href="/education" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">
+                        Edukasi
+                    </Link>
                 </Navbar>
 
                 <main>
                     <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-28" style={{ backgroundColor: softBlueColor }}>
                         <div className="container mx-auto flex flex-col items-center gap-12 px-4 text-center lg:flex-row lg:text-left">
                             <div className="lg:w-1/2" data-aos="fade-right">
-                                <h1 className="text-4xl font-extrabold tracking-tight text-[#23627C] sm:text-5xl md:text-6xl">
+                                {/* <h1 className="text-4xl font-extrabold tracking-tight text-[#23627C] sm:text-5xl md:text-6xl">
                                     Solusi Digital untuk <span style={{ color: primaryColor }}>UMKM</span> Indonesia
-                                </h1>
+                                </h1> */}
+                                <SplitText
+                                    text="Solusi Digital untuk UMKM Indonesia"
+                                    className="text-4xl font-extrabold tracking-tight text-[#23627C] sm:text-5xl md:text-6xl"
+                                    delay={100}
+                                    duration={0.6}
+                                    ease="power3.out"
+                                    splitType="chars"
+                                    from={{ opacity: 0, y: 40 }}
+                                    to={{ opacity: 1, y: 0 }}
+                                    threshold={0.1}
+                                    rootMargin="-100px"
+                                    textAlign="center"
+                                    onLetterAnimationComplete={handleAnimationComplete}
+                                />
                                 <p className="mt-6 max-w-xl text-lg text-gray-600 lg:mx-0">
-                                    EMKM membantu Anda mengelola keuangan, menganalisis performa, dan mengambil keputusan cerdas untuk pertumbuhan bisnis.
+                                    EMKM membantu Anda mengelola keuangan, menganalisis performa, dan mengambil keputusan cerdas untuk pertumbuhan
+                                    bisnis.
                                 </p>
                                 <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                                     <Link href={route(auth.user ? 'dashboard' : 'register')}>
@@ -187,7 +203,7 @@ export default function Welcome() {
                         <div className="container mx-auto px-4">
                             <div className="text-center" data-aos="fade-up">
                                 <h2 className="text-3xl font-bold tracking-tight text-[#23627C]">Semua yang Anda Butuhkan untuk Berkembang</h2>
-                                <p className="mt-4 max-w-2xl mx-auto text-gray-600">
+                                <p className="mx-auto mt-4 max-w-2xl text-gray-600">
                                     Dari pencatatan keuangan hingga analisis mendalam, EMKM menyediakan fitur lengkap dalam satu platform.
                                 </p>
                             </div>
@@ -196,7 +212,10 @@ export default function Welcome() {
                                     <div key={idx} data-aos="fade-up" data-aos-delay={idx * 100}>
                                         <Card className="h-full transform-gpu border-0 bg-gray-50/50 text-center shadow-none transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                                             <CardHeader className="flex flex-col items-center">
-                                                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{backgroundColor: softBlueColor}}>
+                                                <div
+                                                    className="mb-4 flex h-16 w-16 items-center justify-center rounded-full"
+                                                    style={{ backgroundColor: softBlueColor }}
+                                                >
                                                     {feat.icon}
                                                 </div>
                                                 <CardTitle className="text-xl font-semibold text-[#23627C]">{feat.title}</CardTitle>
@@ -208,19 +227,19 @@ export default function Welcome() {
                             </div>
                         </div>
                     </section>
-                    
+
                     <section className="py-16" style={{ backgroundColor: softBlueColor }}>
                         <div className="container mx-auto px-4">
                             <div className="text-center" data-aos="fade-up">
                                 <h2 className="text-3xl font-bold tracking-tight text-[#23627C]">Fitur Unggulan</h2>
-                                <p className="mt-4 max-w-2xl mx-auto text-gray-600">
+                                <p className="mx-auto mt-4 max-w-2xl text-gray-600">
                                     Dirancang khusus untuk memenuhi kebutuhan unik para pelaku UMKM di Indonesia.
                                 </p>
                             </div>
                             <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
                                 {primaryFeatures.map((item, idx) => (
                                     <div key={idx} className="flex items-start gap-4" data-aos="fade-up" data-aos-delay={idx * 50}>
-                                        <div className="flex-shrink-0 rounded-lg p-3" style={{backgroundColor: primaryColor, color: 'white'}}>
+                                        <div className="flex-shrink-0 rounded-lg p-3" style={{ backgroundColor: primaryColor, color: 'white' }}>
                                             {item.icon}
                                         </div>
                                         <div>
@@ -237,15 +256,20 @@ export default function Welcome() {
                         <div className="container mx-auto px-4">
                             <div className="text-center" data-aos="fade-up">
                                 <h2 className="text-3xl font-bold tracking-tight text-[#23627C]">Pilih Paket Sesuai Kebutuhanmu</h2>
-                                <p className="mt-4 max-w-2xl mx-auto text-gray-600">
+                                <p className="mx-auto mt-4 max-w-2xl text-gray-600">
                                     Harga transparan dan fleksibel, dirancang untuk mendukung setiap tahap pertumbuhan bisnis Anda.
                                 </p>
                             </div>
-                            <div className="mt-12 grid max-w-4xl mx-auto gap-8 md:grid-cols-3">
+                            <div className="mx-auto mt-12 grid max-w-4xl gap-8 md:grid-cols-3">
                                 {plans.map((plan, idx) => (
-                                    <Card key={idx} className={`relative flex flex-col transform-gpu overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl ${plan.popular ? 'border-2 border-[#23BBB7]' : 'border border-gray-200'}`} data-aos="fade-up" data-aos-delay={idx * 100}>
+                                    <Card
+                                        key={idx}
+                                        className={`relative flex transform-gpu flex-col overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl ${plan.popular ? 'border-2 border-[#23BBB7]' : 'border border-gray-200'}`}
+                                        data-aos="fade-up"
+                                        data-aos-delay={idx * 100}
+                                    >
                                         {plan.popular && (
-                                            <div className="absolute top-0 left-1/2 w-full -translate-x-1/2 whitespace-nowrap bg-[#23BBB7] px-3 py-1 text-center text-sm font-semibold text-white">
+                                            <div className="absolute top-0 left-1/2 w-full -translate-x-1/2 bg-[#23BBB7] px-3 py-1 text-center text-sm font-semibold whitespace-nowrap text-white">
                                                 Paling Populer
                                             </div>
                                         )}
@@ -257,14 +281,18 @@ export default function Welcome() {
                                             <ul className="space-y-3 text-gray-700">
                                                 {plan.features.map((f, i) => (
                                                     <li key={i} className="flex items-start">
-                                                        <Check className="h-5 w-5 flex-shrink-0 text-green-500 mt-1" />
+                                                        <Check className="mt-1 h-5 w-5 flex-shrink-0 text-green-500" />
                                                         <span className="ml-3">{f}</span>
                                                     </li>
                                                 ))}
                                             </ul>
                                         </CardContent>
                                         <CardFooter>
-                                            <Button className="w-full" variant={plan.variant as any} style={plan.variant === 'outline' ? {borderColor: '#23BBB7', color: '#23BBB7'} : {}}>
+                                            <Button
+                                                className="w-full"
+                                                variant={plan.variant as any}
+                                                style={plan.variant === 'outline' ? { borderColor: '#23BBB7', color: '#23BBB7' } : {}}
+                                            >
                                                 {plan.cta}
                                             </Button>
                                         </CardFooter>
@@ -274,22 +302,26 @@ export default function Welcome() {
                         </div>
                     </section>
 
-                    <section className="py-16" id="faq" style={{backgroundColor: softBlueColor}}>
+                    <section className="py-16" id="faq" style={{ backgroundColor: softBlueColor }}>
                         <div className="container mx-auto px-4">
-                             <div className="text-center" data-aos="fade-up">
+                            <div className="text-center" data-aos="fade-up">
                                 <h2 className="text-3xl font-bold tracking-tight text-[#23627C]">Pertanyaan yang Sering Diajukan</h2>
-                                <p className="mt-4 max-w-2xl mx-auto text-gray-600">
+                                <p className="mx-auto mt-4 max-w-2xl text-gray-600">
                                     Tidak menemukan jawaban yang Anda cari? Hubungi tim dukungan kami.
                                 </p>
                             </div>
                             <div className="mx-auto mt-12 max-w-3xl" data-aos="fade-up" data-aos-delay="100">
                                 <Accordion type="single" collapsible className="w-full space-y-3">
                                     {faqs.map((item, i) => (
-                                        <AccordionItem key={i} value={`faq-${i}`} className="rounded-lg border bg-white px-4 shadow-sm transition-shadow hover:shadow-md">
+                                        <AccordionItem
+                                            key={i}
+                                            value={`faq-${i}`}
+                                            className="rounded-lg border bg-white px-4 shadow-sm transition-shadow hover:shadow-md"
+                                        >
                                             <AccordionTrigger className="py-4 text-left font-medium text-[#23627C] hover:no-underline">
                                                 {item.q}
                                             </AccordionTrigger>
-                                            <AccordionContent className="pb-4 pt-0 text-base text-gray-600">{item.a}</AccordionContent>
+                                            <AccordionContent className="pt-0 pb-4 text-base text-gray-600">{item.a}</AccordionContent>
                                         </AccordionItem>
                                     ))}
                                 </Accordion>
@@ -300,7 +332,7 @@ export default function Welcome() {
                     <section className="py-20 text-center text-white" style={{ backgroundColor: darkBlueColor }}>
                         <div className="container mx-auto px-4" data-aos="fade-up">
                             <h2 className="text-3xl font-bold">Siap Bawa Bisnismu Naik Level?</h2>
-                            <p className="mt-4 mb-8 max-w-xl mx-auto text-lg text-white/90">
+                            <p className="mx-auto mt-4 mb-8 max-w-xl text-lg text-white/90">
                                 Mulai kelola keuanganmu secara cerdas dan otomatis hari ini juga!
                             </p>
                             <Link href={route(auth.user ? 'dashboard' : 'register')}>
@@ -311,9 +343,9 @@ export default function Welcome() {
                         </div>
                     </section>
                 </main>
-                
+
                 <footer style={{ backgroundColor: darkBlueColor }} className="border-t border-t-white/10">
-                    <div className="container mx-auto py-6 px-4 text-center text-sm text-white/70">
+                    <div className="container mx-auto px-4 py-6 text-center text-sm text-white/70">
                         &copy; {new Date().getFullYear()} EMKM. Seluruh hak cipta dilindungi.
                     </div>
                 </footer>
