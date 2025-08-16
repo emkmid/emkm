@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChartOfAccount;
 use App\Models\Income;
 use App\Models\IncomeCategory;
 use App\Services\JournalService;
@@ -57,13 +58,17 @@ class IncomeController extends Controller
 
         Income::create($validated);
 
+        // Ambil akun dari Chart of Accounts
+        $kasAccount       = ChartOfAccount::where('code', '101')->firstOrFail(); // Kas
+        $pendapatanAccount = ChartOfAccount::where('code', '401')->firstOrFail(); // Pendapatan Penjualan
+
         JournalService::add(
             Auth::id(),
             $request->date,
             'Pemasukan: ' . ($request->description ?? 'Tanpa deskripsi'),
             [
-                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount],
-                ['account_id' => 5, 'type' => 'credit', 'amount' => $request->amount],
+                ['account_id' => $kasAccount->id, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $pendapatanAccount->id, 'type' => 'credit', 'amount' => $request->amount],
             ]
         );
 
@@ -109,28 +114,33 @@ class IncomeController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // Reverse jurnal lama
+        $oldAmount = $income->amount;
+        $income->update($validated);
+
+        // Jurnal Pembalik
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
-            'Pembatalan Pemasukan #' . $income->id,
+            'Pembalik: ' . ($income->description ?? 'Pemasukan lama'),
             [
-                ['account_id' => 1, 'type' => 'credit', 'amount' => $income->amount], // Kas
-                ['account_id' => 4, 'type' => 'debit',  'amount' => $income->amount], // Pendapatan
-            ]
+                ['account_id' => 1, 'type' => 'credit', 'amount' => $oldAmount],
+                ['account_id' => 5, 'type' => 'debit',  'amount' => $oldAmount],
+            ],
+            $income->id,
+            'income'
         );
 
-        $income->update($validated);
-
-        // Jurnal baru
+        // Jurnal Baru
         JournalService::add(
             Auth::id(),
             $request->date,
-            'Pemasukan (Update): ' . ($request->description ?? 'Tanpa deskripsi'),
+            'Perubahan: ' . ($income->description ?? 'Pemasukan baru'),
             [
                 ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount],
-                ['account_id' => 4, 'type' => 'credit', 'amount' => $request->amount],
-            ]
+                ['account_id' => 5, 'type' => 'credit', 'amount' => $request->amount],
+            ],
+            $income->id,
+            'income'
         );
 
         return redirect()

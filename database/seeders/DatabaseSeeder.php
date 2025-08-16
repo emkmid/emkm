@@ -20,6 +20,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        User::factory()->create([
+            'name' => 'admin',
+            'email' => 'admin@example.com',
+            'role' => 'admin'
+        ]);
+
         $this->call([
             ExpenseCategorySeeder::class,
             ProductCategorySeeder::class,

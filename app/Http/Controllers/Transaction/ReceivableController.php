@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChartOfAccount;
 use App\Models\Receivable;
 use App\Services\JournalService;
 use Illuminate\Http\Request;
@@ -43,14 +44,17 @@ class ReceivableController extends Controller
 
         Auth::user()->receivables()->create($validated);
 
-        // Jurnal: Piutang Usaha (Debit) & Pendapatan (Credit)
+        // Ambil akun dari Chart of Accounts
+        $piutangAccount   = ChartOfAccount::where('code', '103')->firstOrFail(); // Piutang Usaha
+        $pendapatanAccount = ChartOfAccount::where('code', '401')->firstOrFail(); // Pendapatan Penjualan
+
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
             'Piutang dari ' . $request->debtor,
             [
-                ['account_id' => 4, 'type' => 'debit',  'amount' => $request->amount], // Piutang Usaha
-                ['account_id' => 5, 'type' => 'credit', 'amount' => $request->amount], // Pendapatan
+                ['account_id' => $piutangAccount->id, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $pendapatanAccount->id, 'type' => 'credit', 'amount' => $request->amount],
             ]
         );
 
@@ -86,27 +90,33 @@ class ReceivableController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // Reverse jurnal lama
-        JournalService::add(
-            Auth::id(),
-            now()->toDateString(),
-            'Pembatalan Piutang #' . $receivable->id,
-            [
-                ['account_id' => 3, 'type' => 'credit', 'amount' => $receivable->amount], // Piutang
-                ['account_id' => 1, 'type' => 'debit',  'amount' => $receivable->amount], // Kas
-            ]
-        );
-
+        $oldAmount = $receivable->amount;
         $receivable->update($validated);
 
+        // Jurnal Pembalik
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
-            'Piutang (Update): ' . $request->debtor,
+            'Pembalik: ' . ($receivable->description ?? 'Piutang lama'),
             [
-                ['account_id' => 3, 'type' => 'debit',  'amount' => $request->amount], // Piutang bertambah
-                ['account_id' => 1, 'type' => 'credit', 'amount' => $request->amount], // Kas keluar
-            ]
+                ['account_id' => 2, 'type' => 'credit', 'amount' => $oldAmount], // Piutang berkurang
+                ['account_id' => 5, 'type' => 'debit',  'amount' => $oldAmount], // Pendapatan dibalik
+            ],
+            $receivable->id,
+            'receivable'
+        );
+
+        // Jurnal Baru
+        JournalService::add(
+            Auth::id(),
+            $request->date,
+            'Perubahan: ' . ($receivable->description ?? 'Piutang baru'),
+            [
+                ['account_id' => 2, 'type' => 'debit',  'amount' => $request->amount], // Piutang bertambah
+                ['account_id' => 5, 'type' => 'credit', 'amount' => $request->amount], // Pendapatan bertambah
+            ],
+            $receivable->id,
+            'receivable'
         );
 
         return redirect()->route('receivables.index')->with('success', 'Piutang berhasil diperbarui!');

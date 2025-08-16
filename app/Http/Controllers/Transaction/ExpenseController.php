@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChartOfAccount;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Services\JournalService;
@@ -50,13 +51,16 @@ class ExpenseController extends Controller
 
         Auth::user()->expenses()->create($validated);
 
+        $biayaAccount = ChartOfAccount::where('code', '501')->firstOrFail(); // Biaya Operasional
+        $kasAccount   = ChartOfAccount::where('code', '101')->firstOrFail(); // Kas
+
         JournalService::add(
             Auth::id(),
             $request->date,
             'Pengeluaran: ' . ($request->description ?? 'Tanpa deskripsi'),
             [
-                ['account_id' => 6, 'type' => 'debit',  'amount' => $request->amount],
-                ['account_id' => 1, 'type' => 'credit', 'amount' => $request->amount],
+                ['account_id' => $biayaAccount->id, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $kasAccount->id, 'type' => 'credit', 'amount' => $request->amount],
             ]
         );
 
@@ -102,28 +106,33 @@ class ExpenseController extends Controller
             'date' => 'required|date',
         ]);
 
-        // 1. Jurnal pembalik (reverse)
+        $oldAmount = $expense->amount;
+        $expense->update($validated);
+
+        // Jurnal Pembalik
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
-            'Pembatalan Pengeluaran #' . $expense->id,
+            'Pembalik: ' . ($expense->description ?? 'Pengeluaran lama'),
             [
-                ['account_id' => 6, 'type' => 'credit', 'amount' => $expense->amount],
-                ['account_id' => 1, 'type' => 'debit',  'amount' => $expense->amount],
-            ]
+                ['account_id' => 1, 'type' => 'debit',  'amount' => $oldAmount], // Kas kembali
+                ['account_id' => 6, 'type' => 'credit', 'amount' => $oldAmount], // Biaya dibalik
+            ],
+            $expense->id,
+            'expense'
         );
 
-        $expense->update($validated);
-
-        // 3. Jurnal baru sesuai update
+        // Jurnal Baru
         JournalService::add(
             Auth::id(),
             $request->date,
-            'Pengeluaran (Update): ' . ($request->description ?? 'Tanpa deskripsi'),
+            'Perubahan: ' . ($expense->description ?? 'Pengeluaran baru'),
             [
-                ['account_id' => 6, 'type' => 'debit',  'amount' => $request->amount],
-                ['account_id' => 1, 'type' => 'credit', 'amount' => $request->amount],
-            ]
+                ['account_id' => 1, 'type' => 'credit', 'amount' => $request->amount], // Kas berkurang
+                ['account_id' => 6, 'type' => 'debit',  'amount' => $request->amount], // Biaya bertambah
+            ],
+            $expense->id,
+            'expense'
         );
 
         return redirect()

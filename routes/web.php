@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Education\ArticleController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Report\JournalController;
@@ -38,6 +39,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::prefix('reports')->group(function () {
             Route::get('journal', [JournalController::class, 'index'])->name('journal.index');
+        });
+
+        // Admin
+        Route::prefix('admin')->middleware(['mustBeAdmin', 'web'])->group(function() {
+            Route::resource('articles', ArticleController::class);
+            Route::post('uploads/article-media', [ArticleController::class, 'upload'])->name('articles.upload')->middleware('throttle:20,1');
         });
     });
 });

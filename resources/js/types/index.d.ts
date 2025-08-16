@@ -54,6 +54,7 @@ export interface MainNavItem {
     isActive?: boolean;
     href?: string;
     subItems?: SubItems[];
+    can?: (user: User) => boolean;
 }
 
 export interface SubItems {
@@ -61,6 +62,7 @@ export interface SubItems {
     icon?: LucideIcon | null;
     isActive?: boolean;
     href: string;
+    can?: (user: User) => boolean;
 }
 
 export interface SharedData {

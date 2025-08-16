@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChartOfAccount;
 use App\Models\Debt;
 use App\Services\JournalService;
 use Illuminate\Http\Request;
@@ -45,13 +46,16 @@ class DebtController extends Controller
 
         Auth::user()->debts()->create($validated);
 
+        $kasAccount   = ChartOfAccount::where('code', '101')->firstOrFail(); // Kas
+        $utangAccount = ChartOfAccount::where('code', '201')->firstOrFail(); // Utang Usaha
+
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
             'Hutang dari ' . $request->creditor,
             [
-                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount],
-                ['account_id' => 3, 'type' => 'credit', 'amount' => $request->amount],
+                ['account_id' => $kasAccount->id, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $utangAccount->id, 'type' => 'credit', 'amount' => $request->amount],
             ]
         );
 
@@ -83,27 +87,33 @@ class DebtController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // Reverse jurnal lama (Hutang bertambah = Kredit Hutang, Debit Kas/Barang)
-        JournalService::add(
-            Auth::id(),
-            now()->toDateString(),
-            'Pembatalan Hutang #' . $debt->id,
-            [
-                ['account_id' => 1, 'type' => 'credit', 'amount' => $debt->amount], // Kas keluar
-                ['account_id' => 2, 'type' => 'debit',  'amount' => $debt->amount], // Hutang berkurang
-            ]
-        );
-
+        $oldAmount = $debt->amount;
         $debt->update($validated);
 
+        // Jurnal Pembalik
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
-            'Hutang (Update): ' . $request->creditor,
+            'Pembalik: ' . ($debt->description ?? 'Utang lama'),
             [
-                ['account_id' => 2, 'type' => 'credit', 'amount' => $request->amount], // Hutang bertambah
-                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount], // Kas masuk
-            ]
+                ['account_id' => 3, 'type' => 'debit',  'amount' => $oldAmount], // Utang berkurang
+                ['account_id' => 1, 'type' => 'credit', 'amount' => $oldAmount], // Kas kembali
+            ],
+            $debt->id,
+            'debt'
+        );
+
+        // Jurnal Baru
+        JournalService::add(
+            Auth::id(),
+            $request->date,
+            'Perubahan: ' . ($debt->description ?? 'Utang baru'),
+            [
+                ['account_id' => 3, 'type' => 'credit', 'amount' => $request->amount], // Utang bertambah
+                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount], // Kas bertambah
+            ],
+            $debt->id,
+            'debt'
         );
 
         return redirect()->route('debts.index')->with('success', 'Hutang berhasil diperbarui!');
