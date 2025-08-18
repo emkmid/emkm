@@ -17,7 +17,7 @@ class StoreArticleRequest extends FormRequest
             'content_html' => ['required','string','min:5'],
             'published_at' => ['nullable','date'],
             'meta' => ['nullable','array'],
-            'thumbnail_path' => ['image', 'file', 'max:2000']
+            'thumbnail_path' => ['image', 'file', 'max:2000', 'nullable']
         ];
     }
 

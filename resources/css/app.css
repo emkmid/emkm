@@ -3,6 +3,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@plugin '@tailwindcss/typography';
+
 @plugin 'tailwindcss-animate';
 
 @source '../views';
@@ -252,17 +254,17 @@
 
 /* Toolbar wrapper */
 .trix-toolbar {
-    @apply rounded-t-lg border border-border bg-card px-2 py-1;
+    @apply border-border bg-card rounded-t-lg border px-2 py-1;
 }
 
 /* Button groups */
 .trix-button-group {
-    @apply inline-flex items-center gap-1 rounded-md bg-muted/50 p-1;
+    @apply bg-muted/50 inline-flex items-center gap-1 rounded-md p-1;
 }
 
 /* Buttons */
 .trix-button {
-    @apply rounded-md px-2 py-1 text-foreground transition-colors;
+    @apply text-foreground rounded-md px-2 py-1 transition-colors;
 }
 
 .trix-button:hover {
@@ -281,7 +283,7 @@
 
 /* Editor input area */
 .trix-content {
-    @apply min-h-[200px] rounded-b-lg border border-border bg-background p-4 leading-relaxed text-foreground;
+    @apply border-border bg-background text-foreground min-h-[200px] rounded-b-lg border p-4 leading-relaxed;
 }
 
 /* Placeholder */
@@ -291,7 +293,7 @@ trix-editor[placeholder]::before {
 
 /* Links */
 .trix-content a {
-    @apply text-primary underline hover:text-primary-foreground;
+    @apply text-primary hover:text-primary-foreground underline;
 }
 
 /* Headings */

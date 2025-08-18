@@ -1,7 +1,7 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, BreadcrumbItemType } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -46,13 +46,20 @@ export default function ArticleShowPage() {
 
                 <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
                     <HeadingSmall title={article.title} description={`Diterbitkan pada: ${article.published_at}`} />
-                    <Button asChild className="mt-4 md:mt-0">
-                        <Link href={route('articles.index')}>Kembali ke Daftar</Link>
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button asChild className="mt-4 md:mt-0">
+                            <Link href={route('articles.edit', { article: article.slug })}>Edit Artikel</Link>
+                        </Button>
+
+                        <Button asChild className="mt-4 md:mt-0">
+                            <Link href={route('articles.index')}>Kembali ke Daftar</Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <Card>
                     <CardHeader>
+                        <h1 className="mb-2 text-3xl">{article.title}</h1>
                         {/* Tampilkan gambar thumbnail jika ada */}
                         {article.thumbnail_path && (
                             <img
@@ -61,11 +68,13 @@ export default function ArticleShowPage() {
                                 className="mb-4 h-auto w-full rounded-md object-cover"
                             />
                         )}
-                        <CardTitle>{article.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {/* Tampilkan konten artikel */}
-                        <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: article.content_html }} />
+                        <div
+                            className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert"
+                            dangerouslySetInnerHTML={{ __html: article.content_html }}
+                        />
                     </CardContent>
                 </Card>
             </div>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Education\ArticleController;
+use App\Http\Controllers\Education\EducationController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Report\JournalController;
@@ -49,9 +50,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-Route::get('education', function () {
-    return Inertia::render('education');
-})->name('education');
+Route::prefix('education')->group(function() {
+    Route::get('articles', [EducationController::class, 'articles'])->name('education.article.index');
+    Route::get('articles/{article}', [EducationController::class, 'articleShow'])->name('education.article.show');
+});
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

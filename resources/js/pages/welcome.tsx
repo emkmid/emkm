@@ -181,21 +181,24 @@ export default function Welcome() {
             <Navbar auth={auth} className="sticky top-0 z-50">
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                        <Link href="#" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
+                        <Link href="#home" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
                             Beranda
                         </Link>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                        <Link href="#" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
+                        <Link
+                            href="#tentang-kami"
+                            className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200"
+                        >
                             Tentang Kami
                         </Link>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                        <Link href="#" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
+                        <Link href="#fitur" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
                             Fitur
                         </Link>
                     </NavigationMenuLink>
@@ -214,7 +217,7 @@ export default function Welcome() {
                         <ul className="grid w-[200px] gap-4 bg-white text-gray-600">
                             <li>
                                 <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                                    <Link href={'#'}>Artikel</Link>
+                                    <Link href={route('education.article.index')}>Artikel</Link>
                                 </NavigationMenuLink>
                             </li>
                         </ul>
@@ -228,7 +231,7 @@ export default function Welcome() {
                 </NavigationMenuItem>
             </Navbar>
 
-            <section className="bg-sky-100">
+            <section className="bg-sky-100" id="home">
                 <div className="container mx-auto flex flex-col gap-5 px-5 md:flex-row md:items-center">
                     {/* LEFT: Text */}
                     <div className="fade-down flex-1 text-center md:text-start">
@@ -276,7 +279,7 @@ export default function Welcome() {
                 </div>
             </section>
 
-            <section className="py-20">
+            <section className="py-20" id="tentang-kami">
                 <div className="container mx-auto px-5">
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                         {/* Bagian Card */}
@@ -325,7 +328,7 @@ export default function Welcome() {
                 </div>
             </section>
 
-            <section className="bg-sky-100 py-20">
+            <section className="bg-sky-100 py-20" id="fitur">
                 <div className="fade-down container mx-auto px-5">
                     <div className="text-center">
                         <p className="mb-2 text-sm tracking-widest text-[#23627C] uppercase">Fitur Unggulan</p>
@@ -348,7 +351,7 @@ export default function Welcome() {
                 </div>
             </section>
 
-            <section className="py-20">
+            <section className="py-20" id="harga">
                 <div className="container mx-auto px-5">
                     <div className="fade-down text-center">
                         <p className="mb-2 text-sm tracking-widest text-[#23627C] uppercase">Harga Paket</p>
@@ -395,7 +398,7 @@ export default function Welcome() {
                 </div>
             </section>
 
-            <section className="bg-sky-100 pt-20">
+            <section className="bg-sky-100 pt-20" id="team">
                 <div className="container mx-auto px-5">
                     <div className="grid grid-cols-1 items-stretch md:grid-cols-2">
                         {/* kiri */}

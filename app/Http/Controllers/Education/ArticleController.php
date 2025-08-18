@@ -8,6 +8,7 @@ use App\Models\Article;
 use App\Services\ArticleImageUploader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ArticleController extends Controller
@@ -65,7 +66,7 @@ class ArticleController extends Controller
     public function edit(Article $article)
     {
         Gate::authorize('edit', $article);
-        return Inertia::render('Articles/Edit', [
+        return Inertia::render('dashboard/admin/education/article/edit', [
             'article' => $article->only('id','title','excerpt','content_html','slug','meta','published_at'),
         ]);
     }
@@ -73,18 +74,23 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Article $article)
+    public function update(StoreArticleRequest $request, Article $article)
     {
         Gate::authorize('update', $article);
-        $article->update([
-            'title' => $request->input('title'),
-            'excerpt' => $request->input('excerpt'),
-            'content_html' => $request->sanitizedContent(),
-            'meta' => $request->input('meta'),
-            'published_at' => $request->input('published_at'),
-        ]);
 
-        return back()->with('success','Saved.');
+        $validatedData = $request->validated();
+
+        if ($request->hasFile('thumbnail_path')) {
+            if ($article->thumbnail_path) {
+                Storage::delete($article->thumbnail_path);
+            }
+
+            $path = $request->file('thumbnail_path')->store('article-images');
+            $validatedData['thumbnail_path'] = $path;
+        }
+
+        $article->update($validatedData);
+        return redirect()->route('articles.index')->with('success', 'Article updated successfully.');
     }
 
     /**

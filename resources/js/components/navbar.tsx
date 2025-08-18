@@ -19,7 +19,6 @@ export function Navbar({ auth, className, children }: NavbarProps) {
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
                     <img src="/images/emkm.png" className="h-7 w-auto" alt="E-MKM" />
-                    E-MKM
                 </Link>
 
                 {/* Desktop Menu */}
