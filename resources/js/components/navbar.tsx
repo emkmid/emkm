@@ -1,58 +1,49 @@
-import { Button } from '@/components/ui/button';
-import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu';
+import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { ReactNode } from 'react';
-import AppLogo from './app-logo';
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 interface NavbarProps {
     auth?: any;
     className?: string;
-    children?: ReactNode;
+    children?: React.ReactNode;
 }
 
 export function Navbar({ auth, className, children }: NavbarProps) {
+    const [isOpen, setIsOpen] = useState(false);
+
     return (
-        <header className={cn('w-full border-b border-border text-foreground', className)}>
-            <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+        <header className={cn('w-full bg-sky-100 text-foreground', className)}>
+            <div className="container mx-auto flex h-16 items-center justify-between px-5">
                 {/* Logo */}
-                <Link href="/" className="text-xl font-bold text-primary">
+                <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
                     <img src="/images/emkm.png" className="h-7 w-auto" alt="E-MKM" />
+                    E-MKM
                 </Link>
 
-                {/* Menu + Actions */}
-                <div className="flex items-center gap-4">
-                    {/* Menu */}
-                    <NavigationMenu>
-                        <NavigationMenuList className="gap-4">
-                            {children && (
-                                <>
-                                    {/** Mapping children jadi NavigationMenuItem */}
-                                    {Array.isArray(children) ? (
-                                        children.map((child, idx) => (
-                                            <NavigationMenuItem key={idx}>
-                                                <NavigationMenuLink asChild>{child}</NavigationMenuLink>
-                                            </NavigationMenuItem>
-                                        ))
-                                    ) : (
-                                        <NavigationMenuItem>
-                                            <NavigationMenuLink asChild>{children}</NavigationMenuLink>
-                                        </NavigationMenuItem>
-                                    )}
-                                </>
-                            )}
-                        </NavigationMenuList>
+                {/* Desktop Menu */}
+                <div className="hidden items-center gap-4 md:flex">
+                    <NavigationMenu viewport={false}>
+                        <NavigationMenuList>{children}</NavigationMenuList>
                     </NavigationMenu>
-
-                    {/* Theme Toggle */}
-                    {/* <ThemeToggle /> */}
-
-                    {/* CTA Button */}
-                    <Button asChild variant="blue">
-                        <Link href={route(auth?.user ? 'dashboard' : 'register')}>{auth?.user ? 'Dashboard' : 'Get Started'}</Link>
-                    </Button>
                 </div>
+
+                {/* Hamburger */}
+                <button className="rounded-md p-2 text-gray-600 hover:bg-gray-200 md:hidden" onClick={() => setIsOpen(!isOpen)}>
+                    {isOpen ? <X /> : <Menu />}
+                </button>
             </div>
+
+            {/* Mobile Menu */}
+            {/* Mobile Menu */}
+            {isOpen && (
+                <div className="w-full bg-sky-100 px-5 py-2 md:hidden">
+                    <NavigationMenu viewport={false}>
+                        <NavigationMenuList className="flex flex-col items-start gap-2 text-left">{children}</NavigationMenuList>
+                    </NavigationMenu>
+                </div>
+            )}
         </header>
     );
 }
