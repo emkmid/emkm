@@ -1,10 +1,15 @@
 import { Navbar } from '@/components/navbar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
+import { SkipLink } from '@/components/ui/skip-link';
+import { useArticleFilter } from '@/hooks/useArticleFilter';
 import { Head, Link, usePage } from '@inertiajs/react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { ArrowRight, BookOpen, Calendar, Clock, Search, Star, User } from 'lucide-react';
 import moment from 'moment';
 import 'moment/locale/id';
 import { useEffect } from 'react';
@@ -19,10 +24,27 @@ export default function Education() {
                 slug: string;
                 excerpt: string;
                 published_at: string;
+                author?: string;
+                reading_time?: number;
+                category?: string;
             }[];
             links: { url: string | null; label: string; active: boolean }[];
         };
     }>().props;
+
+    const {
+        searchTerm,
+        selectedCategory,
+        setSearchTerm,
+        setSelectedCategory,
+        filteredArticles,
+        categories,
+        resetFilters,
+        totalArticles,
+        filteredCount,
+        hasActiveFilters,
+    } = useArticleFilter({ articles: articles.data });
+
     moment.locale('id'); // Set locale to Indonesian
 
     useEffect(() => {
@@ -42,13 +64,20 @@ export default function Education() {
 
     return (
         <>
-            <Head title="Education" />
+            <Head title="Education - Artikel" />
+
+            {/* Skip Link for Accessibility */}
+            <SkipLink href="#main-content">Langsung ke konten utama</SkipLink>
+
             <div className="min-h-screen bg-background text-foreground">
                 {/* Navbar */}
                 <Navbar auth={auth} className="sticky top-0 z-50">
                     <NavigationMenuItem>
                         <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                            <Link href="#" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
+                            <Link
+                                href={route('home')}
+                                className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200"
+                            >
                                 Beranda
                             </Link>
                         </NavigationMenuLink>
@@ -84,7 +113,9 @@ export default function Education() {
                             <ul className="grid w-[200px] gap-4 bg-white text-gray-600">
                                 <li>
                                     <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                                        <Link href={'#'}>Artikel</Link>
+                                        <Link href={route('education.article.index')} className="block rounded-md px-3 py-2">
+                                            Artikel
+                                        </Link>
                                     </NavigationMenuLink>
                                 </li>
                             </ul>
@@ -98,205 +129,387 @@ export default function Education() {
                     </NavigationMenuItem>
                 </Navbar>
 
-                {/* Hero */}
-                <section className="relative overflow-hidden bg-[#D3EDFF] py-20 md:py-28">
-                    <div className="container mx-auto max-w-screen-xl px-4 text-center">
-                        <h2 className="reveal mb-4 text-4xl font-bold text-[#23627C] opacity-0 transition-all duration-700 md:text-5xl">
-                            Belajar Digitalisasi UMKM
-                        </h2>
-                        <p className="reveal mx-auto mb-6 max-w-2xl text-lg text-[#23627C] opacity-0 transition-all delay-100 duration-700">
-                            Raih potensi maksimal bisnis Anda melalui pembelajaran online gratis & bersertifikat
-                        </p>
-                        <div className="reveal flex justify-center gap-4 opacity-0 transition-all delay-200 duration-700">
-                            <Button size="lg" variant="blue">
-                                Mulai Belajar
-                            </Button>
-                            <Button size="lg" variant="outline">
-                                Jelajahi Kursus
-                            </Button>
+                {/* Enhanced Hero Section */}
+                <section className="relative overflow-hidden bg-gradient-to-br from-[#D3EDFF] via-[#E8F4FD] to-[#F0F9FF] py-20 md:py-28">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-teal-600/5"></div>
+                    <div className="container mx-auto max-w-screen-xl px-4">
+                        <div className="text-center">
+                            <Badge variant="secondary" className="mb-4 bg-[#23BBB7]/10 text-[#23627C] hover:bg-[#23BBB7]/20">
+                                <BookOpen className="mr-1 h-3 w-3" />
+                                Pusat Pembelajaran UMKM
+                            </Badge>
+                            <h1 className="reveal mb-6 text-4xl font-bold text-[#23627C] opacity-0 transition-all duration-700 md:text-6xl lg:text-7xl">
+                                Artikel & <span className="text-[#23BBB7]">Edukasi</span>
+                            </h1>
+                            <p className="reveal mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-[#23627C]/80 opacity-0 transition-all delay-100 duration-700 md:text-xl">
+                                Jelajahi artikel terbaru tentang digitalisasi UMKM, tips bisnis, dan strategi pengembangan usaha untuk meningkatkan
+                                performa bisnis Anda
+                            </p>
+
+                            {/* Search and Filter Section */}
+                            <div className="reveal mx-auto mb-8 max-w-4xl space-y-4 opacity-0 transition-all delay-200 duration-700">
+                                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-center">
+                                    <div className="relative max-w-md flex-1">
+                                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                        <Input
+                                            type="text"
+                                            placeholder="Cari artikel..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="border-white/20 bg-white/80 pl-10 backdrop-blur-sm focus:border-[#23BBB7] focus:ring-[#23BBB7]"
+                                        />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => setSelectedCategory('all')}
+                                            className={
+                                                selectedCategory === 'all'
+                                                    ? 'bg-[#23BBB7] hover:bg-[#23627C]'
+                                                    : 'border-white/20 bg-white/80 hover:bg-white'
+                                            }
+                                        >
+                                            Semua
+                                        </Button>
+                                        {categories
+                                            .filter((cat) => cat !== 'all')
+                                            .map((category) => (
+                                                <Button
+                                                    key={category}
+                                                    variant={selectedCategory === category ? 'default' : 'outline'}
+                                                    size="sm"
+                                                    onClick={() => setSelectedCategory(category || 'all')}
+                                                    className={
+                                                        selectedCategory === category
+                                                            ? 'bg-[#23BBB7] hover:bg-[#23627C]'
+                                                            : 'border-white/20 bg-white/80 hover:bg-white'
+                                                    }
+                                                >
+                                                    {category}
+                                                </Button>
+                                            ))}
+                                    </div>
+                                </div>
+
+                                {/* Results Counter */}
+                                <p className="text-sm text-[#23627C]/60">
+                                    Menampilkan {filteredCount} dari {totalArticles} artikel
+                                    {searchTerm && <span className="font-medium"> untuk "{searchTerm}"</span>}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                {/* Stat Bar */}
-                <section className="border-y bg-white py-10">
-                    <div className="container mx-auto grid max-w-screen-xl grid-cols-2 gap-6 px-4 text-center md:grid-cols-4">
-                        {[
-                            ['100+', 'Kursus UMKM Digital'],
-                            ['Sertifikat', 'Diakui Nasional'],
-                            ['Gratis', 'Akses Selamanya'],
-                            ['Komunitas', 'Pendamping UMKM'],
-                        ].map(([val, label], idx) => (
-                            <div key={idx} className="reveal opacity-0 transition-all duration-700">
-                                <p className="text-2xl font-extrabold text-[#23BBB7]">{val}</p>
-                                <p className="text-sm text-[#23627C]">{label}</p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                <section className="bg-[#D3EDFF] py-16">
+                {/* Enhanced Stat Bar */}
+                <section className="border-y bg-white py-12 shadow-sm">
                     <div className="container mx-auto max-w-screen-xl px-4">
-                        <h2 className="reveal mb-10 text-center text-3xl font-bold text-[#23627C] opacity-0 transition-all duration-700">
-                            Atikel Terbaru
-                        </h2>
-                        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
-                            {articles.data.map((article, idx) => (
-                                <Card key={idx} className="reveal translate-y-10 bg-white opacity-0 transition-all duration-300 hover:-translate-y-2">
-                                    <div className="h-36 rounded-t-md bg-[#23BBB7] opacity-10" />
-                                    <CardHeader>
-                                        <p className="mb-1 text-sm font-semibold text-[#23BBB7]">
-                                            {moment(article.published_at).format('DD MMMM YYYY')}
-                                        </p>
-                                        <CardTitle className="text-base text-[#23627C]">{article.title}</CardTitle>
-                                        <CardDescription className="text-sm text-gray-600">{article.excerpt}</CardDescription>
-                                    </CardHeader>
-                                </Card>
+                        <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
+                            {[
+                                { value: '100+', label: 'Artikel Berkualitas', icon: BookOpen },
+                                { value: 'Gratis', label: 'Akses Selamanya', icon: Star },
+                                { value: '24/7', label: 'Tersedia Online', icon: Clock },
+                                { value: 'Terpercaya', label: 'Sumber Informasi', icon: User },
+                            ].map(({ value, label, icon: Icon }, idx) => (
+                                <div key={idx} className="reveal group cursor-default opacity-0 transition-all duration-700 hover:scale-105">
+                                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#23BBB7]/10 transition-colors group-hover:bg-[#23BBB7]/20">
+                                        <Icon className="h-6 w-6 text-[#23BBB7]" />
+                                    </div>
+                                    <p className="text-2xl font-extrabold text-[#23BBB7] md:text-3xl">{value}</p>
+                                    <p className="text-sm text-[#23627C]/70 md:text-base">{label}</p>
+                                </div>
                             ))}
                         </div>
                     </div>
                 </section>
 
-                <footer className="bg-sky-100">
-                    <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
-                        <div className="md:flex md:justify-between">
-                            <div className="mb-6 md:mb-0">
-                                <a href="https://flowbite.com/" className="flex items-center">
-                                    <img src="https://flowbite.com/docs/images/logo.svg" className="me-3 h-8" alt="FlowBite Logo" />
-                                    <span className="self-center text-2xl font-semibold whitespace-nowrap text-[#23627C]">EMKM</span>
-                                </a>
+                {/* Enhanced Articles Section */}
+                <main id="main-content" className="bg-gradient-to-b from-[#F8FBFF] to-white py-20">
+                    <div className="container mx-auto max-w-screen-xl px-4">
+                        <div className="mb-12 text-center">
+                            <h2 className="reveal mb-4 text-3xl font-bold text-[#23627C] opacity-0 transition-all duration-700 md:text-4xl">
+                                Artikel Terbaru
+                            </h2>
+                            <p className="reveal mx-auto max-w-2xl text-lg text-[#23627C]/70 opacity-0 transition-all delay-100 duration-700">
+                                Temukan wawasan terbaru tentang digitalisasi UMKM dan strategi bisnis yang efektif
+                            </p>
+                        </div>
+
+                        {filteredArticles.length === 0 ? (
+                            /* Empty State */
+                            <div className="reveal flex flex-col items-center justify-center py-16 text-center opacity-0 transition-all duration-700">
+                                <div className="mb-4 rounded-full bg-gray-100 p-6">
+                                    <Search className="h-8 w-8 text-gray-400" />
+                                </div>
+                                <h3 className="mb-2 text-xl font-semibold text-gray-600">Artikel tidak ditemukan</h3>
+                                <p className="mb-4 text-gray-500">
+                                    {searchTerm
+                                        ? `Tidak ada artikel yang cocok dengan "${searchTerm}"`
+                                        : 'Tidak ada artikel dalam kategori yang dipilih'}
+                                </p>
+                                <Button variant="outline" onClick={resetFilters}>
+                                    Reset Filter
+                                </Button>
                             </div>
-                            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-6">
+                        ) : (
+                            /* Articles Grid */
+                            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                {filteredArticles.map((article, idx) => (
+                                    <Card
+                                        key={article.id}
+                                        className="reveal group cursor-pointer overflow-hidden bg-white opacity-0 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                                        style={{ transitionDelay: `${idx * 100}ms` }}
+                                    >
+                                        {/* Article Image Placeholder */}
+                                        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[#23BBB7]/20 to-[#23627C]/20">
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                                            <div className="absolute bottom-3 left-3">
+                                                <Badge variant="secondary" className="bg-white/90 text-[#23627C] backdrop-blur-sm">
+                                                    {article.category || 'UMKM'}
+                                                </Badge>
+                                            </div>
+                                            {/* Reading time indicator */}
+                                            <div className="absolute top-3 right-3">
+                                                <div className="flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs text-[#23627C] backdrop-blur-sm">
+                                                    <Clock className="h-3 w-3" />
+                                                    {article.reading_time || 5} min
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <CardHeader className="p-6">
+                                            {/* Date and Author */}
+                                            <div className="mb-3 flex items-center gap-4 text-sm text-[#23627C]/60">
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {moment(article.published_at).format('DD MMM YYYY')}
+                                                </div>
+                                                {article.author && (
+                                                    <div className="flex items-center gap-1">
+                                                        <User className="h-3 w-3" />
+                                                        {article.author}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Title */}
+                                            <CardTitle className="mb-3 line-clamp-2 text-lg font-bold text-[#23627C] transition-colors group-hover:text-[#23BBB7]">
+                                                {article.title}
+                                            </CardTitle>
+
+                                            {/* Excerpt */}
+                                            <CardDescription className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-600">
+                                                {article.excerpt}
+                                            </CardDescription>
+
+                                            {/* Read More Link */}
+                                            <div className="flex items-center justify-between">
+                                                <Link
+                                                    href={route('education.article.show', article.slug) || '#'}
+                                                    className="group/link flex items-center gap-1 text-sm font-medium text-[#23BBB7] transition-colors hover:text-[#23627C]"
+                                                >
+                                                    Baca Selengkapnya
+                                                    <ArrowRight className="h-3 w-3 transition-transform group-hover/link:translate-x-1" />
+                                                </Link>
+                                            </div>
+                                        </CardHeader>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Load More Button */}
+                        {filteredArticles.length > 0 &&
+                            articles.links.some(
+                                (link) => link.url && link.label !== '&laquo; Previous' && link.label !== 'Next &raquo;' && !link.active,
+                            ) && (
+                                <div className="mt-12 text-center">
+                                    <Button
+                                        size="lg"
+                                        variant="outline"
+                                        className="border-[#23BBB7] text-[#23BBB7] hover:bg-[#23BBB7] hover:text-white"
+                                    >
+                                        Muat Artikel Lainnya
+                                    </Button>
+                                </div>
+                            )}
+                    </div>
+                </main>
+
+                {/* Enhanced Footer */}
+                <footer className="border-t bg-gradient-to-r from-slate-50 to-blue-50">
+                    <div className="mx-auto w-full max-w-screen-xl p-4 py-12 lg:py-16">
+                        <div className="md:flex md:justify-between">
+                            <div className="mb-8 md:mb-0">
+                                <Link href="/" className="group flex items-center">
+                                    <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#23BBB7] transition-transform group-hover:scale-110">
+                                        <BookOpen className="h-5 w-5 text-white" />
+                                    </div>
+                                    <span className="self-center text-2xl font-bold text-[#23627C] transition-colors group-hover:text-[#23BBB7]">
+                                        EMKM
+                                    </span>
+                                </Link>
+                                <p className="mt-4 max-w-sm text-sm text-gray-600">
+                                    Platform pembelajaran digital untuk mengembangkan UMKM Indonesia menjadi lebih maju dan berkelanjutan.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-12">
                                 <div>
-                                    <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase">Resources</h2>
-                                    <ul className="font-medium text-gray-500">
-                                        <li className="mb-4">
-                                            <a href="https://flowbite.com/" className="hover:underline">
-                                                EMKM
-                                            </a>
+                                    <h3 className="mb-4 text-sm font-semibold tracking-wider text-[#23627C] uppercase">Pembelajaran</h3>
+                                    <ul className="space-y-2 text-sm text-gray-600">
+                                        <li>
+                                            <Link href="#" className="transition-colors hover:text-[#23BBB7]">
+                                                Artikel UMKM
+                                            </Link>
                                         </li>
                                         <li>
-                                            <a href="https://tailwindcss.com/" className="hover:underline">
-                                                Tailwind CSS
-                                            </a>
+                                            <Link href="#" className="transition-colors hover:text-[#23BBB7]">
+                                                Panduan Digital
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="#" className="transition-colors hover:text-[#23BBB7]">
+                                                Tips Bisnis
+                                            </Link>
                                         </li>
                                     </ul>
                                 </div>
+
                                 <div>
-                                    <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase">Follow us</h2>
-                                    <ul className="font-medium text-gray-500">
-                                        <li className="mb-4">
-                                            <a href="https://github.com/themesberg/flowbite" className="hover:underline">
-                                                Github
-                                            </a>
+                                    <h3 className="mb-4 text-sm font-semibold tracking-wider text-[#23627C] uppercase">Dukungan</h3>
+                                    <ul className="space-y-2 text-sm text-gray-600">
+                                        <li>
+                                            <Link href="#" className="transition-colors hover:text-[#23BBB7]">
+                                                Pusat Bantuan
+                                            </Link>
                                         </li>
                                         <li>
-                                            <a href="https://discord.gg/4eeurUVvTy" className="hover:underline">
-                                                Discord
-                                            </a>
+                                            <Link href="#" className="transition-colors hover:text-[#23BBB7]">
+                                                FAQ
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="#" className="transition-colors hover:text-[#23BBB7]">
+                                                Hubungi Kami
+                                            </Link>
                                         </li>
                                     </ul>
                                 </div>
+
                                 <div>
-                                    <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase">Legal</h2>
-                                    <ul className="font-medium text-gray-500">
-                                        <li className="mb-4">
-                                            <a href="#" className="hover:underline">
-                                                Privacy Policy
-                                            </a>
+                                    <h3 className="mb-4 text-sm font-semibold tracking-wider text-[#23627C] uppercase">Legal</h3>
+                                    <ul className="space-y-2 text-sm text-gray-600">
+                                        <li>
+                                            <Link href="#" className="transition-colors hover:text-[#23BBB7]">
+                                                Kebijakan Privasi
+                                            </Link>
                                         </li>
                                         <li>
-                                            <a href="#" className="hover:underline">
-                                                Terms &amp; Conditions
-                                            </a>
+                                            <Link href="#" className="transition-colors hover:text-[#23BBB7]">
+                                                Syarat & Ketentuan
+                                            </Link>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
-                        <hr className="my-6 border-gray-200 sm:mx-auto lg:my-8" />
+
+                        <hr className="my-8 border-gray-200" />
+
                         <div className="sm:flex sm:items-center sm:justify-between">
-                            <span className="text-sm text-gray-500 sm:text-center">
+                            <p className="text-sm text-gray-500">
                                 © 2025{' '}
-                                <a href="https://flowbite.com/" className="hover:underline">
-                                    EMKM™
-                                </a>
-                                . All Rights Reserved.
-                            </span>
-                            <div className="mt-4 flex sm:mt-0 sm:justify-center">
-                                <a href="#" className="text-gray-500 hover:text-gray-900">
-                                    <svg
-                                        className="h-4 w-4"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="currentColor"
-                                        viewBox="0 0 8 19"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                    <span className="sr-only">Facebook page</span>
-                                </a>
-                                <a href="#" className="ms-5 text-gray-500 hover:text-gray-900">
-                                    <svg
-                                        className="h-4 w-4"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="currentColor"
-                                        viewBox="0 0 21 16"
-                                    >
-                                        <path d="M16.942 1.556a16.3 16.3 0 0 0-4.126-1.3 12.04 12.04 0 0 0-.529 1.1 15.175 15.175 0 0 0-4.573 0 11.585 11.585 0 0 0-.535-1.1 16.274 16.274 0 0 0-4.129 1.3A17.392 17.392 0 0 0 .182 13.218a15.785 15.785 0 0 0 4.963 2.521c.41-.564.773-1.16 1.084-1.785a10.63 10.63 0 0 1-1.706-.83c.143-.106.283-.217.418-.33a11.664 11.664 0 0 0 10.118 0c.137.113.277.224.418.33-.544.328-1.116.606-1.71.832a12.52 12.52 0 0 0 1.084 1.785 16.46 16.46 0 0 0 5.064-2.595 17.286 17.286 0 0 0-2.973-11.59ZM6.678 10.813a1.941 1.941 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.919 1.919 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Zm6.644 0a1.94 1.94 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.918 1.918 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Z" />
-                                    </svg>
-                                    <span className="sr-only">Discord community</span>
-                                </a>
-                                <a href="#" className="ms-5 text-gray-500 hover:text-gray-900">
-                                    <svg
-                                        className="h-4 w-4"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 17"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.18.572.681.475A9.911 9.911 0 0 0 10 .333Z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                    <span className="sr-only">GitHub account</span>
-                                </a>
-                                <a href="#" className="ms-5 text-gray-500 hover:text-gray-900">
-                                    <svg
-                                        className="h-4 w-4"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M10 0a10 10 0 1 0 10 10A10.009 10.009 0 0 0 10 0Zm6.613 4.614a8.523 8.523 0 0 1 1.93 5.32 20.094 20.094 0 0 0-5.949-.274c-.059-.149-.122-.292-.184-.441a23.879 23.879 0 0 0-.566-1.239 11.41 11.41 0 0 0 4.769-3.366ZM8 1.707a8.821 8.821 0 0 1 2-.238 8.5 8.5 0 0 1 5.664 2.152 9.608 9.608 0 0 1-4.476 3.087A45.758 45.758 0 0 0 8 1.707ZM1.642 8.262a8.57 8.57 0 0 1 4.73-5.981A53.998 53.998 0 0 1 9.54 7.222a32.078 32.078 0 0 1-7.9 1.04h.002Zm2.01 7.46a8.51 8.51 0 0 1-2.2-5.707v-.262a31.64 31.64 0 0 0 8.777-1.219c.243.477.477.964.692 1.449-.114.032-.227.067-.336.1a13.569 13.569 0 0 0-6.942 5.636l.009.003ZM10 18.556a8.508 8.508 0 0 1-5.243-1.8 11.717 11.717 0 0 1 6.7-5.332.509.509 0 0 1 .055-.02 35.65 35.65 0 0 1 1.819 6.476 8.476 8.476 0 0 1-3.331.676Zm4.772-1.462A37.232 37.232 0 0 0 13.113 11a12.513 12.513 0 0 1 5.321.364 8.56 8.56 0 0 1-3.66 5.73h-.002Z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                    <span className="sr-only">Dribbble account</span>
-                                </a>
+                                <Link href="/" className="font-medium transition-colors hover:text-[#23BBB7]">
+                                    EMKM
+                                </Link>
+                                . Semua hak dilindungi.
+                            </p>
+
+                            <div className="mt-4 flex space-x-4 sm:mt-0">
+                                {[
+                                    {
+                                        name: 'Facebook',
+                                        path: 'M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z',
+                                    },
+                                    {
+                                        name: 'Twitter',
+                                        path: 'M20 4.172a8.192 8.192 0 01-2.357.646 4.11 4.11 0 001.804-2.27 8.22 8.22 0 01-2.606.996A4.096 4.096 0 0013.847 2.5a4.1 4.1 0 00-4.1 4.1c0 .321.036.634.106.935A11.64 11.64 0 011.392 3.08a4.101 4.101 0 001.27 5.474 4.078 4.078 0 01-1.858-.514v.052a4.1 4.1 0 003.288 4.017 4.097 4.097 0 01-1.853.07 4.1 4.1 0 003.833 2.849A8.227 8.227 0 011 16.41a11.616 11.616 0 006.29 1.84c7.547 0 11.675-6.252 11.675-11.675 0-.178-.004-.355-.012-.53A8.348 8.348 0 0020 4.172Z',
+                                    },
+                                    {
+                                        name: 'Instagram',
+                                        path: 'M7.978 4c-2.205 0-4 1.795-4 4v8c0 2.205 1.795 4 4 4h8c2.205 0 4-1.795 4-4V8c0-2.205-1.795-4-4-4h-8zM12 5.865A2.135 2.135 0 1114.135 8 2.135 2.135 0 0112 5.865zM16 6a1 1 0 11-2 0 1 1 0 012 0zM12 8a4 4 0 100 8 4 4 0 000-8z',
+                                    },
+                                ].map((social) => (
+                                    <Link key={social.name} href="#" className="text-gray-400 transition-colors hover:text-[#23BBB7]">
+                                        <span className="sr-only">{social.name}</span>
+                                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d={social.path} clipRule="evenodd" />
+                                        </svg>
+                                    </Link>
+                                ))}
                             </div>
                         </div>
                     </div>
                 </footer>
             </div>
 
-            {/* Reveal Animation */}
-            <style>
-                {`
-                .reveal { opacity: 0; transform: translateY(20px); }
-                .reveal.active { opacity: 1; transform: translateY(0); transition: all 0.6s ease-out; }
-                `}
-            </style>
+            {/* Enhanced Reveal Animation Styles */}
+            <style>{`
+                .reveal { 
+                    opacity: 0; 
+                    transform: translateY(30px); 
+                    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .reveal.active { 
+                    opacity: 1; 
+                    transform: translateY(0); 
+                }
+                
+                /* Line clamp utilities */
+                .line-clamp-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+                
+                .line-clamp-3 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+                
+                /* Smooth hover effects */
+                .hover-lift {
+                    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+                }
+                
+                .hover-lift:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                }
+                
+                /* Custom scrollbar */
+                ::-webkit-scrollbar {
+                    width: 8px;
+                }
+                
+                ::-webkit-scrollbar-track {
+                    background: #f1f5f9;
+                }
+                
+                ::-webkit-scrollbar-thumb {
+                    background: #23BBB7;
+                    border-radius: 4px;
+                }
+                
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #23627C;
+                }
+            `}</style>
         </>
     );
 }

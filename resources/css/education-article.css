@@ -1,0 +1,155 @@
+/* Enhanced styles for Education Article page */
+
+/* Search input focus styles */
+.search-input:focus {
+    @apply border-[#23BBB7] ring-2 ring-[#23BBB7]/20;
+}
+
+/* Article card hover effects */
+.article-card {
+    @apply transition-all duration-500 ease-out;
+    transform-style: preserve-3d;
+}
+
+.article-card:hover {
+    @apply shadow-2xl;
+    transform: translateY(-8px) rotateX(2deg);
+}
+
+/* Category badge animations */
+.category-badge {
+    @apply transition-all duration-300;
+}
+
+.category-badge:hover {
+    @apply scale-110;
+}
+
+/* Reading progress indicator */
+.progress-bar {
+    @apply fixed top-0 left-0 z-50 h-1 bg-gradient-to-r from-[#23BBB7] to-[#23627C] transition-all duration-300;
+}
+
+/* Smooth reveal animations */
+.reveal-fade-up {
+    @apply translate-y-8 opacity-0 transition-all duration-700 ease-out;
+}
+
+.reveal-fade-up.active {
+    @apply translate-y-0 opacity-100;
+}
+
+.reveal-fade-in {
+    @apply opacity-0 transition-opacity duration-1000 ease-out;
+}
+
+.reveal-fade-in.active {
+    @apply opacity-100;
+}
+
+/* Enhanced button styles */
+.btn-primary {
+    @apply transform bg-gradient-to-r from-[#23BBB7] to-[#23627C] transition-all duration-300 hover:scale-105 hover:from-[#23627C] hover:to-[#23BBB7];
+}
+
+.btn-outline {
+    @apply transform border-2 border-[#23BBB7] text-[#23BBB7] transition-all duration-300 hover:scale-105 hover:bg-[#23BBB7] hover:text-white;
+}
+
+/* Loading skeleton */
+.skeleton {
+    @apply bg-size-200 bg-pos-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200;
+    animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+/* Article grid responsive improvements */
+.article-grid {
+    @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+@media (max-width: 640px) {
+    .article-grid {
+        @apply grid-cols-1 gap-4;
+    }
+}
+
+/* Enhanced typography */
+.article-title {
+    @apply text-lg leading-tight font-bold;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.article-excerpt {
+    @apply text-sm leading-relaxed text-gray-600;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Search highlight */
+.search-highlight {
+    @apply rounded bg-yellow-200 px-1 font-medium;
+}
+
+/* Filter transition */
+.filter-transition {
+    @apply transition-all duration-500 ease-in-out;
+}
+
+/* Empty state illustration */
+.empty-state {
+    @apply flex flex-col items-center justify-center py-16 text-center;
+}
+
+.empty-state-icon {
+    @apply mx-auto mb-4 h-16 w-16 text-gray-400;
+}
+
+/* Gradient overlays */
+.gradient-overlay-blue {
+    background: linear-gradient(135deg, rgba(35, 98, 124, 0.1) 0%, rgba(35, 187, 183, 0.1) 100%);
+}
+
+.gradient-overlay-teal {
+    background: linear-gradient(135deg, rgba(35, 187, 183, 0.1) 0%, rgba(35, 98, 124, 0.1) 100%);
+}
+
+/* Accessibility improvements */
+.focus-visible {
+    @apply focus:ring-2 focus:ring-[#23BBB7] focus:ring-offset-2 focus:outline-none;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        @apply hidden;
+    }
+
+    .print-friendly {
+        @apply bg-white text-black shadow-none;
+    }
+}
+
+/* Dark mode support (if needed in future) */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        @apply bg-gray-900 text-gray-100;
+    }
+
+    .dark-mode .card {
+        @apply border-gray-700 bg-gray-800;
+    }
+}
