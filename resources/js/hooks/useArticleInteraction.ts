@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface UseArticleInteractionProps {
     initialLikes?: number;
@@ -11,6 +11,20 @@ export const useArticleInteraction = ({ initialLikes = 0, articleId }: UseArticl
     const [readingProgress, setReadingProgress] = useState(0);
     const [isSticky, setIsSticky] = useState(false);
     const [timeSpent, setTimeSpent] = useState(0);
+
+    // Use ref to store start time to avoid effect restarts
+    const startTimeRef = useRef<number>(Date.now());
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, []);
 
     // Check if article is already liked (from localStorage or API)
     useEffect(() => {
@@ -47,20 +61,32 @@ export const useArticleInteraction = ({ initialLikes = 0, articleId }: UseArticl
 
     // Track time spent reading
     useEffect(() => {
-        const startTime = Date.now();
+        // Reset start time for new article
+        startTimeRef.current = Date.now();
+        setTimeSpent(0);
 
         const updateTimeSpent = () => {
-            setTimeSpent(Math.floor((Date.now() - startTime) / 1000));
+            const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+            setTimeSpent(elapsed);
         };
 
-        const interval = setInterval(updateTimeSpent, 1000);
+        // Update immediately
+        updateTimeSpent();
+
+        // Then update every second
+        intervalRef.current = setInterval(updateTimeSpent, 1000);
 
         return () => {
-            clearInterval(interval);
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+
             // Send analytics data here
-            console.log(`Article ${articleId} read for ${timeSpent} seconds`);
+            const finalTimeSpent = Math.floor((Date.now() - startTimeRef.current) / 1000);
+            console.log(`Article ${articleId} read for ${finalTimeSpent} seconds`);
         };
-    }, [articleId, timeSpent]);
+    }, [articleId]); // Only depend on articleId
 
     // Like functionality
     const toggleLike = async () => {

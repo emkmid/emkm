@@ -17,7 +17,7 @@ interface Article {
     id: number;
     title: string;
     slug: string;
-    content: string;
+    content_html: string;
     excerpt: string;
     published_at: string;
     author?: string;
@@ -440,10 +440,16 @@ export default function ArticleShow() {
                                 </div>
 
                                 {/* Article Body */}
-                                <div
-                                    className="prose prose-lg max-w-none prose-headings:text-[#23627C] prose-p:leading-relaxed prose-p:text-gray-700 prose-a:text-[#23BBB7] prose-a:no-underline hover:prose-a:text-[#23627C] prose-blockquote:border-l-[#23BBB7] prose-blockquote:bg-[#23BBB7]/5 prose-blockquote:px-4 prose-blockquote:py-2 prose-strong:text-[#23627C]"
-                                    dangerouslySetInnerHTML={{ __html: article.content }}
-                                />
+                                <div className="prose prose-lg max-w-none prose-headings:text-[#23627C] prose-p:leading-relaxed prose-p:text-gray-700 prose-a:text-[#23BBB7] prose-a:no-underline hover:prose-a:text-[#23627C] prose-blockquote:border-l-[#23BBB7] prose-blockquote:bg-[#23BBB7]/5 prose-blockquote:px-4 prose-blockquote:py-2 prose-strong:text-[#23627C]">
+                                    {article.content_html ? (
+                                        <div dangerouslySetInnerHTML={{ __html: article.content_html }} />
+                                    ) : (
+                                        <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+                                            <BookOpen className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                                            <p className="text-gray-500">Konten artikel sedang dalam proses penambahan...</p>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Tags */}
                                 {article.tags && article.tags.length > 0 && (

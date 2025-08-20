@@ -22,6 +22,23 @@ class EducationController extends Controller
 
     public function articleShow(Article $article)
     {
-        return Inertia::render('education/article/show', compact('article'));
+        // Make sure the article is published
+        if (!$article->published_at) {
+            abort(404);
+        }
+
+        // Load related articles (same category or recent articles)
+        $relatedArticles = Article::query()
+            ->whereNotNull('published_at')
+            ->where('id', '!=', $article->id)
+            ->latest('published_at')
+            ->limit(3)
+            ->select('id', 'title', 'slug', 'excerpt', 'published_at')
+            ->get();
+
+        return Inertia::render('education/article/show', [
+            'article' => $article,
+            'relatedArticles' => $relatedArticles,
+        ]);
     }
 }
