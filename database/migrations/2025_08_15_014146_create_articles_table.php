@@ -19,8 +19,9 @@ return new class extends Migration
             $table->string('excerpt', 300)->nullable();
             $table->text('content_html');
             $table->json('meta')->nullable();
-            $table->timestamp('published_at')->nullable();
+            $table->timestamp('published_at');
             $table->string('thumbnail_path')->nullable();
+            $table->unsignedSmallInteger('reading_time')->default(5);
             $table->index(['user_id','published_at']);
             $table->timestamps();
         });

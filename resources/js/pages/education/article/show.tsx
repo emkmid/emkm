@@ -21,7 +21,6 @@ interface Article {
     excerpt: string;
     published_at: string;
     author?: string;
-    author_bio?: string;
     author_avatar?: string;
     reading_time?: number;
     category?: string;
@@ -64,6 +63,7 @@ export default function ArticleShow() {
     } = useArticleInteraction({
         initialLikes: article.likes_count || 0,
         articleId: article.id,
+        articleSlug: article.slug,
     });
 
     const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
@@ -565,7 +565,7 @@ export default function ArticleShow() {
                                         </div>
                                         <CardTitle className="text-[#23627C]">{article.author || 'Admin EMKM'}</CardTitle>
                                         <CardDescription>
-                                            {article.author_bio || 'Kontributor ahli dalam bidang digitalisasi UMKM dan pengembangan bisnis.'}
+                                            {'Kontributor ahli dalam bidang digitalisasi UMKM dan pengembangan bisnis.'}
                                         </CardDescription>
                                     </CardHeader>
                                 </Card>

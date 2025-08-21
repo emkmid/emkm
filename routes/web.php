@@ -53,6 +53,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::prefix('education')->group(function() {
     Route::get('articles', [EducationController::class, 'articles'])->name('education.article.index');
     Route::get('articles/{article}', [EducationController::class, 'articleShow'])->name('education.article.show');
+
+    // Toggle Like Article
+    Route::post('articles/{article}/like', [EducationController::class, 'toggleLike'])->name('article.toggle')->middleware('auth');
+    Route::get('articles/{article}/like/status', [EducationController::class, 'likeStatus'])->name('article.likeStatus');
 });
 
 require __DIR__.'/settings.php';

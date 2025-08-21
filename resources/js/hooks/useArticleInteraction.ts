@@ -3,9 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 interface UseArticleInteractionProps {
     initialLikes?: number;
     articleId: number;
+    articleSlug: any;
 }
 
-export const useArticleInteraction = ({ initialLikes = 0, articleId }: UseArticleInteractionProps) => {
+export const useArticleInteraction = ({ initialLikes = 0, articleId, articleSlug }: UseArticleInteractionProps) => {
     const [isLiked, setIsLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(initialLikes);
     const [readingProgress, setReadingProgress] = useState(0);
@@ -26,10 +27,30 @@ export const useArticleInteraction = ({ initialLikes = 0, articleId }: UseArticl
         };
     }, []);
 
-    // Check if article is already liked (from localStorage or API)
     useEffect(() => {
-        const likedArticles = JSON.parse(localStorage.getItem('likedArticles') || '[]');
-        setIsLiked(likedArticles.includes(articleId));
+        const fetchLikeStatus = async () => {
+            try {
+                const res = await fetch(`/education/articles/${articleSlug}/like/status`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                    },
+                    credentials: 'include',
+                });
+
+                if (!res.ok) throw new Error('Failed to fetch like status');
+
+                const data = await res.json();
+                setIsLiked(data.liked);
+                setLikesCount(data.totalLikes);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+
+        fetchLikeStatus();
     }, [articleId]);
 
     // Track reading progress
@@ -90,30 +111,24 @@ export const useArticleInteraction = ({ initialLikes = 0, articleId }: UseArticl
 
     // Like functionality
     const toggleLike = async () => {
-        const newLikedState = !isLiked;
-        setIsLiked(newLikedState);
-        setLikesCount((prev) => (newLikedState ? prev + 1 : prev - 1));
-
-        // Update localStorage
-        const likedArticles = JSON.parse(localStorage.getItem('likedArticles') || '[]');
-        if (newLikedState) {
-            likedArticles.push(articleId);
-        } else {
-            const index = likedArticles.indexOf(articleId);
-            if (index > -1) likedArticles.splice(index, 1);
-        }
-        localStorage.setItem('likedArticles', JSON.stringify(likedArticles));
-
-        // TODO: Send to backend API
         try {
-            // await fetch(`/api/articles/${articleId}/like`, {
-            //     method: newLikedState ? 'POST' : 'DELETE',
-            //     headers: { 'Content-Type': 'application/json' }
-            // });
-        } catch (error) {
-            // Revert on error
-            setIsLiked(!newLikedState);
-            setLikesCount((prev) => (newLikedState ? prev - 1 : prev + 1));
+            const res = await fetch(`/education/articles/${articleSlug}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                },
+                credentials: 'include',
+            });
+
+            if (!res.ok) throw new Error('Failed to toggle like');
+
+            const data = await res.json();
+            setIsLiked(data.liked);
+            setLikesCount(data.totalLikes);
+        } catch (err) {
+            console.log(err);
         }
     };
 

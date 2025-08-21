@@ -22,6 +22,7 @@ class ArticleController extends Controller
             ->latest('published_at')
             ->select('id','title','slug','excerpt','published_at','created_at')
             ->paginate(12);
+
         return Inertia::render('dashboard/admin/education/article/index', compact('articles'));
     }
 
@@ -39,17 +40,16 @@ class ArticleController extends Controller
     public function store(StoreArticleRequest $request)
     {
         $validatedData = $request->validated();
-
         $validatedData['user_id'] = $request->user()->id;
+        $validatedData['reading_time'] = $this->calculateReadingTime($validatedData['content_html']);
 
         if ($request->hasFile('thumbnail_path')) {
-            $path = $request->file('thumbnail_path')->store('article-images');
-            $validatedData['thumbnail_path'] = $path;
+            $validatedData['thumbnail_path'] = $request->file('thumbnail_path')->store('article-images');
         }
 
-        $article = Article::create($validatedData);
+        Article::create($validatedData);
 
-        return redirect()->route('articles.index')->with('success', 'Article created.');
+        return redirect()->route('articles.index')->with('success', 'Artikel berhasil dibuat.');
     }
 
     /**
@@ -78,18 +78,20 @@ class ArticleController extends Controller
     {
         Gate::authorize('update', $article);
 
-        $validatedData = $request->validated();
+        $validatedData['user_id'] = $article->user_id;
+
+        $validatedData['reading_time'] = $this->calculateReadingTime($validatedData['content_html']);
 
         if ($request->hasFile('thumbnail_path')) {
             if ($article->thumbnail_path) {
                 Storage::delete($article->thumbnail_path);
             }
-
             $path = $request->file('thumbnail_path')->store('article-images');
             $validatedData['thumbnail_path'] = $path;
         }
 
         $article->update($validatedData);
+
         return redirect()->route('articles.index')->with('success', 'Article updated successfully.');
     }
 
@@ -111,5 +113,12 @@ class ArticleController extends Controller
             'url' => $img->url(),
             'href' => $img->url(),
         ]);
+    }
+
+    private function calculateReadingTime($content)
+    {
+        $words = str_word_count(strip_tags($content));
+        $minutes = ceil($words / 200);
+        return $minutes;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Education;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class EducationController extends Controller
@@ -39,6 +40,29 @@ class EducationController extends Controller
         return Inertia::render('education/article/show', [
             'article' => $article,
             'relatedArticles' => $relatedArticles,
+            'totalLikes' => $article->likedByUsers()->count()
+        ]);
+    }
+    
+    public function toggleLike(Article $article)
+    {
+        $user = Auth::user();
+        $article->likedByUsers()->toggle($user->id);
+        // cek status setelah toggle (true kalau sudah like, false kalau unlike)
+        $liked = $article->likedByUsers()->where('user_id', $user->id)->exists();
+        return response()->json([
+            'liked' => $liked,
+            'totalLikes' => $article->likedByUsers()->count(),
+        ]);
+    }
+
+    public function likeStatus(Article $article)
+    {
+        $user = Auth::user();
+
+        return response()->json([
+            'liked' => $article->isLikedBy($user),
+            'totalLikes' => $article->likedByUsers()->count(),
         ]);
     }
 }

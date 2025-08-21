@@ -84,4 +84,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Receivable::class);
     }
+
+    public function likes()
+    {
+        return $this->hasMany(ArticleLike::class);
+    }
+
+    public function likedArticles()
+    {
+        return $this->belongsToMany(Article::class, 'article_likes')
+                    ->withTimestamps();
+    }
 }
