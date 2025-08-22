@@ -74,13 +74,23 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreArticleRequest $request, Article $article)
+    public function update(Request $request, Article $article)
     {
         Gate::authorize('update', $article);
 
+        $validatedData = $request->validate([
+            'title'         => 'sometimes|required|string|max:255',
+            'excerpt'       => 'sometimes|required|string',
+            'content_html'  => 'sometimes|required|string',
+            'published_at'  => 'sometimes|required|date',
+            'thumbnail_path'=> 'nullable|image',
+        ]);
+
         $validatedData['user_id'] = $article->user_id;
 
-        $validatedData['reading_time'] = $this->calculateReadingTime($validatedData['content_html']);
+        $validatedData['reading_time'] = $this->calculateReadingTime(
+            $validatedData['content_html'] ?? $article->content_html
+        );
 
         if ($request->hasFile('thumbnail_path')) {
             if ($article->thumbnail_path) {
@@ -92,8 +102,11 @@ class ArticleController extends Controller
 
         $article->update($validatedData);
 
-        return redirect()->route('articles.index')->with('success', 'Article updated successfully.');
+        return redirect()
+            ->route('articles.index')
+            ->with('success', 'Article updated successfully.');
     }
+
 
     /**
      * Remove the specified resource from storage.

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import React from 'react';
 
 interface ArticleFormProps {
@@ -35,11 +35,16 @@ export default function ArticleForm({ initialData = {}, submitUrl, method = 'pos
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (method === 'put' || method === 'patch') {
-            put(submitUrl);
-        } else {
-            post(submitUrl);
-        }
+        router.post(
+            submitUrl,
+            {
+                ...data,
+                _method: method.toUpperCase(),
+            },
+            {
+                forceFormData: true,
+            },
+        );
     };
 
     const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {

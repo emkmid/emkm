@@ -22,7 +22,7 @@ export default function Edit() {
             <div className="flex flex-col gap-4 p-4">
                 <Breadcrumbs breadcrumbs={breadcrumbItems} />
                 <HeadingSmall title="Edit Artikel" description="Perbarui artikel edukatif agar UMKM berkembang!" />
-                <ArticleForm initialData={article} submitUrl={route('articles.update', article.id)} method="put" />
+                <ArticleForm initialData={article} submitUrl={route('articles.update', article.slug)} method="put" />
             </div>
         </AppLayout>
     );
