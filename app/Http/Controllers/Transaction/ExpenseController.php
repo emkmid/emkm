@@ -45,23 +45,26 @@ class ExpenseController extends Controller
         $validated = $request->validate([
             'expense_category_id' => 'required|exists:expense_categories,id',
             'description' => 'nullable|string|max:255',
-            'amount' => 'required|integer|min:0',
+            'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
         ]);
 
-        Auth::user()->expenses()->create($validated);
+        $expense = Auth::user()->expenses()->create($validated);
 
-        $biayaAccount = ChartOfAccount::where('code', '501')->firstOrFail(); // Biaya Operasional
+        $category = ExpenseCategory::with('account')->findOrFail($validated['expense_category_id']);
+        $biayaAccount = $category->account; 
         $kasAccount   = ChartOfAccount::where('code', '101')->firstOrFail(); // Kas
 
         JournalService::add(
             Auth::id(),
             $request->date,
-            'Pengeluaran: ' . ($request->description ?? 'Tanpa deskripsi'),
+            'Pengeluaran: ' . ($request->description ?? $category->name),
             [
                 ['account_id' => $biayaAccount->id, 'type' => 'debit',  'amount' => $request->amount],
-                ['account_id' => $kasAccount->id, 'type' => 'credit', 'amount' => $request->amount],
-            ]
+                ['account_id' => $kasAccount->id,   'type' => 'credit', 'amount' => $request->amount],
+            ],
+            $expense->id,
+            'expense'
         );
 
         return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil ditambahkan.');
@@ -101,43 +104,48 @@ class ExpenseController extends Controller
 
         $validated = $request->validate([
             'expense_category_id' => 'required|exists:expense_categories,id',
-            'description' => 'nullable|string|max:255',
-            'amount' => 'required|integer|min:0',
-            'date' => 'required|date',
+            'description'         => 'nullable|string|max:255',
+            'amount'              => 'required|numeric|min:0',
+            'date'                => 'required|date',
         ]);
 
-        $oldAmount = $expense->amount;
+        $oldAmount   = $expense->amount;
+        $oldCategory = $expense->expense_category;
+        $oldAccount  = $oldCategory->account;
+
         $expense->update($validated);
 
-        // Jurnal Pembalik
+        $newCategory = ExpenseCategory::with('account')->findOrFail($validated['expense_category_id']);
+        $newAccount  = $newCategory->account;
+        $kasAccount  = ChartOfAccount::where('code', '101')->firstOrFail(); // Kas
+
+        // 🔄 Jurnal Pembalik (reverse entry lama)
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
-            'Pembalik: ' . ($expense->description ?? 'Pengeluaran lama'),
+            'Pembalik expense lama: ' . ($expense->description ?? $oldCategory->name),
             [
-                ['account_id' => 1, 'type' => 'debit',  'amount' => $oldAmount], // Kas kembali
-                ['account_id' => 6, 'type' => 'credit', 'amount' => $oldAmount], // Biaya dibalik
+                ['account_id' => $kasAccount->id, 'type' => 'debit',  'amount' => $oldAmount],
+                ['account_id' => $oldAccount->id, 'type' => 'credit', 'amount' => $oldAmount],
             ],
             $expense->id,
             'expense'
         );
 
-        // Jurnal Baru
+        // 🆕 Jurnal Baru
         JournalService::add(
             Auth::id(),
             $request->date,
-            'Perubahan: ' . ($expense->description ?? 'Pengeluaran baru'),
+            'Perubahan expense: ' . ($request->description ?? $newCategory->name),
             [
-                ['account_id' => 1, 'type' => 'credit', 'amount' => $request->amount], // Kas berkurang
-                ['account_id' => 6, 'type' => 'debit',  'amount' => $request->amount], // Biaya bertambah
+                ['account_id' => $newAccount->id, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $kasAccount->id, 'type' => 'credit', 'amount' => $request->amount],
             ],
             $expense->id,
             'expense'
         );
 
-        return redirect()
-            ->route('expenses.index')
-            ->with('success', 'Data pengeluaran berhasil diperbarui.');
+        return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil diperbarui.');
     }
 
     /**
@@ -147,9 +155,25 @@ class ExpenseController extends Controller
     {
         Gate::authorize('destroy', $expense);
 
+        $category   = $expense->category;
+        $biayaAccount = $category->account;
+        $kasAccount   = ChartOfAccount::where('code', '101')->firstOrFail();
+
+        // 🔄 Jurnal Pembalik (hapus expense = reverse full)
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Hapus expense: ' . ($expense->description ?? $category->name),
+            [
+                ['account_id' => $kasAccount->id,   'type' => 'debit',  'amount' => $expense->amount],
+                ['account_id' => $biayaAccount->id, 'type' => 'credit', 'amount' => $expense->amount],
+            ],
+            $expense->id,
+            'expense'
+        );
+
         $expense->delete();
-        return redirect()
-            ->route('expenses.index')
-            ->with('success', 'Pengeluaran berhasil dihapus.');
+
+        return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil dihapus.');
     }
 }

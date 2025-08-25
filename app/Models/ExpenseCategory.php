@@ -9,4 +9,14 @@ class ExpenseCategory extends Model
 {
     use HasHashid;
     protected $guarded = ['id'];
+
+    public function account()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'account_id');
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
 }

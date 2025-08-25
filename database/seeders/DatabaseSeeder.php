@@ -27,10 +27,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
+            ChartOfAccountSeeder::class,
             ExpenseCategorySeeder::class,
-            ProductCategorySeeder::class,
             IncomeCategorySeeder::class,
-            ChartOfAccountSeeder::class
+            ProductCategorySeeder::class,
         ]);
     }
 }

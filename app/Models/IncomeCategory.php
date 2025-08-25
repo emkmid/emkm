@@ -13,4 +13,14 @@ class IncomeCategory extends Model
         'name',
         'user_id',
     ];
+
+    public function account()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'account_id');
+    }
+
+    public function incomes()
+    {
+        return $this->hasMany(Income::class);
+    }
 }

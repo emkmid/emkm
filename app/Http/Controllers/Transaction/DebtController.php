@@ -37,26 +37,28 @@ class DebtController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'creditor' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'paid_amount' => 'nullable|numeric|min:0',
-            'due_date' => 'nullable|date',
-            'description' => 'nullable|string',
+            'creditor'   => 'required|string|max:255',
+            'amount'     => 'required|numeric|min:0',
+            'paid_amount'=> 'nullable|numeric|min:0',
+            'due_date'   => 'nullable|date',
+            'description'=> 'nullable|string',
         ]);
 
-        Auth::user()->debts()->create($validated);
+        $debt = Auth::user()->debts()->create($validated);
 
         $kasAccount   = ChartOfAccount::where('code', '101')->firstOrFail(); // Kas
         $utangAccount = ChartOfAccount::where('code', '201')->firstOrFail(); // Utang Usaha
 
         JournalService::add(
             Auth::id(),
-            now()->toDateString(),
+            $request->date ?? now()->toDateString(),
             'Hutang dari ' . $request->creditor,
             [
-                ['account_id' => $kasAccount->id, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $kasAccount->id,   'type' => 'debit',  'amount' => $request->amount],
                 ['account_id' => $utangAccount->id, 'type' => 'credit', 'amount' => $request->amount],
-            ]
+            ],
+            $debt->id,
+            'debt'
         );
 
         return redirect()->route('debts.index')->with('success', 'Hutang berhasil ditambahkan!');
@@ -80,37 +82,40 @@ class DebtController extends Controller
         Gate::authorize('update', $debt);
 
         $validated = $request->validate([
-            'creditor' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'paid_amount' => 'nullable|numeric|min:0',
-            'due_date' => 'nullable|date',
-            'description' => 'nullable|string',
+            'creditor'   => 'required|string|max:255',
+            'amount'     => 'required|numeric|min:0',
+            'paid_amount'=> 'nullable|numeric|min:0',
+            'due_date'   => 'nullable|date',
+            'description'=> 'nullable|string',
         ]);
 
         $oldAmount = $debt->amount;
         $debt->update($validated);
 
-        // Jurnal Pembalik
+        $kasAccount   = ChartOfAccount::where('code', '101')->firstOrFail();
+        $utangAccount = ChartOfAccount::where('code', '201')->firstOrFail();
+
+        // 🔄 Jurnal Pembalik
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
-            'Pembalik: ' . ($debt->description ?? 'Utang lama'),
+            'Pembalik hutang lama: ' . ($debt->description ?? 'Tanpa deskripsi'),
             [
-                ['account_id' => 3, 'type' => 'debit',  'amount' => $oldAmount], // Utang berkurang
-                ['account_id' => 1, 'type' => 'credit', 'amount' => $oldAmount], // Kas kembali
+                ['account_id' => $utangAccount->id, 'type' => 'debit',  'amount' => $oldAmount], // Utang berkurang
+                ['account_id' => $kasAccount->id,   'type' => 'credit', 'amount' => $oldAmount], // Kas kembali
             ],
             $debt->id,
             'debt'
         );
 
-        // Jurnal Baru
+        // 🆕 Jurnal Baru
         JournalService::add(
             Auth::id(),
-            $request->date,
-            'Perubahan: ' . ($debt->description ?? 'Utang baru'),
+            $request->date ?? now()->toDateString(),
+            'Perubahan hutang: ' . ($debt->description ?? 'Tanpa deskripsi'),
             [
-                ['account_id' => 3, 'type' => 'credit', 'amount' => $request->amount], // Utang bertambah
-                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount], // Kas bertambah
+                ['account_id' => $kasAccount->id,   'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $utangAccount->id, 'type' => 'credit', 'amount' => $request->amount],
             ],
             $debt->id,
             'debt'
@@ -125,6 +130,22 @@ class DebtController extends Controller
     public function destroy(Debt $debt)
     {
         Gate::authorize('delete', $debt);
+
+        $kasAccount   = ChartOfAccount::where('code', '101')->firstOrFail();
+        $utangAccount = ChartOfAccount::where('code', '201')->firstOrFail();
+
+        // 🔄 Jurnal Pembalik (hapus hutang = hapus efek jurnal awal)
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Hapus hutang: ' . ($debt->description ?? 'Tanpa deskripsi'),
+            [
+                ['account_id' => $utangAccount->id, 'type' => 'debit',  'amount' => $debt->amount],
+                ['account_id' => $kasAccount->id,   'type' => 'credit', 'amount' => $debt->amount],
+            ],
+            $debt->id,
+            'debt'
+        );
 
         $debt->delete();
 

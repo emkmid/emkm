@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->foreignId('account_id')->constrained('chart_of_accounts');
             $table->timestamps();
         });
     }

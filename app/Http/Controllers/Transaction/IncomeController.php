@@ -50,26 +50,26 @@ class IncomeController extends Controller
         $validated = $request->validate([
             'date' => 'required|date',
             'income_category_id' => 'required|exists:income_categories,id',
-            'amount' => 'required|numeric',
+            'amount' => 'required|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
-        $validated['user_id'] = Auth::id();
+        $income = Auth::user()->incomes()->create($validated);
 
-        Income::create($validated);
-
-        // Ambil akun dari Chart of Accounts
-        $kasAccount       = ChartOfAccount::where('code', '101')->firstOrFail(); // Kas
-        $pendapatanAccount = ChartOfAccount::where('code', '401')->firstOrFail(); // Pendapatan Penjualan
+        $category = IncomeCategory::with('account')->findOrFail($validated['income_category_id']);
+        $pendapatanAccount = $category->account;
+        $kasAccount        = ChartOfAccount::where('code', '101')->firstOrFail();
 
         JournalService::add(
             Auth::id(),
             $request->date,
-            'Pemasukan: ' . ($request->description ?? 'Tanpa deskripsi'),
+            'Pemasukan: ' . ($request->description ?? $category->name),
             [
-                ['account_id' => $kasAccount->id, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $kasAccount->id,        'type' => 'debit',  'amount' => $request->amount],
                 ['account_id' => $pendapatanAccount->id, 'type' => 'credit', 'amount' => $request->amount],
-            ]
+            ],
+            $income->id,
+            'income'
         );
 
         return redirect()->route('incomes.index')->with('success', 'Pemasukan berhasil ditambahkan.');
@@ -108,44 +108,49 @@ class IncomeController extends Controller
         Gate::authorize('update', $income);
 
         $validated = $request->validate([
-            'date' => 'required|date',
+            'date'               => 'required|date',
             'income_category_id' => 'required|exists:income_categories,id',
-            'amount' => 'required|numeric',
-            'description' => 'nullable|string',
+            'amount'             => 'required|numeric|min:0',
+            'description'        => 'nullable|string',
         ]);
 
-        $oldAmount = $income->amount;
+        $oldAmount   = $income->amount;
+        $oldCategory = $income->income_category;
+        $oldAccount  = $oldCategory->account;
+
         $income->update($validated);
 
-        // Jurnal Pembalik
+        $newCategory = IncomeCategory::with('account')->findOrFail($validated['income_category_id']);
+        $newAccount  = $newCategory->account;
+        $kasAccount  = ChartOfAccount::where('code', '101')->firstOrFail();
+
+        // 🔄 Jurnal Pembalik
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
-            'Pembalik: ' . ($income->description ?? 'Pemasukan lama'),
+            'Pembalik income lama: ' . ($income->description ?? $oldCategory->name),
             [
-                ['account_id' => 1, 'type' => 'credit', 'amount' => $oldAmount],
-                ['account_id' => 5, 'type' => 'debit',  'amount' => $oldAmount],
+                ['account_id' => $oldAccount->id, 'type' => 'debit',  'amount' => $oldAmount],
+                ['account_id' => $kasAccount->id, 'type' => 'credit', 'amount' => $oldAmount],
             ],
             $income->id,
             'income'
         );
 
-        // Jurnal Baru
+        // 🆕 Jurnal Baru
         JournalService::add(
             Auth::id(),
             $request->date,
-            'Perubahan: ' . ($income->description ?? 'Pemasukan baru'),
+            'Perubahan income: ' . ($request->description ?? $newCategory->name),
             [
-                ['account_id' => 1, 'type' => 'debit',  'amount' => $request->amount],
-                ['account_id' => 5, 'type' => 'credit', 'amount' => $request->amount],
+                ['account_id' => $kasAccount->id, 'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $newAccount->id, 'type' => 'credit', 'amount' => $request->amount],
             ],
             $income->id,
             'income'
         );
 
-        return redirect()
-            ->route('incomes.index')
-            ->with('success', 'Data pengeluaran berhasil diperbarui.');
+        return redirect()->route('incomes.index')->with('success', 'Pemasukan berhasil diperbarui.');
     }
 
     /**
@@ -155,10 +160,25 @@ class IncomeController extends Controller
     {
         Gate::authorize('destroy', $income);
 
+        $category          = $income->income_category;
+        $pendapatanAccount = $category->account;
+        $kasAccount        = ChartOfAccount::where('code', '101')->firstOrFail();
+
+        // 🔄 Jurnal Pembalik (hapus income = reverse full)
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Hapus income: ' . ($income->description ?? $category->name),
+            [
+                ['account_id' => $pendapatanAccount->id, 'type' => 'debit',  'amount' => $income->amount],
+                ['account_id' => $kasAccount->id,        'type' => 'credit', 'amount' => $income->amount],
+            ],
+            $income->id,
+            'income'
+        );
+
         $income->delete();
 
-        return redirect()
-            ->route('incomes.index')
-            ->with('success', 'Pengeluaran berhasil dihapus.');
+        return redirect()->route('incomes.index')->with('success', 'Pemasukan berhasil dihapus.');
     }
 }

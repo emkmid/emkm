@@ -8,6 +8,7 @@ use App\Models\Receivable;
 use App\Services\JournalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class ReceivableController extends Controller
@@ -35,27 +36,28 @@ class ReceivableController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'debtor' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'paid_amount' => 'nullable|numeric|min:0',
-            'due_date' => 'nullable|date',
-            'description' => 'nullable|string',
+            'debtor'     => 'required|string|max:255',
+            'amount'     => 'required|numeric|min:0',
+            'paid_amount'=> 'nullable|numeric|min:0',
+            'due_date'   => 'nullable|date',
+            'description'=> 'nullable|string',
         ]);
 
-        Auth::user()->receivables()->create($validated);
+        $receivable = Auth::user()->receivables()->create($validated);
 
-        // Ambil akun dari Chart of Accounts
         $piutangAccount   = ChartOfAccount::where('code', '103')->firstOrFail(); // Piutang Usaha
         $pendapatanAccount = ChartOfAccount::where('code', '401')->firstOrFail(); // Pendapatan Penjualan
 
         JournalService::add(
             Auth::id(),
-            now()->toDateString(),
+            $request->date ?? now()->toDateString(),
             'Piutang dari ' . $request->debtor,
             [
-                ['account_id' => $piutangAccount->id, 'type' => 'debit',  'amount' => $request->amount],
-                ['account_id' => $pendapatanAccount->id, 'type' => 'credit', 'amount' => $request->amount],
-            ]
+                ['account_id' => $piutangAccount->id,   'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $pendapatanAccount->id,'type' => 'credit', 'amount' => $request->amount],
+            ],
+            $receivable->id,
+            'receivable'
         );
 
         return redirect()->route('receivables.index')->with('success', 'Piutang berhasil ditambahkan!');
@@ -83,37 +85,40 @@ class ReceivableController extends Controller
     public function update(Request $request, Receivable $receivable)
     {
         $validated = $request->validate([
-            'debtor' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'paid_amount' => 'nullable|numeric|min:0',
-            'due_date' => 'nullable|date',
-            'description' => 'nullable|string',
+            'debtor'     => 'required|string|max:255',
+            'amount'     => 'required|numeric|min:0',
+            'paid_amount'=> 'nullable|numeric|min:0',
+            'due_date'   => 'nullable|date',
+            'description'=> 'nullable|string',
         ]);
 
         $oldAmount = $receivable->amount;
         $receivable->update($validated);
 
-        // Jurnal Pembalik
+        $piutangAccount    = ChartOfAccount::where('code', '103')->firstOrFail();
+        $pendapatanAccount = ChartOfAccount::where('code', '401')->firstOrFail();
+
+        // 🔄 Jurnal Pembalik
         JournalService::add(
             Auth::id(),
             now()->toDateString(),
-            'Pembalik: ' . ($receivable->description ?? 'Piutang lama'),
+            'Pembalik piutang lama: ' . ($receivable->description ?? 'Tanpa deskripsi'),
             [
-                ['account_id' => 2, 'type' => 'credit', 'amount' => $oldAmount], // Piutang berkurang
-                ['account_id' => 5, 'type' => 'debit',  'amount' => $oldAmount], // Pendapatan dibalik
+                ['account_id' => $pendapatanAccount->id, 'type' => 'debit',  'amount' => $oldAmount], // pendapatan dibalik
+                ['account_id' => $piutangAccount->id,    'type' => 'credit', 'amount' => $oldAmount], // piutang dikurangi
             ],
             $receivable->id,
             'receivable'
         );
 
-        // Jurnal Baru
+        // 🆕 Jurnal Baru
         JournalService::add(
             Auth::id(),
-            $request->date,
-            'Perubahan: ' . ($receivable->description ?? 'Piutang baru'),
+            $request->date ?? now()->toDateString(),
+            'Perubahan piutang: ' . ($receivable->description ?? 'Tanpa deskripsi'),
             [
-                ['account_id' => 2, 'type' => 'debit',  'amount' => $request->amount], // Piutang bertambah
-                ['account_id' => 5, 'type' => 'credit', 'amount' => $request->amount], // Pendapatan bertambah
+                ['account_id' => $piutangAccount->id,    'type' => 'debit',  'amount' => $request->amount],
+                ['account_id' => $pendapatanAccount->id, 'type' => 'credit', 'amount' => $request->amount],
             ],
             $receivable->id,
             'receivable'
@@ -127,6 +132,22 @@ class ReceivableController extends Controller
      */
     public function destroy(Receivable $receivable)
     {
+        $piutangAccount    = ChartOfAccount::where('code', '103')->firstOrFail();
+        $pendapatanAccount = ChartOfAccount::where('code', '401')->firstOrFail();
+
+        // 🔄 Jurnal Pembalik
+        JournalService::add(
+            Auth::id(),
+            now()->toDateString(),
+            'Hapus piutang: ' . ($receivable->description ?? 'Tanpa deskripsi'),
+            [
+                ['account_id' => $pendapatanAccount->id, 'type' => 'debit',  'amount' => $receivable->amount],
+                ['account_id' => $piutangAccount->id,    'type' => 'credit', 'amount' => $receivable->amount],
+            ],
+            $receivable->id,
+            'receivable'
+        );
+
         $receivable->delete();
 
         return redirect()->route('receivables.index')->with('success', 'Piutang berhasil dihapus!');

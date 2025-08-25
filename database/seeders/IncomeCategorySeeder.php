@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ChartOfAccount;
 use App\Models\IncomeCategory;
 use App\Models\User;
 use App\Policies\IncomePolicy;
@@ -15,12 +16,21 @@ class IncomeCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $globalCategories = ['Makanan', 'Transportasi', 'Listrik', 'Internet', 'Kesehatan', 'lainnya'];
-        foreach ($globalCategories as $name) {
-            IncomeCategory::create([
-                'name' => $name,
-                'user_id' => null,
-            ]);
+        $categories = [
+            ['name' => 'Penjualan Produk A', 'coa_code' => '401'],
+            ['name' => 'Penjualan Produk B', 'coa_code' => '401'],
+            ['name' => 'Penjualan Jasa Servis', 'coa_code' => '401'],
+            ['name' => 'Pendapatan Sewa', 'coa_code' => '402'],
+            ['name' => 'Pendapatan Bunga Bank', 'coa_code' => '402'],
+        ];
+
+        foreach ($categories as $cat) {
+            $account = ChartOfAccount::where('code', $cat['coa_code'])->firstOrFail();
+
+            IncomeCategory::updateOrCreate(
+                ['name' => $cat['name']],
+                ['account_id' => $account->id]
+            );
         }
     }
 }

@@ -6,5 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class ChartOfAccount extends Model
 {
-    //
+    protected $guarded = ['id'];
+
+    public function expenseCategories()
+    {
+        return $this->hasMany(ExpenseCategory::class, 'account_id');
+    }
+
+    public function incomeCategories()
+    {
+        return $this->hasMany(IncomeCategory::class, 'account_id');
+    }
 }
