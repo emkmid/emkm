@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Report;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Journal;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class JournalController extends Controller
@@ -12,6 +13,7 @@ class JournalController extends Controller
     public function index()
     {
         $journals = Journal::with(['entries.account', 'user'])
+            ->where('user_id', Auth::id())
             ->orderBy('date', 'desc')
             ->paginate(10);
 
