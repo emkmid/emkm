@@ -2,26 +2,25 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import HeadingSmall from '@/components/heading-small';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, BreadcrumbItemType } from '@/types';
+import { BreadcrumbItemType } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import React from 'react';
+import React, { JSX } from 'react';
 
 type Entry = { id: number; date: string; description: string; type: 'debit' | 'credit'; amount: number };
 type Account = {
     id: number;
     code: string;
     name: string;
-    type: string;
+    type: string; // bisa di-refine jadi union: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
     debit: number;
     credit: number;
     balance: number;
     entries: Entry[];
 };
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Buku Besar', href: '/dashboard/reports/journal' }];
 const breadcrumbItems: BreadcrumbItemType[] = [{ title: 'Buku Besar', href: '' }];
 
-export default function ledger() {
+export default function Ledger() {
     const { accounts, filters } = usePage<{ accounts: Account[]; filters: any }>().props;
     const [sortField, setSortField] = React.useState(filters.sortField || 'date');
     const [sortOrder, setSortOrder] = React.useState(filters.sortOrder || 'asc');
@@ -116,7 +115,8 @@ export default function ledger() {
                                 {/* Saldo */}
                                 <div className="text-right">
                                     <div className="text-sm text-gray-700 dark:text-gray-200">
-                                        Saldo: <strong>{acc.balance.toLocaleString()}</strong>
+                                        Saldo: <strong>{acc.balance.toLocaleString()}</strong>{' '}
+                                        {['asset', 'expense'].includes(acc.type) ? '(D)' : '(K)'}
                                     </div>
                                     <div className="text-sm text-gray-500 dark:text-gray-400">
                                         D: {acc.debit.toLocaleString()} / K: {acc.credit.toLocaleString()}
@@ -127,22 +127,45 @@ export default function ledger() {
                             <div className="overflow-x-auto">
                                 <Table>
                                     <TableHeader>
-                                        <TableRow onClick={() => toggleSort('date')}>
-                                            Tanggal {sortField === 'date' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                                        <TableRow>
+                                            <TableCell onClick={() => toggleSort('date')} className="cursor-pointer">
+                                                Tanggal {sortField === 'date' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                                            </TableCell>
+                                            <TableCell>Keterangan</TableCell>
+                                            <TableCell className="text-right">Debit</TableCell>
+                                            <TableCell className="text-right">Kredit</TableCell>
+                                            <TableCell className="text-right">Saldo</TableCell>
                                         </TableRow>
-                                        <TableRow>Keterangan</TableRow>
-                                        <TableRow>Debit</TableRow>
-                                        <TableRow>Kredit</TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {acc.entries.map((e) => (
-                                            <TableRow key={e.id}>
-                                                <TableCell>{e.date}</TableCell>
-                                                <TableCell>{e.description}</TableCell>
-                                                <TableCell>{e.type === 'debit' ? e.amount.toLocaleString() : ''}</TableCell>
-                                                <TableCell>{e.type === 'credit' ? e.amount.toLocaleString() : ''}</TableCell>
-                                            </TableRow>
-                                        ))}
+                                        {
+                                            acc.entries.reduce<{ running: number; rows: JSX.Element[] }>(
+                                                (state, e) => {
+                                                    let newBalance = state.running;
+                                                    if (e.type === 'debit') newBalance += e.amount;
+                                                    if (e.type === 'credit') newBalance -= e.amount;
+
+                                                    const row = (
+                                                        <TableRow key={e.id}>
+                                                            <TableCell>{e.date}</TableCell>
+                                                            <TableCell>{e.description}</TableCell>
+                                                            <TableCell className="text-right">
+                                                                {e.type === 'debit' ? e.amount.toLocaleString() : '—'}
+                                                            </TableCell>
+                                                            <TableCell className="text-right">
+                                                                {e.type === 'credit' ? e.amount.toLocaleString() : '—'}
+                                                            </TableCell>
+                                                            <TableCell className="text-right font-medium">
+                                                                {newBalance.toLocaleString()} {['asset', 'expense'].includes(acc.type) ? 'D' : 'K'}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+
+                                                    return { running: newBalance, rows: [...state.rows, row] };
+                                                },
+                                                { running: 0, rows: [] },
+                                            ).rows
+                                        }
                                     </TableBody>
                                 </Table>
                             </div>
