@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountingReportController;
 use App\Http\Controllers\Education\ArticleController;
 use App\Http\Controllers\Education\EducationController;
 use App\Http\Controllers\Product\ProductCategoryController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Transaction\DebtController;
 use App\Http\Controllers\Transaction\ExpenseController;
 use App\Http\Controllers\Transaction\IncomeController;
 use App\Http\Controllers\Transaction\ReceivableController;
+use App\Services\AccountingService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -40,6 +42,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::prefix('reports')->group(function () {
             Route::get('journal', [JournalController::class, 'index'])->name('journal.index');
+            Route::get('ledger',[AccountingReportController::class, 'ledger'])->name('reports.ledger');
+            Route::get('trial-balance', [AccountingService::class, 'trialBalance'])->name('reports.trial-balance');
+            Route::get('income-statement', [AccountingReportController::class, 'incomeStatement'])->name('reports.income-statement');
+            Route::get('balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
         });
 
         // Admin
