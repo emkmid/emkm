@@ -43,9 +43,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('reports')->group(function () {
             Route::get('journal', [JournalController::class, 'index'])->name('journal.index');
             Route::get('ledger',[AccountingReportController::class, 'ledger'])->name('reports.ledger');
-            Route::get('trial-balance', [AccountingService::class, 'trialBalance'])->name('reports.trial-balance');
-            Route::get('income-statement', [AccountingReportController::class, 'incomeStatement'])->name('reports.income-statement');
-            Route::get('balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+            Route::get('trial-balance', [AccountingReportController::class, 'trialBalance'])->name('reports.trial-balance');
+            // Route::get('income-statement', [AccountingReportController::class, 'incomeStatement'])->name('reports.income-statement');
+            // Route::get('balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+            // Route::('');
         });
 
         // Admin
