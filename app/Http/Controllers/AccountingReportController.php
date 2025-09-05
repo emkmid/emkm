@@ -124,81 +124,97 @@ class AccountingReportController extends Controller
         ]);
     }
 
-    // public function trialBalance(Request $request)
-    // {
-    //     $start = $request->query('start_date');
-    //     $end = $request->query('end_date');
+    public function incomeStatement(Request $request)
+    {
+        $start = $request->query('start_date');
+        $end   = $request->query('end_date');
 
-    //     $rows = JournalEntry::query()
-    //         ->join('journals', 'journals.id', '=', 'journal_entries.journal_id')
-    //         ->join('chart_of_accounts as coa', 'coa.id', '=', 'journal_entries.account_id')
-    //         ->when($start && $end, fn($q) => $q->whereBetween('journals.date', [$start, $end]))
-    //         ->select([
-    //             'journal_entries.account_id',
-    //             'coa.code',
-    //             'coa.name',
-    //             'coa.type',
-    //             DB::raw("SUM(CASE WHEN journal_entries.type='debit'  THEN journal_entries.amount ELSE 0 END) AS sum_debit"),
-    //             DB::raw("SUM(CASE WHEN journal_entries.type='credit' THEN journal_entries.amount ELSE 0 END) AS sum_credit"),
-    //         ])
-    //         ->groupBy('journal_entries.account_id', 'coa.code', 'coa.name', 'coa.type')
-    //         ->orderBy('coa.code')
-    //         ->get();
+        $accounts = ChartOfAccount::whereIn('type', ['pendapatan', 'biaya'])
+            ->whereHas('journalEntries.journal', fn($q) => $q->where('user_id', Auth::id()))
+            ->with(['journalEntries' => function ($q) use ($start, $end) {
+                $q->join('journals', 'journals.id', '=', 'journal_entries.journal_id')
+                ->select('journal_entries.*', 'journals.date')
+                ->when($start && $end, fn($q) => $q->whereBetween('journals.date', [$start, $end]))
+                ->where('journals.user_id', Auth::id());
+            }])
+            ->orderBy('code')
+            ->get()
+            ->map(function ($account) {
+                $debit  = $account->journalEntries->where('type', 'debit')->sum('amount');
+                $credit = $account->journalEntries->where('type', 'credit')->sum('amount');
+                $balance = AccountingService::endingBalance($account->type, $debit, $credit);
 
-    //     $totalDebit = $rows->sum('sum_debit');
-    //     $totalCredit = $rows->sum('sum_credit');
+                return [
+                    'code' => $account->code,
+                    'name' => $account->name,
+                    'type' => $account->type,
+                    'balance' => $balance,
+                ];
+            });
 
-    //     return Inertia::render('Reports/TrialBalance', [
-    //         'filters' => ['start_date' => $start, 'end_date' => $end],
-    //         'rows' => $rows,
-    //         'totals' => ['debit' => (float) $totalDebit, 'credit' => (float) $totalCredit],
-    //     ]);
-    // }
+        $income = $accounts->where('type', 'pendapatan')->sum('balance');
+        $expense = $accounts->where('type', 'biaya')->sum('balance');
+        $net = $income - $expense;
 
-    // public function incomeStatement(Request $request)
-    // {
-    //     $start = $request->query('start_date');
-    //     $end = $request->query('end_date');
+        return Inertia::render('dashboard/user/reports/income-statement', [
+            'accounts' => $accounts,
+            'totals' => [
+                'income' => $income,
+                'expense' => $expense,
+                'net' => $net,
+            ],
+            'filters' => [
+                'start_date' => $start,
+                'end_date' => $end,
+            ],
+        ]);
+    }
 
-    //     $rows = JournalEntry::query()
-    //         ->join('journals', 'journals.id', '=', 'journal_entries.journal_id')
-    //         ->join('chart_of_accounts as coa', 'coa.id', '=', 'journal_entries.account_id')
-    //         ->when($start && $end, fn($q) => $q->whereBetween('journals.date', [$start, $end]))
-    //         ->whereIn('coa.type', ['pendapatan', 'biaya'])
-    //         ->select([
-    //             'coa.type',
-    //             'coa.code',
-    //             'coa.name',
-    //             DB::raw("SUM(CASE WHEN journal_entries.type='debit'  THEN journal_entries.amount ELSE 0 END) AS sum_debit"),
-    //             DB::raw("SUM(CASE WHEN journal_entries.type='credit' THEN journal_entries.amount ELSE 0 END) AS sum_credit"),
-    //         ])
-    //         ->groupBy('coa.type', 'coa.code', 'coa.name')
-    //         ->orderBy('coa.type')
-    //         ->orderBy('coa.code')
-    //         ->get()
-    //         ->map(function ($r) {
-    //             $r->value = $r->type === 'pendapatan' ? (float) $r->sum_credit - (float) $r->sum_debit : (float) $r->sum_debit - (float) $r->sum_credit;
-    //             return $r;
-    //         });
+    public function balanceSheet(Request $request)
+    {
+        $start = $request->query('start_date');
+        $end   = $request->query('end_date');
 
-    //     $revenues = $rows->where('type', 'pendapatan')->values();
-    //     $expenses = $rows->where('type', 'biaya')->values();
+        $accounts = ChartOfAccount::whereIn('type', ['aset', 'liabilitas', 'ekuitas'])
+            ->whereHas('journalEntries.journal', fn($q) => $q->where('user_id', Auth::id()))
+            ->with(['journalEntries' => function ($q) use ($start, $end) {
+                $q->join('journals', 'journals.id', '=', 'journal_entries.journal_id')
+                ->select('journal_entries.*', 'journals.date')
+                ->when($start && $end, fn($q) => $q->whereBetween('journals.date', [$start, $end]))
+                ->where('journals.user_id', Auth::id());
+            }])
+            ->orderBy('code')
+            ->get()
+            ->map(function ($account) {
+                $debit  = $account->journalEntries->where('type', 'debit')->sum('amount');
+                $credit = $account->journalEntries->where('type', 'credit')->sum('amount');
+                $balance = AccountingService::endingBalance($account->type, (float) $debit, (float) $credit);
 
-    //     $totalRevenue = $revenues->sum('value');
-    //     $totalExpense = $expenses->sum('value');
-    //     $netIncome = $totalRevenue - $totalExpense;
+                return [
+                    'code'    => $account->code,
+                    'name'    => $account->name,
+                    'type'    => $account->type,
+                    'balance' => $balance,
+                ];
+            });
 
-    //     return Inertia::render('Reports/IncomeStatement', [
-    //         'filters' => ['start_date' => $start, 'end_date' => $end],
-    //         'revenues' => $revenues,
-    //         'expenses' => $expenses,
-    //         'totals' => [
-    //             'revenue' => (float) $totalRevenue,
-    //             'expense' => (float) $totalExpense,
-    //             'net' => (float) $netIncome,
-    //         ],
-    //     ]);
-    // }
+        // Hitung total per kelompok
+        $totals = [
+            'assets'      => $accounts->where('type', 'aset')->sum('balance'),
+            'liabilities' => $accounts->where('type', 'liabilitas')->sum('balance'),
+            'equity'      => $accounts->where('type', 'ekuitas')->sum('balance'),
+        ];
+
+        return Inertia::render('dashboard/user/reports/balance-sheet', [
+            'accounts' => $accounts,
+            'totals'   => $totals,
+            'filters'  => [
+                'start_date' => $start,
+                'end_date'   => $end,
+            ],
+        ]);
+    }
+
 
     // public function balanceSheet(Request $request)
     // {

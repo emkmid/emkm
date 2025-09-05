@@ -57,8 +57,9 @@ const mainNavItems: MainNavItem[] = [
         subItems: [
             { title: 'Jurnal Umum', href: '/dashboard/reports/journal' },
             { title: 'Buku Besar', href: '/dashboard/reports/ledger' },
-            { title: 'Laba Rugi', href: '/dashboard/reports/profit-loss' },
-            { title: 'Neraca', href: route('reports.trial-balance') },
+            { title: 'Laba Rugi', href: '/dashboard/reports/income-statement' },
+            { title: 'Neraca Saldo', href: '/dashboard/reports/trial-balance' },
+            { title: 'Neraca', href: '/dashboard/reports/balance-sheet' },
         ],
     },
     {
