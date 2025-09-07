@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AccountingReportController;
+use App\Http\Controllers\Dashboard\AdminDashboardController;
+use App\Http\Controllers\Dashboard\UserDashboardController;
 use App\Http\Controllers\Education\ArticleController;
 use App\Http\Controllers\Education\EducationController;
 use App\Http\Controllers\Product\ProductCategoryController;
@@ -13,6 +15,7 @@ use App\Http\Controllers\Transaction\ExpenseController;
 use App\Http\Controllers\Transaction\IncomeController;
 use App\Http\Controllers\Transaction\ReceivableController;
 use App\Services\AccountingService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -23,8 +26,12 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('dashboard')->group(function () {
         Route::get('/', function () {
-            return Inertia::render('dashboard');
+            return Auth::user()->role === 'admin'
+                ? redirect()->route('admin.dashboard')
+                : redirect()->route('user.dashboard');
         })->name('dashboard');
+
+        Route::get('user', [UserDashboardController::class, 'index'])->name('user.dashboard');
 
         Route::get('hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index');
         Route::get('hpp/hasil', fn () => Inertia::render('dashboard/user/hpp/result'))->name('hpp.hasil');
@@ -50,6 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Admin
         Route::prefix('admin')->middleware(['mustBeAdmin', 'web'])->group(function() {
+            Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
             Route::resource('articles', ArticleController::class);
             Route::post('uploads/article-media', [ArticleController::class, 'upload'])->name('articles.upload')->middleware('throttle:20,1');
         });
