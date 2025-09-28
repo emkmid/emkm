@@ -17,9 +17,10 @@ class IncomeCategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Penjualan Jasa Servis', 'coa_code' => '401'],
-            ['name' => 'Pendapatan Sewa', 'coa_code' => '402'],
-            ['name' => 'Pendapatan Bunga Bank', 'coa_code' => '402'],
+            ['name' => 'Penjualan Produk', 'coa_code' => '401'],
+            ['name' => 'Penjualan Jasa',   'coa_code' => '401'],
+            ['name' => 'Pendapatan Sewa',  'coa_code' => '402'],
+            ['name' => 'Pendapatan Lain-lain', 'coa_code' => '402'],
         ];
 
         foreach ($categories as $cat) {

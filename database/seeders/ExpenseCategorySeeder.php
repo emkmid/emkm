@@ -13,14 +13,12 @@ class ExpenseCategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Listrik',   'coa_code' => '501'],
-            ['name' => 'Internet',  'coa_code' => '501'],
-            ['name' => 'Air',       'coa_code' => '501'],
-            ['name' => 'Bensin',    'coa_code' => '502'],
-            ['name' => 'Parkir',    'coa_code' => '502'],
-            ['name' => 'Sewa Kantor','coa_code' => '503'],
-            ['name' => 'Gaji Karyawan','coa_code' => '504'],
-            ['name' => 'ATK',       'coa_code' => '502'],
+            ['name' => 'Biaya Operasional',   'coa_code' => '501'],
+            ['name' => 'Biaya Transportasi',  'coa_code' => '502'],
+            ['name' => 'Biaya Sewa',          'coa_code' => '503'],
+            ['name' => 'Biaya Gaji & Tenaga Kerja', 'coa_code' => '504'],
+            ['name' => 'Biaya Peralatan & ATK','coa_code' => '502'],
+            ['name' => 'Biaya Lain-lain',     'coa_code' => '502'],
         ];
 
         foreach ($categories as $cat) {

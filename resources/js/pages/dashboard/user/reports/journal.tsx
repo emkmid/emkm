@@ -99,8 +99,12 @@ export default function JournalPage() {
                                                 <TableCell>
                                                     {entry.account.code} - {entry.account.name}
                                                 </TableCell>
-                                                <TableCell>{entry.type === 'debit' ? `Rp${entry.amount.toLocaleString('id-ID')}` : ''}</TableCell>
-                                                <TableCell>{entry.type === 'credit' ? `Rp${entry.amount.toLocaleString('id-ID')}` : ''}</TableCell>
+                                                <TableCell>
+                                                    {entry.type === 'debit' ? `Rp${Number(entry.amount).toLocaleString('id-ID')}` : ''}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {entry.type === 'credit' ? `Rp${Number(entry.amount).toLocaleString('id-ID')}` : ''}
+                                                </TableCell>
                                             </TableRow>
                                         )),
                                     )
