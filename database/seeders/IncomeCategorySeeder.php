@@ -17,8 +17,6 @@ class IncomeCategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Penjualan Produk A', 'coa_code' => '401'],
-            ['name' => 'Penjualan Produk B', 'coa_code' => '401'],
             ['name' => 'Penjualan Jasa Servis', 'coa_code' => '401'],
             ['name' => 'Pendapatan Sewa', 'coa_code' => '402'],
             ['name' => 'Pendapatan Bunga Bank', 'coa_code' => '402'],

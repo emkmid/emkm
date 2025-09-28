@@ -226,7 +226,7 @@ export default function Welcome() {
 
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild className="bg-[#23627C] transition hover:bg-[#23BBB7]">
-                        <Link href={route('login')}>Daftar Sekarang</Link>
+                        <Link href={route('register')}>Daftar Sekarang</Link>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
             </Navbar>
