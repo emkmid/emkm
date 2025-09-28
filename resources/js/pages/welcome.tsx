@@ -468,7 +468,6 @@ export default function Welcome() {
                     <div className="md:flex md:justify-between">
                         <div className="mb-6 md:mb-0">
                             <a href="https://flowbite.com/" className="flex items-center">
-                                <img src="https://flowbite.com/docs/images/logo.svg" className="me-3 h-8" alt="FlowBite Logo" />
                                 <span className="self-center text-2xl font-semibold whitespace-nowrap">EMKM</span>
                             </a>
                         </div>
@@ -524,7 +523,7 @@ export default function Welcome() {
                     <div className="sm:flex sm:items-center sm:justify-between">
                         <span className="text-sm text-gray-500 sm:text-center">
                             © 2025{' '}
-                            <a href="https://flowbite.com/" className="hover:underline">
+                            <a href="" className="hover:underline">
                                 EMKM™
                             </a>
                             . All Rights Reserved.
