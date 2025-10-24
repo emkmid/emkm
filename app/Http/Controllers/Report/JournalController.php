@@ -10,15 +10,30 @@ use Inertia\Inertia;
 
 class JournalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $journals = Journal::with(['entries.account', 'user'])
-            ->where('user_id', Auth::id())
-            ->orderBy('date', 'desc')
+        $query = Journal::with(['entries.account', 'user'])
+            ->where('user_id', Auth::id());
+
+        // Filter by month (format: Y-m)
+        if ($request->has('month') && $request->month) {
+            $query->whereRaw("strftime('%Y-%m', date) = ?", [$request->month]);
+        }
+
+        // Filter by expense category
+        if ($request->has('expense_category') && $request->expense_category) {
+            $query->whereHas('entries.account', function ($q) use ($request) {
+                $q->where('name', $request->expense_category)
+                  ->where('type', 'biaya');
+            });
+        }
+
+        $journals = $query->orderBy('date', 'desc')
             ->paginate(10);
 
         return inertia('dashboard/user/reports/journal', [
-            'journals' => $journals
+            'journals' => $journals,
+            'filters' => $request->only(['month', 'expense_category'])
         ]);
     }
 }

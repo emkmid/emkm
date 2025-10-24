@@ -72,6 +72,13 @@ class UserDashboardController extends Controller
 
         $profit = $income - $expense;
 
+        // Calculate cash balance (sum of debit - credit for cash accounts)
+        $cash = JournalEntry::whereHas('journal', fn($q) => $q->where('user_id', $userId))
+            ->whereHas('account', fn($q) => $q->where('code', '101')) // Kas account
+            ->join('journals', 'journals.id', '=', 'journal_entries.journal_id')
+            ->selectRaw('SUM(CASE WHEN journal_entries.type = "debit" THEN journal_entries.amount ELSE -journal_entries.amount END) as balance')
+            ->value('balance') ?? 0;
+
         // 2) Trends last N months (group by Y-m)
         $trendsStart = Carbon::now()->subMonths($trendsMonths - 1)->startOfMonth()->toDateString();
         $trendsRaw = JournalEntry::join('journals', 'journals.id', '=', 'journal_entries.journal_id')
