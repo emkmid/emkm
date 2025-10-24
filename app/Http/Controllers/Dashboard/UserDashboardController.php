@@ -20,43 +20,64 @@ class UserDashboardController extends Controller
     {
         $userId = Auth::id();
         $today = Carbon::today();
+        $period = $request->get('period', 'current_month');
 
-        // 1) Summary KPI
-        // cash: sum journal_entries for accounts type 'aset' (cash-like) — simple approach
-        $cashAccountIds = ChartOfAccount::where('type', 'aset')
-            ->whereHas('journalEntries.journal', fn($q) => $q->where('user_id', $userId))
-            ->pluck('id');
+        // Calculate date range based on period
+        switch ($period) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                $trendsMonths = 6; // last 6 months
+                break;
+            case 'last_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                $trendsMonths = 6;
+                break;
+            case 'last_3_months':
+                $startDate = Carbon::now()->subMonths(2)->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                $trendsMonths = 3;
+                break;
+            case 'last_6_months':
+                $startDate = Carbon::now()->subMonths(5)->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                $trendsMonths = 6;
+                break;
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                $trendsMonths = 12; // last 12 months
+                break;
+            default:
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                $trendsMonths = 6;
+        }
 
-        $cash = JournalEntry::whereIn('account_id', $cashAccountIds)
-            ->join('journals', 'journals.id', '=', 'journal_entries.journal_id')
-            ->where('journals.user_id', $userId)
-            ->selectRaw("COALESCE(SUM(CASE WHEN journal_entries.type='debit' THEN journal_entries.amount ELSE -journal_entries.amount END),0) as balance")
-            ->value('balance') ?? 0;
-
-        // income & expense for current month
-        $startOfMonth = Carbon::now()->startOfMonth()->toDateString();
-        $endOfMonth = Carbon::now()->endOfMonth()->toDateString();
+        $startOfPeriod = $startDate->toDateString();
+        $endOfPeriod = $endDate->toDateString();
 
         $income = JournalEntry::whereHas('journal', fn($q) => $q->where('user_id', $userId))
             ->whereHas('account', fn($q) => $q->where('type', 'pendapatan'))
             ->join('journals', 'journals.id', '=', 'journal_entries.journal_id')
-            ->whereBetween('journals.date', [$startOfMonth, $endOfMonth])
+            ->whereBetween('journals.date', [$startOfPeriod, $endOfPeriod])
             ->sum('journal_entries.amount');
 
         $expense = JournalEntry::whereHas('journal', fn($q) => $q->where('user_id', $userId))
             ->whereHas('account', fn($q) => $q->where('type', 'biaya'))
             ->join('journals', 'journals.id', '=', 'journal_entries.journal_id')
-            ->whereBetween('journals.date', [$startOfMonth, $endOfMonth])
+            ->whereBetween('journals.date', [$startOfPeriod, $endOfPeriod])
             ->sum('journal_entries.amount');
 
         $profit = $income - $expense;
 
-        // 2) Trends last 6 months (group by Y-m)
-        $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth()->toDateString();
+        // 2) Trends last N months (group by Y-m)
+        $trendsStart = Carbon::now()->subMonths($trendsMonths - 1)->startOfMonth()->toDateString();
         $trendsRaw = JournalEntry::join('journals', 'journals.id', '=', 'journal_entries.journal_id')
             ->join('chart_of_accounts as coa', 'coa.id', '=', 'journal_entries.account_id')
             ->where('journals.user_id', $userId)
-            ->whereBetween('journals.date', [$sixMonthsAgo, Carbon::now()->endOfMonth()->toDateString()])
+            ->whereBetween('journals.date', [$trendsStart, Carbon::now()->endOfMonth()->toDateString()])
             ->whereIn('coa.type', ['pendapatan', 'biaya'])
             ->select('journals.date', 'coa.type', DB::raw('SUM(journal_entries.amount) as total'))
             ->groupBy('journals.date', 'coa.type')
@@ -74,9 +95,9 @@ class UserDashboardController extends Controller
             })
             ->values();
 
-        // ensure months with zero exist (fill last 6 months)
+        // ensure months with zero exist (fill last N months)
         $months = collect();
-        for ($i = 5; $i >= 0; $i--) {
+        for ($i = $trendsMonths - 1; $i >= 0; $i--) {
             $m = Carbon::now()->subMonths($i)->format('Y-m');
             $months->push($m);
         }
