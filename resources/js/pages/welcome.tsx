@@ -1,4 +1,3 @@
-import { lazy, Suspense, useState } from 'react';
 import { Navbar } from '@/components/navbar';
 import { NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import RotatingText from '@/textAnimations/RotatingText/RotatingText';
@@ -7,13 +6,12 @@ import { Link, usePage } from '@inertiajs/react';
 import { BarChart3, BookOpen, Calculator, Check, DollarSign, FolderKanban, LineChart, NotebookPen, UserPlus, Users, Wallet } from 'lucide-react';
 
 import person1 from '@/../images/person1.png';
-const ChromaGrid = lazy(() => import('@/components/ChromaGrid/ChromaGrid'));
+import ChromaGrid from '@/components/ChromaGrid/ChromaGrid';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
-    const [isLoading, setIsLoading] = useState(false);
 
     const primaryColor = '#23BBB7';
     const darkBlueColor = '#23627C';
@@ -90,37 +88,37 @@ export default function Welcome() {
             image: 'https://i.pravatar.cc/300?img=1',
             title: 'Andi Aryanto',
             subtitle: 'Frontend Developer',
-            handle: '@andiar',
+            handle: '@sarahjohnson',
             borderColor: '#23627C',
             gradient: 'linear-gradient(145deg, #23627C, #000)',
-            url: 'https://github.com/andiar',
+            url: 'https://github.com/sarahjohnson',
         },
         {
-            image: 'https://i.pravatar.cc/300?img=3',
+            image: 'https://i.pravatar.cc/300?img=2',
             title: 'Rizky Hakim',
             subtitle: 'Backend Engineer',
-            handle: '@rizkyhakim',
+            handle: '@mikechen',
             borderColor: '#23BBB7',
             gradient: 'linear-gradient(180deg, #23BBB7, #000)',
-            url: 'https://linkedin.com/in/rizkyhakim',
+            url: 'https://linkedin.com/in/mikechen',
         },
         {
-            image: 'https://i.pravatar.cc/300?img=4',
+            image: 'https://i.pravatar.cc/300?img=2',
             title: 'Nazmie Fadhilah',
-            subtitle: 'Marketing Specialist',
-            handle: '@nazmief',
-            borderColor: '#FFA14A',
-            gradient: 'linear-gradient(180deg, #FFA14A, #000)',
-            url: 'https://linkedin.com/in/nazmiefadhilah',
+            subtitle: 'Marketing',
+            handle: '@mikechen',
+            borderColor: '#23BBB7',
+            gradient: 'linear-gradient(180deg, #23BBB7, #000)',
+            url: 'https://linkedin.com/in/mikechen',
         },
         {
-            image: 'https://i.pravatar.cc/300?img=5',
+            image: 'https://i.pravatar.cc/300?img=2',
             title: 'Muhammad Khairan',
-            subtitle: 'Finance Advisor',
-            handle: '@khairanm',
+            subtitle: 'Finance',
+            handle: '@mikechen',
             borderColor: '#23627C',
-            gradient: 'linear-gradient(145deg, #23627C, #000)',
-            url: 'https://linkedin.com/in/muhammadkhairan',
+            gradient: 'linear-gradient(180deg, #23627C, #000)',
+            url: 'https://linkedin.com/in/mikechen',
         },
     ];
 
@@ -140,6 +138,14 @@ export default function Welcome() {
             cta: 'Coba Gratis 14 Hari',
             variant: 'blue',
             popular: true,
+        },
+        {
+            title: 'Pro',
+            price: 'Rp 59.000 / bln',
+            features: ['Semua Fitur Basic', 'Grafik & Simulasi', 'Dukungan Prioritas'],
+            cta: 'Mulai Langganan',
+            variant: 'outline',
+            popular: false,
         },
         {
             title: 'Pro',
@@ -172,14 +178,6 @@ export default function Welcome() {
 
     return (
         <div className="min-h-screen bg-white text-gray-800">
-            {/* Skip Link untuk Accessibility */}
-            <a
-                href="#main-content"
-                className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-[#23627C] text-white px-4 py-2 rounded-md z-50"
-            >
-                Lewati ke konten utama
-            </a>
-
             <Navbar auth={auth} className="sticky top-0 z-50">
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild className="hover:bg-[#23627C]">
@@ -233,49 +231,35 @@ export default function Welcome() {
                 </NavigationMenuItem>
             </Navbar>
 
-            <main id="main-content">
-                <section className="bg-sky-100" id="home" aria-labelledby="hero-heading">
-                    <div className="container mx-auto flex flex-col gap-5 px-5 md:flex-row md:items-center">
-                        {/* LEFT: Text */}
-                        <div className="fade-down flex-1 text-center md:text-start">
-                            <h1 id="hero-heading" className="letter-wide text-2xl leading-relaxed font-medium md:text-4xl md:font-semibold">
-                                Atur Usaha Lebih Mudah dengan EMKM{' '}
-                                <span className="sr-only">dengan berbagai keunggulan seperti</span>
-                                <RotatingText
-                                    texts={['Murah', 'Mudah & Cepat', 'Tanpa Ribet', 'Akses Dimana Saja']}
-                                    mainClassName="text-white inline-flex align-baseline bg-[#23627C] px-4 rounded-lg"
-                                    staggerFrom="last"
-                                    initial={{ y: '100%' }}
-                                    animate={{ y: 0 }}
-                                    exit={{ y: '-120%' }}
-                                    staggerDuration={0.025}
-                                    splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-                                    transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-                                    rotationInterval={2000}
-                                />
-                            </h1>
+            <section className="bg-sky-100" id="home">
+                <div className="container mx-auto flex flex-col gap-5 px-5 md:flex-row md:items-center">
+                    {/* LEFT: Text */}
+                    <div className="fade-down flex-1 text-center md:text-start">
+                        <h1 className="letter-wide text-2xl leading-relaxed font-medium md:text-4xl md:font-semibold">
+                            Atur Usaha Lebih Mudah dengan EMKM{' '}
+                            <RotatingText
+                                texts={['Murah', 'Mudah & Cepat', 'Tanpa Ribet', 'Akses Dimana Saja']}
+                                mainClassName="text-white inline-flex align-baseline bg-[#23627C] px-4 rounded-lg"
+                                staggerFrom="last"
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                exit={{ y: '-120%' }}
+                                staggerDuration={0.025}
+                                splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+                                transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+                                rotationInterval={2000}
+                            />
+                        </h1>
 
                         <p className="text-1xl mt-6 text-gray-500 md:text-xl">
                             Kelola penjualan, laporan, dan data bisnismu dalam satu platform praktis. Bantu UMKM lebih teratur dan berkembang.
                         </p>
 
-                        <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3 md:justify-start">
-                            <button
-                                className="w-full sm:w-auto cursor-pointer rounded-lg bg-[#23627C] px-8 py-4 font-medium text-white transition hover:bg-[#1b4d61] focus:outline-none focus:ring-2 focus:ring-[#23627C] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed text-base min-h-[48px]"
-                                onClick={() => {
-                                    setIsLoading(true);
-                                    window.location.href = route('register');
-                                }}
-                                disabled={isLoading}
-                                aria-label="Mulai uji coba gratis EMKM"
-                            >
-                                {isLoading ? 'Memuat...' : 'Coba Gratis'}
+                        <div className="mt-6 flex justify-center gap-3 md:justify-start">
+                            <button className="cursor-pointer rounded-lg bg-[#23627C] px-6 py-3 font-medium text-white transition hover:bg-[#1b4d61]">
+                                Coba Gratis
                             </button>
-                            <button
-                                className="w-full sm:w-auto cursor-pointer rounded-lg border border-gray-300 px-8 py-4 font-medium text-gray-700 transition hover:bg-[#23627C] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#23627C] focus:ring-offset-2 text-base min-h-[48px]"
-                                onClick={() => document.getElementById('fitur')?.scrollIntoView({ behavior: 'smooth' })}
-                                aria-label="Pelajari lebih lanjut tentang fitur EMKM"
-                            >
+                            <button className="cursor-pointer rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-[#1b4d61] hover:text-white">
                                 Pelajari Lebih Lanjut
                             </button>
                         </div>
@@ -290,44 +274,38 @@ export default function Welcome() {
                                 transform="translate(100 100)"
                             />
                         </svg>
-                        <img
-                            src={person1}
-                            alt="Ilustrasi pengusaha UMKM yang sedang mengelola bisnis dengan aplikasi EMKM"
-                            className="relative z-10 mx-auto h-auto w-2/3 max-w-sm md:w-full"
-                            loading="lazy"
-                            decoding="async"
-                        />
+                        <img src={person1} alt="" className="relative z-10 mx-auto h-auto w-2/3 max-w-sm md:w-full" />
                     </div>
                 </div>
             </section>
 
-            <section className="py-16 md:py-24" id="tentang-kami" aria-labelledby="about-heading">
+            <section className="py-20" id="tentang-kami">
                 <div className="container mx-auto px-5">
-                    <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                         {/* Bagian Card */}
-                        <div className="fade-down order-2 grid grid-cols-2 grid-rows-2 gap-4 md:order-1 md:gap-6">
-                            <Card className="border border-[#23627C] bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-                                <CardContent className="p-6 text-center">
-                                    <h3 className="text-2xl md:text-3xl font-bold text-[#23BBB7] mb-2">100+</h3>
-                                    <p className="text-sm md:text-base text-gray-600 font-medium">Kursus UMKM Digital</p>
+                        <div className="fade-down order-2 grid grid-cols-2 grid-rows-2 gap-5 md:order-1">
+                            <Card className="border border-[#23627C] bg-white">
+                                <CardContent>
+                                    <h3 className="text-3xl font-bold text-[#23BBB7]">100+</h3>
+                                    <p className="text-gray-500">Kursus UMKM Digital</p>
                                 </CardContent>
                             </Card>
-                            <Card className="border border-[#23627C] bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-                                <CardContent className="p-6 text-center">
-                                    <h3 className="text-2xl md:text-3xl font-bold text-[#23BBB7] mb-2">100+</h3>
-                                    <p className="text-sm md:text-base text-gray-600 font-medium">UMKM Bergabung</p>
+                            <Card className="border border-[#23627C] bg-white">
+                                <CardContent>
+                                    <h3 className="text-3xl font-bold text-[#23BBB7]">100+</h3>
+                                    <p className="text-gray-500">UMKM Bergabung</p>
                                 </CardContent>
                             </Card>
-                            <Card className="border border-[#23627C] bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-                                <CardContent className="p-6 text-center">
-                                    <h3 className="text-2xl md:text-3xl font-bold text-[#23BBB7] mb-2">Sertifikat</h3>
-                                    <p className="text-sm md:text-base text-gray-600 font-medium">Edukasi Bersertifikat</p>
+                            <Card className="border border-[#23627C] bg-white">
+                                <CardContent>
+                                    <h3 className="text-3xl font-bold text-[#23BBB7]">Sertifikat</h3>
+                                    <p className="text-gray-500">Edukasi Bersertifikat</p>
                                 </CardContent>
                             </Card>
-                            <Card className="border border-[#23627C] bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-                                <CardContent className="p-6 text-center">
-                                    <h3 className="text-2xl md:text-3xl font-bold text-[#23BBB7] mb-2">Komunitas</h3>
-                                    <p className="text-sm md:text-base text-gray-600 font-medium">Pendamping UMKM</p>
+                            <Card className="border border-[#23627C] bg-white">
+                                <CardContent>
+                                    <h3 className="text-3xl font-bold text-[#23BBB7]">Komunitas</h3>
+                                    <p className="text-gray-500">Pendamping UMKM</p>
                                 </CardContent>
                             </Card>
                         </div>
@@ -335,11 +313,11 @@ export default function Welcome() {
                         {/* Bagian About Us */}
                         <div className="fade-down order-1 md:order-2">
                             <div>
-                                <p className="mb-4 text-sm font-semibold tracking-widest text-[#23627C] uppercase" id="about-heading">Tentang Kami</p>
-                                <h2 className="text-2xl md:text-3xl lg:text-4xl leading-tight font-bold tracking-wide text-gray-900 mb-6">
+                                <p className="mb-2 text-sm tracking-widest text-[#23627C] uppercase">Tentang Kami</p>
+                                <h2 className="text-3xl leading-normal font-semibold tracking-wide md:text-4xl">
                                     Wujudkan usaha mu dengan <span className="text-[#23627C]">EMKM</span>
                                 </h2>
-                                <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                                <p className="mt-5 text-gray-500">
                                     EMKM adalah platform digital yang dirancang khusus untuk membantu pelaku Usaha Mikro, Kecil, dan Menengah dalam
                                     mengembangkan usahanya. Kami percaya bahwa setiap usaha, sekecil apapun, berhak mendapatkan kesempatan untuk
                                     tumbuh dan dikenal lebih luas.
@@ -357,15 +335,15 @@ export default function Welcome() {
                         <h2 className="text-3xl leading-normal font-semibold tracking-wide md:text-4xl">Fitur yang dapat membantu kamu</h2>
                     </div>
 
-                    <div className="fade-down mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="fade-down mt-12 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
                         {primaryFeatures.map((item, idx) => (
-                            <div key={idx} className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                                <div className="flex-shrink-0 rounded-lg p-3 min-w-[48px] min-h-[48px] flex items-center justify-center" style={{ backgroundColor: primaryColor, color: 'white' }}>
+                            <div key={idx} className="flex items-start gap-4">
+                                <div className="flex-shrink-0 rounded-lg p-3" style={{ backgroundColor: primaryColor, color: 'white' }}>
                                     {item.icon}
                                 </div>
-                                <div className="flex-1">
-                                    <h3 className="font-semibold text-[#23627C] text-lg mb-2">{item.title}</h3>
-                                    <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                                <div>
+                                    <h3 className="font-semibold text-[#23627C]">{item.title}</h3>
+                                    <p className="text-sm text-gray-600">{item.desc}</p>
                                 </div>
                             </div>
                         ))}
@@ -373,77 +351,49 @@ export default function Welcome() {
                 </div>
             </section>
 
-            <section className="py-16 md:py-24" id="harga" aria-labelledby="pricing-heading">
+            <section className="py-20" id="harga">
                 <div className="container mx-auto px-5">
-                    <div className="fade-down text-center mb-12">
-                        <p className="mb-4 text-sm font-semibold tracking-widest text-[#23627C] uppercase" id="pricing-heading">Harga Paket</p>
-                        <h2 className="text-2xl md:text-3xl lg:text-4xl leading-tight font-bold tracking-wide text-gray-900 mb-4">
-                            Fitur Lengkap untuk Usaha Lebih Mudah
-                        </h2>
-                        <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-                            Pilih paket yang sesuai dengan kebutuhan bisnis Anda. Semua paket sudah termasuk fitur dasar untuk mengelola keuangan UMKM.
-                        </p>
+                    <div className="fade-down text-center">
+                        <p className="mb-2 text-sm tracking-widest text-[#23627C] uppercase">Harga Paket</p>
+                        <h2 className="text-3xl leading-normal font-semibold tracking-wide md:text-4xl">Fitur Lengkap untuk Usaha Lebih Mudah</h2>
                     </div>
 
-                    <div className="grid-cols-1 mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto justify-items-center">
+                    <div className="gird-cols-1 mt-10 grid gap-5 md:grid-cols-4">
                         {plans.map((plan, idx) => (
                             <Card
                                 key={idx}
-                                className={`relative flex transform-gpu flex-col overflow-hidden rounded-xl bg-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border-0 w-full max-w-sm ${
-                                    plan.popular
-                                        ? 'ring-2 ring-[#23BBB7] shadow-[#23BBB7]/20'
-                                        : 'shadow-gray-200/50 hover:shadow-gray-300/50'
-                                }`}
+                                className={`relative flex transform-gpu flex-col overflow-hidden rounded-xl bg-white shadow transition-all duration-300 hover:scale-105 hover:shadow-2xl ${plan.popular ? 'border-2 border-[#23BBB7]' : 'border border-gray-200'}`}
                             >
                                 {plan.popular && (
-                                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#23BBB7] text-white px-4 py-1 rounded-full text-xs font-semibold shadow-lg z-10">
+                                    <div className="absolute top-0 left-1/2 w-full -translate-x-1/2 bg-[#23BBB7] px-3 py-1 text-center text-sm font-semibold whitespace-nowrap text-white">
                                         Paling Populer
                                     </div>
                                 )}
-                                <CardHeader className={`text-center pb-4 ${plan.popular ? 'pt-8' : 'pt-6'}`}>
-                                    <CardTitle className="text-xl md:text-2xl font-bold text-[#23627C] mb-2">{plan.title}</CardTitle>
-                                    <div className="flex items-baseline justify-center gap-1">
-                                        <span className="text-3xl md:text-4xl font-bold text-[#23627C]">{plan.price.split('/')[0]}</span>
-                                        <span className="text-lg text-gray-500">/{plan.price.split('/')[1]}</span>
-                                    </div>
+                                <CardHeader className={`text-center ${plan.popular ? 'pt-12' : 'pt-6'}`}>
+                                    <CardTitle className="text-xl font-semibold text-[#23627C]">{plan.title}</CardTitle>
+                                    <p className="text-3xl font-bold text-[#23627C]">{plan.price}</p>
                                 </CardHeader>
-                                <CardContent className="flex-grow px-6 pb-4">
-                                    <ul className="space-y-3">
+                                <CardContent className="flex-grow">
+                                    <ul className="space-y-3 text-gray-700">
                                         {plan.features.map((f, i) => (
-                                            <li key={i} className="flex items-start gap-3">
-                                                <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                                                <span className="text-sm md:text-base text-gray-700 leading-relaxed">{f}</span>
+                                            <li key={i} className="flex items-start">
+                                                <Check className="mt-1 h-5 w-5 flex-shrink-0 text-green-500" />
+                                                <span className="ml-3">{f}</span>
                                             </li>
                                         ))}
                                     </ul>
                                 </CardContent>
-                                <CardFooter className="px-6 pb-6">
+                                <CardFooter>
                                     <Button
-                                        className={`w-full h-12 text-base font-semibold transition-all duration-200 ${
-                                            plan.variant === 'blue'
-                                                ? 'bg-[#23627C] hover:bg-[#1b4d61] text-white shadow-lg hover:shadow-xl'
-                                                : 'bg-transparent border-2 border-[#23BBB7] text-[#23BBB7] hover:bg-[#23BBB7] hover:text-white'
-                                        } focus:outline-none focus:ring-2 focus:ring-[#23627C] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        className={`w-full ${plan.variant === 'blue' ? '' : 'bg-transparent'}`}
                                         variant={plan.variant as any}
                                         style={plan.variant === 'outline' ? { borderColor: '#23BBB7', color: '#23BBB7' } : {}}
-                                        onClick={() => window.location.href = route('register')}
-                                        aria-label={`Pilih paket ${plan.title} - ${plan.price}`}
                                     >
                                         {plan.cta}
                                     </Button>
                                 </CardFooter>
                             </Card>
                         ))}
-                    </div>
-
-                    {/* Additional Info */}
-                    <div className="text-center mt-12">
-                        <p className="text-sm text-gray-500 mb-4">
-                            Semua paket dapat diupgrade kapan saja • Pembayaran bulanan atau tahunan • Uji coba gratis 14 hari
-                        </p>
-                        <p className="text-sm text-gray-600">
-                            Butuh paket custom? <a href="#" className="text-[#23627C] hover:text-[#23BBB7] font-medium">Hubungi tim kami</a>
-                        </p>
                     </div>
                 </div>
             </section>
@@ -484,9 +434,7 @@ export default function Welcome() {
                         <h2 className="text-3xl leading-normal font-semibold tracking-wide md:text-4xl">Bersama, Kami Mewujudkan Impian UMKM</h2>
                     </div>
 
-                    <Suspense fallback={<div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#23627C]"></div></div>}>
-                        <ChromaGrid items={items} radius={300} damping={0.45} fadeOut={0.6} ease="power3.out" />
-                    </Suspense>
+                    <ChromaGrid items={items} radius={300} damping={0.45} fadeOut={0.6} ease="power3.out" />
                 </div>
             </section>
 
@@ -504,16 +452,10 @@ export default function Welcome() {
                         </div>
 
                         <div className="flex justify-center gap-3">
-                            <button 
-                                className="cursor-pointer rounded-lg bg-[#23BBB7] px-6 py-3 font-medium text-white transition hover:bg-[#1b4d61]"
-                                onClick={() => window.location.href = route('register')}
-                            >
+                            <button className="cursor-pointer rounded-lg bg-[#23BBB7] px-6 py-3 font-medium text-white transition hover:bg-[#1b4d61]">
                                 Coba Gratis
                             </button>
-                            <button 
-                                className="cursor-pointer rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-100 transition hover:bg-[#23BBB7] hover:text-white"
-                                onClick={() => window.location.href = route('register')}
-                            >
+                            <button className="cursor-pointer rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-100 transition hover:bg-[#1b4d61] hover:text-white">
                                 Daftar sekarang
                             </button>
                         </div>
@@ -661,7 +603,6 @@ export default function Welcome() {
                     </div>
                 </div>
             </footer>
-            </main>
         </div>
     );
 }
