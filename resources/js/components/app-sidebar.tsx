@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Book, BookOpen, Calculator, Folder, LayoutGrid, NotebookText, Package } from 'lucide-react';
+import { Book, BookOpen, Calculator, Folder, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
 
 const mainNavItems: MainNavItem[] = [
     {
@@ -73,6 +73,12 @@ const mainNavItems: MainNavItem[] = [
         icon: Book,
         can: (user) => user?.role === 'admin',
         subItems: [{ title: 'Article', href: '/dashboard/admin/articles' }],
+    },
+    {
+        title: 'Kelola Pengguna',
+        icon: Users,
+        can: (user) => user?.role === 'admin',
+        href: '/dashboard/admin/users',
     },
 ];
 

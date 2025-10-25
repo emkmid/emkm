@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountingReportController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Dashboard\AdminDashboardController;
 use App\Http\Controllers\Dashboard\UserDashboardController;
 use App\Http\Controllers\Education\ArticleController;
@@ -60,6 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
             Route::resource('articles', ArticleController::class);
             Route::post('uploads/article-media', [ArticleController::class, 'upload'])->name('articles.upload')->middleware('throttle:20,1');
+            Route::resource('users', AdminUserController::class)->except(['show']);
         });
     });
 });
