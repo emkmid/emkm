@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountingReportController;
+use App\Http\Controllers\AdminPackageController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Dashboard\AdminDashboardController;
 use App\Http\Controllers\Dashboard\UserDashboardController;
@@ -62,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('articles', ArticleController::class);
             Route::post('uploads/article-media', [ArticleController::class, 'upload'])->name('articles.upload')->middleware('throttle:20,1');
             Route::resource('users', AdminUserController::class)->except(['show']);
+            Route::resource('packages', AdminPackageController::class)->except(['show']);
         });
     });
 });

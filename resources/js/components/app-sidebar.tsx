@@ -80,6 +80,12 @@ const mainNavItems: MainNavItem[] = [
         can: (user) => user?.role === 'admin',
         href: '/dashboard/admin/users',
     },
+    {
+        title: 'Kelola Paket Layanan',
+        icon: Package,
+        can: (user) => user?.role === 'admin',
+        href: '/dashboard/admin/packages',
+    },
 ];
 
 const footerNavItems: NavItem[] = [
