@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Book, BookOpen, Calculator, Folder, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
+import { Bell, Book, BookOpen, Calculator, Folder, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
 
 const mainNavItems: MainNavItem[] = [
     {
@@ -85,6 +85,12 @@ const mainNavItems: MainNavItem[] = [
         icon: Package,
         can: (user) => user?.role === 'admin',
         href: '/dashboard/admin/packages',
+    },
+    {
+        title: 'Kelola Notifikasi',
+        icon: Bell,
+        can: (user) => user?.role === 'admin',
+        href: '/dashboard/admin/notifications',
     },
 ];
 

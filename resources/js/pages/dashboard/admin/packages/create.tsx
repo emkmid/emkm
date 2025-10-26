@@ -41,7 +41,10 @@ export default function CreatePackage() {
         if (checked) {
             setData('features', [...data.features, feature]);
         } else {
-            setData('features', data.features.filter((f: string) => f !== feature));
+            setData(
+                'features',
+                data.features.filter((f: string) => f !== feature),
+            );
         }
     };
 
