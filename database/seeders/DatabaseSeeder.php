@@ -32,5 +32,11 @@ class DatabaseSeeder extends Seeder
             IncomeCategorySeeder::class,
             ProductCategorySeeder::class,
         ]);
+
+        // Packages and a test subscription
+        $this->call([
+            \Database\Seeders\PackageSeeder::class,
+            \Database\Seeders\SubscriptionSeeder::class,
+        ]);
     }
 }

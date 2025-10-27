@@ -17,6 +17,15 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+
+        /**
+         * Attributes to append when serializing the model (so Inertia receives current subscription).
+         *
+         * @var array<int, string>
+         */
+        protected $appends = [
+            'current_subscription',
+        ];
     protected $fillable = [
         'name',
         'email',
@@ -94,5 +103,30 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Article::class, 'article_likes')
                     ->withTimestamps();
+    }
+
+    /**
+     * User subscriptions (history). A user can have many subscriptions over time.
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Current active subscription relationship (returns latest active/trial subscription if any).
+     */
+    public function currentSubscription()
+    {
+        return $this->hasOne(Subscription::class)->whereIn('status', ['active', 'trial'])->latest('starts_at');
+    }
+
+    /**
+     * Accessor used by Inertia share to include the current subscription with package relation.
+     */
+    public function getCurrentSubscriptionAttribute()
+    {
+        // eager load package on the subscription for frontend convenience
+        return $this->subscriptions()->whereIn('status', ['active', 'trial'])->latest('starts_at')->with('package')->first();
     }
 }

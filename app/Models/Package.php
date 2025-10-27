@@ -10,6 +10,8 @@ class Package extends Model
         'name',
         'description',
         'price',
+        'stripe_product_id',
+        'stripe_price_id',
         'features',
         'is_active',
     ];
@@ -18,5 +20,7 @@ class Package extends Model
         'features' => 'array',
         'is_active' => 'boolean',
         'price' => 'decimal:2',
+        'stripe_product_id' => 'string',
+        'stripe_price_id' => 'string',
     ];
 }

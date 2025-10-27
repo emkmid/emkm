@@ -11,6 +11,15 @@ interface User {
     email: string;
     role: 'admin' | 'user';
     created_at: string;
+    current_subscription?: {
+        package?: {
+            id?: number;
+            name?: string;
+            price?: number;
+        };
+        ends_at?: string | null;
+        status?: string;
+    } | null;
 }
 
 interface Props {
@@ -22,10 +31,16 @@ interface Props {
         total: number;
         links?: any[];
     };
+    packages: {
+        id: number;
+        name: string;
+        price: number;
+    }[];
 }
 
 export default function Index({ users }: Props) {
     const { flash } = usePage().props as any;
+    const packages = (usePage().props as any).packages as Props['packages'];
 
     return (
         <AppLayout>
@@ -55,6 +70,7 @@ export default function Index({ users }: Props) {
                                     <TableHead>Nama</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead>Role</TableHead>
+                                    <TableHead>Paket</TableHead>
                                     <TableHead>Dibuat</TableHead>
                                     <TableHead>Aksi</TableHead>
                                 </TableRow>
@@ -73,6 +89,15 @@ export default function Index({ users }: Props) {
                                                 {user.role === 'admin' ? 'Admin' : 'User'}
                                             </span>
                                         </TableCell>
+                                        <TableCell>
+                                            {user.current_subscription?.package?.name ?? <span className="text-xs text-muted-foreground">Free</span>}
+                                            {user.current_subscription?.ends_at && (
+                                                <div className="mt-1 text-xs text-muted-foreground">
+                                                    Sampai: {new Date(user.current_subscription.ends_at).toLocaleDateString('id-ID')}
+                                                </div>
+                                            )}
+                                        </TableCell>
+
                                         <TableCell>{new Date(user.created_at).toLocaleDateString('id-ID')}</TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
@@ -81,6 +106,34 @@ export default function Index({ users }: Props) {
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
                                                 </Link>
+                                                <form
+                                                    method="POST"
+                                                    action={route('admin.users.subscribe', user.id)}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <input
+                                                        type="hidden"
+                                                        name="_token"
+                                                        value={document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''}
+                                                    />
+                                                    <select name="package_id" className="rounded border px-2 py-1 text-sm">
+                                                        {packages.map((p) => (
+                                                            <option key={p.id} value={p.id}>
+                                                                {p.name} - ${p.price}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <Button
+                                                        type="submit"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={(e) => {
+                                                            if (!confirm('Assign selected package to user?')) e.preventDefault();
+                                                        }}
+                                                    >
+                                                        Assign
+                                                    </Button>
+                                                </form>
                                                 <form
                                                     method="POST"
                                                     action={route('users.destroy', user.id)}
@@ -94,7 +147,7 @@ export default function Index({ users }: Props) {
                                                     <input
                                                         type="hidden"
                                                         name="_token"
-                                                        value={document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')}
+                                                        value={document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''}
                                                     />
                                                     <Button type="submit" variant="outline" size="sm" className="text-red-600 hover:text-red-800">
                                                         <Trash2 className="h-4 w-4" />

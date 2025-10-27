@@ -3,12 +3,12 @@ import { NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, Navigati
 import RotatingText from '@/textAnimations/RotatingText/RotatingText';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart3, BookOpen, Calculator, Check, DollarSign, FolderKanban, LineChart, NotebookPen, UserPlus, Users, Wallet } from 'lucide-react';
+import { BarChart3, BookOpen, Calculator, DollarSign, FolderKanban, LineChart, NotebookPen, UserPlus, Users, Wallet } from 'lucide-react';
 
 import person1 from '@/../images/person1.png';
 import ChromaGrid from '@/components/ChromaGrid/ChromaGrid';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import PackagesList from '@/components/PackagesList';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -358,42 +358,8 @@ export default function Welcome() {
                         <h2 className="text-3xl leading-normal font-semibold tracking-wide md:text-4xl">Fitur Lengkap untuk Usaha Lebih Mudah</h2>
                     </div>
 
-                    <div className="gird-cols-1 mt-10 grid gap-5 md:grid-cols-4">
-                        {plans.map((plan, idx) => (
-                            <Card
-                                key={idx}
-                                className={`relative flex transform-gpu flex-col overflow-hidden rounded-xl bg-white shadow transition-all duration-300 hover:scale-105 hover:shadow-2xl ${plan.popular ? 'border-2 border-[#23BBB7]' : 'border border-gray-200'}`}
-                            >
-                                {plan.popular && (
-                                    <div className="absolute top-0 left-1/2 w-full -translate-x-1/2 bg-[#23BBB7] px-3 py-1 text-center text-sm font-semibold whitespace-nowrap text-white">
-                                        Paling Populer
-                                    </div>
-                                )}
-                                <CardHeader className={`text-center ${plan.popular ? 'pt-12' : 'pt-6'}`}>
-                                    <CardTitle className="text-xl font-semibold text-[#23627C]">{plan.title}</CardTitle>
-                                    <p className="text-3xl font-bold text-[#23627C]">{plan.price}</p>
-                                </CardHeader>
-                                <CardContent className="flex-grow">
-                                    <ul className="space-y-3 text-gray-700">
-                                        {plan.features.map((f, i) => (
-                                            <li key={i} className="flex items-start">
-                                                <Check className="mt-1 h-5 w-5 flex-shrink-0 text-green-500" />
-                                                <span className="ml-3">{f}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button
-                                        className={`w-full ${plan.variant === 'blue' ? '' : 'bg-transparent'}`}
-                                        variant={plan.variant as any}
-                                        style={plan.variant === 'outline' ? { borderColor: '#23BBB7', color: '#23BBB7' } : {}}
-                                    >
-                                        {plan.cta}
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
+                    <div className="gird-cols-1 mt-10 grid gap-5 md:grid-cols-3">
+                        <PackagesList />
                     </div>
                 </div>
             </section>

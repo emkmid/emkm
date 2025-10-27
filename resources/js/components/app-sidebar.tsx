@@ -2,9 +2,9 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type MainNavItem, NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { Bell, Book, BookOpen, Calculator, Folder, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
+import { type MainNavItem, NavItem, SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+import { Bell, Book, BookOpen, Calculator, CreditCard, Folder, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
 
 const mainNavItems: MainNavItem[] = [
     {
@@ -69,6 +69,12 @@ const mainNavItems: MainNavItem[] = [
         href: '/dashboard/hpp',
     },
     {
+        title: 'Paket',
+        icon: Package,
+        can: (user) => user?.role === 'user',
+        href: '/dashboard/packages',
+    },
+    {
         title: 'Edukasi',
         icon: Book,
         can: (user) => user?.role === 'admin',
@@ -92,6 +98,12 @@ const mainNavItems: MainNavItem[] = [
         can: (user) => user?.role === 'admin',
         href: '/dashboard/admin/notifications',
     },
+    {
+        title: 'Payments',
+        icon: CreditCard,
+        can: (user) => user?.role === 'admin',
+        href: '/dashboard/admin/payments',
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -108,6 +120,9 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage<SharedData>().props;
+    // current_subscription comes from backend (appended attribute). Cast to any for flexible access in TSX.
+    const planName = ((auth?.user as any)?.current_subscription?.package?.name as string) ?? 'Free';
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -127,7 +142,11 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <div className="px-4 pt-2">
+                    <div className="text-xs text-muted-foreground">Plan</div>
+                    <div className="mt-1 inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-medium">{planName}</div>
+                </div>
+                <NavFooter items={footerNavItems} className="mt-2" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

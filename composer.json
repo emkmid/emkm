@@ -15,6 +15,8 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "mews/purifier": "^3.4",
+        "midtrans/midtrans-php": "^2.6",
+        "stripe/stripe-php": "^18.0",
         "tightenco/ziggy": "^2.4",
         "vinkla/hashids": "^13.0"
     },

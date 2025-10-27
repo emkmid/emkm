@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
+use App\Models\Package;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
@@ -12,10 +13,14 @@ class AdminUserController extends Controller
 {
     public function index()
     {
-        $users = User::paginate(10);
+    // Eager-load current subscription with its package for display in admin UI
+    $users = User::with(['currentSubscription.package'])->paginate(10);
+
+        $packages = Package::where('is_active', true)->get();
 
         return Inertia::render('dashboard/admin/users/index', [
             'users' => $users,
+            'packages' => $packages,
         ]);
     }
 

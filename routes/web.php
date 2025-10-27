@@ -10,6 +10,8 @@ use App\Http\Controllers\Education\ArticleController;
 use App\Http\Controllers\Education\EducationController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\AdminSubscriptionController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Report\JournalController;
 use App\Http\Controllers\Transaction\Category\ExpenseCategoryController;
 use App\Http\Controllers\Transaction\Category\IncomeCategoryController;
@@ -36,8 +38,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('user', [UserDashboardController::class, 'index'])->name('user.dashboard');
 
-        Route::get('hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index');
-        Route::get('hpp/hasil', fn () => Inertia::render('dashboard/user/hpp/result'))->name('hpp.hasil');
+    // Packages page for users
+    Route::get('packages', [\App\Http\Controllers\SubscriptionController::class, 'page'])->name('dashboard.packages');
+
+    Route::get('hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index')->middleware('subscribed');
+    Route::get('hpp/hasil', fn () => Inertia::render('dashboard/user/hpp/result'))->name('hpp.hasil')->middleware('subscribed');
 
         Route::resource('expenses', ExpenseController::class);
         Route::resource('incomes', IncomeController::class);
@@ -64,7 +69,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('articles', ArticleController::class);
             Route::post('uploads/article-media', [ArticleController::class, 'upload'])->name('articles.upload')->middleware('throttle:20,1');
             Route::resource('users', AdminUserController::class)->except(['show']);
+            Route::post('users/{user}/subscribe', [AdminSubscriptionController::class, 'store'])->name('admin.users.subscribe');
             Route::resource('packages', AdminPackageController::class)->except(['show']);
+            Route::get('payments', [\App\Http\Controllers\AdminPaymentController::class, 'index'])->name('admin.payments.index');
+            Route::get('payments/list', [\App\Http\Controllers\AdminPaymentController::class, 'list'])->name('admin.payments.list');
+            Route::get('payments/{id}', [\App\Http\Controllers\AdminPaymentController::class, 'showNotification'])->name('admin.payments.show');
+            Route::post('payments/{id}/replay', [\App\Http\Controllers\AdminPaymentController::class, 'replay'])->name('admin.payments.replay');
+            Route::get('payments/export', [\App\Http\Controllers\AdminPaymentController::class, 'exportNotifications'])->name('admin.payments.export');
+            Route::get('subscriptions/list', [\App\Http\Controllers\AdminPaymentController::class, 'subscriptionsList'])->name('admin.subscriptions.list');
             Route::resource('notifications', AdminNotificationController::class)->except(['show']);
         });
     });
@@ -81,3 +93,9 @@ Route::prefix('education')->group(function() {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
+// Subscription / billing public endpoints
+Route::get('packages', [SubscriptionController::class, 'index'])->name('packages.index');
+Route::post('subscriptions/checkout', [SubscriptionController::class, 'createCheckout'])->middleware('auth')->name('subscriptions.checkout');
+Route::post('webhooks/stripe', [SubscriptionController::class, 'webhook'])->name('webhooks.stripe');
+Route::post('webhooks/midtrans', [SubscriptionController::class, 'midtransWebhook'])->name('webhooks.midtrans');
