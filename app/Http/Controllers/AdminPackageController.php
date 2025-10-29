@@ -34,7 +34,7 @@ class AdminPackageController extends Controller
             'is_active' => $request->is_active ?? true,
         ]);
 
-        return redirect()->route('packages.index')->with('success', 'Package created successfully.');
+        return redirect()->route('admin.packages.index')->with('success', 'Package created successfully.');
     }
 
     public function edit(Package $package)
@@ -54,13 +54,13 @@ class AdminPackageController extends Controller
             'is_active' => $request->is_active,
         ]);
 
-        return redirect()->route('packages.index')->with('success', 'Package updated successfully.');
+        return redirect()->route('admin.packages.index')->with('success', 'Package updated successfully.');
     }
 
     public function destroy(Package $package)
     {
         $package->delete();
 
-        return redirect()->route('packages.index')->with('success', 'Package deleted successfully.');
+        return redirect()->route('admin.packages.index')->with('success', 'Package deleted successfully.');
     }
 }

@@ -28,7 +28,7 @@ interface EditPackagePageProps {
 const breadcrumbItems: BreadcrumbItemType[] = [
     {
         title: 'Kelola Paket Layanan',
-        href: route('packages.index'),
+        href: route('admin.packages.index'),
     },
     {
         title: 'Edit Paket',
@@ -47,7 +47,7 @@ export default function EditPackage({ pkg }: EditPackagePageProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('packages.update', pkg.id));
+        put(route('admin.packages.update', pkg.id));
     };
 
     const handleFeatureChange = (feature: string, checked: boolean) => {
@@ -140,7 +140,7 @@ export default function EditPackage({ pkg }: EditPackagePageProps) {
 
                             {/* Tombol Submit */}
                             <div className="flex justify-end gap-2">
-                                <Link href={route('packages.index')}>
+                                <Link href={route('admin.packages.index')}>
                                     <Button type="button" variant="outline">
                                         Batal
                                     </Button>

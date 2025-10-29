@@ -15,7 +15,7 @@ import React from 'react';
 const breadcrumbItems: BreadcrumbItemType[] = [
     {
         title: 'Kelola Paket Layanan',
-        href: route('packages.index'),
+        href: route('admin.packages.index'),
     },
     {
         title: 'Tambah Paket',
@@ -34,7 +34,7 @@ export default function CreatePackage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('packages.store'));
+        post(route('admin.packages.store'));
     };
 
     const handleFeatureChange = (feature: string, checked: boolean) => {
@@ -127,7 +127,7 @@ export default function CreatePackage() {
 
                             {/* Tombol Submit */}
                             <div className="flex justify-end gap-2">
-                                <Link href={route('packages.index')}>
+                                <Link href={route('admin.packages.index')}>
                                     <Button type="button" variant="outline">
                                         Batal
                                     </Button>

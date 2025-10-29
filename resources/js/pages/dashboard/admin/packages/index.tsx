@@ -35,7 +35,7 @@ export default function Index({ packages }: Props) {
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Kelola Paket Layanan</h1>
-                    <Link href={route('packages.create')}>
+                    <Link href={route('admin.packages.create')}>
                         <Button>
                             <Plus className="mr-2 h-4 w-4" />
                             Tambah Paket
@@ -77,14 +77,14 @@ export default function Index({ packages }: Props) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
-                                                <Link href={route('packages.edit', pkg.id)}>
+                                                <Link href={route('admin.packages.edit', pkg.id)}>
                                                     <Button variant="outline" size="sm">
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
                                                 </Link>
                                                 <form
                                                     method="POST"
-                                                    action={route('packages.destroy', pkg.id)}
+                                                    action={route('admin.packages.destroy', pkg.id)}
                                                     onSubmit={(e) => {
                                                         if (!confirm('Apakah Anda yakin ingin menghapus paket ini?')) {
                                                             e.preventDefault();
