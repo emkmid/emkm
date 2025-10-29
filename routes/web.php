@@ -70,7 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('uploads/article-media', [ArticleController::class, 'upload'])->name('articles.upload')->middleware('throttle:20,1');
             Route::resource('users', AdminUserController::class)->except(['show']);
             Route::post('users/{user}/subscribe', [AdminSubscriptionController::class, 'store'])->name('admin.users.subscribe');
-            Route::resource('packages', AdminPackageController::class)->except(['show']);
+            Route::resource('packages', AdminPackageController::class)->except(['show'])->names('admin.packages');
             Route::get('payments', [\App\Http\Controllers\AdminPaymentController::class, 'index'])->name('admin.payments.index');
             Route::get('payments/list', [\App\Http\Controllers\AdminPaymentController::class, 'list'])->name('admin.payments.list');
             Route::get('payments/{id}', [\App\Http\Controllers\AdminPaymentController::class, 'showNotification'])->name('admin.payments.show');
