@@ -91,10 +91,21 @@ Route::prefix('education')->group(function() {
     Route::get('articles/{article}/like/status', [EducationController::class, 'likeStatus'])->name('article.likeStatus');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
-
-// Subscription / billing public endpoints
+// Test route for Midtrans configuration
+Route::get('/test-midtrans', function () {
+    return response()->json([
+        'server_key_configured' => !empty(env('MIDTRANS_SERVER_KEY')),
+        'client_key_configured' => !empty(env('MIDTRANS_CLIENT_KEY')),
+        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
+        'merchant_id' => 'G150957554', // From user input
+        'config' => config('midtrans'),
+        'env_test' => [
+            'server_key' => env('MIDTRANS_SERVER_KEY'),
+            'client_key' => env('MIDTRANS_CLIENT_KEY'),
+            'is_production' => env('MIDTRANS_IS_PRODUCTION'),
+        ],
+    ]);
+});
 Route::get('packages', [SubscriptionController::class, 'index'])->name('packages.index');
 Route::post('subscriptions/checkout', [SubscriptionController::class, 'createCheckout'])->middleware('auth')->name('subscriptions.checkout');
 Route::post('webhooks/stripe', [SubscriptionController::class, 'webhook'])->name('webhooks.stripe');
