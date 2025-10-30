@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, Book, BookOpen, Calculator, CreditCard, Folder, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
+import { Bell, Book, BookOpen, Calculator, CreditCard, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
 
 const mainNavItems: MainNavItem[] = [
     {
@@ -104,19 +104,25 @@ const mainNavItems: MainNavItem[] = [
         can: (user) => user?.role === 'admin',
         href: '/dashboard/admin/payments',
     },
+    {
+        title: 'Kategori',
+        icon: BookOpen,
+        can: (user) => user?.role === 'admin',
+        subItems: [{ title: 'Kategori', href: '/dashboard/reports/journal' }],
+    },
 ];
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
+    // {
+    //     title: 'Repository',
+    //     href: 'https://github.com/laravel/react-starter-kit',
+    //     icon: Folder,
+    // },
+    // {
+    //     title: 'Documentation',
+    //     href: 'https://laravel.com/docs/starter-kits#react',
+    //     icon: BookOpen,
+    // },
 ];
 
 export function AppSidebar() {

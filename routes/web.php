@@ -38,11 +38,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('user', [UserDashboardController::class, 'index'])->name('user.dashboard');
 
-    // Packages page for users
-    Route::get('packages', [\App\Http\Controllers\SubscriptionController::class, 'page'])->name('dashboard.packages');
+        // Packages page for users
+        Route::get('packages', [\App\Http\Controllers\SubscriptionController::class, 'page'])->name('dashboard.packages');
 
-    Route::get('hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index')->middleware('subscribed');
-    Route::get('hpp/hasil', fn () => Inertia::render('dashboard/user/hpp/result'))->name('hpp.hasil')->middleware('subscribed');
+        Route::get('hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index')->middleware('subscribed');
+        Route::get('hpp/hasil', fn () => Inertia::render('dashboard/user/hpp/result'))->name('hpp.hasil')->middleware('subscribed');
 
         Route::resource('expenses', ExpenseController::class);
         Route::resource('incomes', IncomeController::class);
