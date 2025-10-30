@@ -7,6 +7,7 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class SubscriptionController extends Controller
 {
@@ -56,8 +57,10 @@ class SubscriptionController extends Controller
                         'gross_amount' => $grossAmount,
                     ],
                     'customer_details' => [
-                        'first_name' => $user->name ?? $user->email,
+                        'first_name' => $user->name ?? explode('@', $user->email)[0],
+                        'last_name' => '',
                         'email' => $user->email,
+                        'phone' => '081234567890', // Default phone, bisa diupdate nanti
                     ],
                     'item_details' => [[
                         'id' => (string) $package->id,
@@ -65,6 +68,23 @@ class SubscriptionController extends Controller
                         'quantity' => 1,
                         'name' => $package->name,
                     ]],
+                    'enabled_payments' => [
+                        'dana', // Prioritize DANA
+                        'gopay',
+                        'ovo',
+                        'shopeepay',
+                        'linkaja',
+                        'credit_card',
+                        'permata_va',
+                        'bca_va',
+                        'bni_va',
+                        'bri_va'
+                    ],
+                    'expiry' => [
+                        'start_time' => date('Y-m-d H:i:s O'), // UTC timezone
+                        'unit' => 'minutes',
+                        'duration' => 60, // 1 hour expiry
+                    ],
                 ];
 
                 $snap = new \Midtrans\Snap();

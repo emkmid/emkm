@@ -7,8 +7,8 @@ import { BarChart3, BookOpen, Calculator, DollarSign, FolderKanban, LineChart, N
 
 import person1 from '@/../images/person1.png';
 import ChromaGrid from '@/components/ChromaGrid/ChromaGrid';
-import PackagesList from '@/components/PackagesList';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -138,14 +138,6 @@ export default function Welcome() {
             cta: 'Coba Gratis 14 Hari',
             variant: 'blue',
             popular: true,
-        },
-        {
-            title: 'Pro',
-            price: 'Rp 59.000 / bln',
-            features: ['Semua Fitur Basic', 'Grafik & Simulasi', 'Dukungan Prioritas'],
-            cta: 'Mulai Langganan',
-            variant: 'outline',
-            popular: false,
         },
         {
             title: 'Pro',
@@ -358,8 +350,41 @@ export default function Welcome() {
                         <h2 className="text-3xl leading-normal font-semibold tracking-wide md:text-4xl">Fitur Lengkap untuk Usaha Lebih Mudah</h2>
                     </div>
 
-                    <div className="gird-cols-1 mt-10 grid gap-5 md:grid-cols-3">
-                        <PackagesList />
+                    <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
+                        {plans.map((plan, index) => (
+                            <Card key={index} className={`relative ${plan.popular ? 'border-[#23BBB7] shadow-lg' : 'border-gray-200'}`}>
+                                {plan.popular && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#23BBB7] px-4 py-1 text-xs font-semibold text-white">
+                                        Paling Populer
+                                    </div>
+                                )}
+                                <CardHeader className="text-center pb-2">
+                                    <CardTitle className="text-2xl font-bold text-[#23627C]">{plan.title}</CardTitle>
+                                    <div className="text-3xl font-bold text-[#23BBB7]">{plan.price}</div>
+                                    <p className="text-sm text-gray-500">per bulan</p>
+                                </CardHeader>
+                                <CardContent className="pt-4">
+                                    <ul className="space-y-3 mb-6">
+                                        {plan.features.map((feature, idx) => (
+                                            <li key={idx} className="flex items-center text-sm">
+                                                <div className="mr-3 h-1.5 w-1.5 rounded-full bg-[#23BBB7]"></div>
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <Button
+                                        className={`w-full ${
+                                            plan.variant === 'blue'
+                                                ? 'bg-[#23BBB7] hover:bg-[#1a8f85] text-white'
+                                                : 'border-[#23627C] text-[#23627C] hover:bg-[#23627C] hover:text-white'
+                                        }`}
+                                        variant={plan.variant === 'blue' ? 'default' : 'outline'}
+                                    >
+                                        {plan.cta}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 </div>
             </section>
