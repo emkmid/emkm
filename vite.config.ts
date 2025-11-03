@@ -23,4 +23,7 @@ export default defineConfig({
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
         },
     },
+    define: {
+        'import.meta.env.VITE_MIDTRANS_CLIENT_KEY': JSON.stringify(process.env.MIDTRANS_CLIENT_KEY || ''),
+    },
 });

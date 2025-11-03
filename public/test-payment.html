@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flash Data Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Flash Data & Midtrans Test</h1>
+    
+    <div class="debug">
+        <h3>Debug Info:</h3>
+        <div id="debug-info">Loading...</div>
+    </div>
+    
+    <div class="debug">
+        <h3>Flash Data:</h3>
+        <div id="flash-data">Checking...</div>
+    </div>
+    
+    <button onclick="testDirectPayment()">Test Direct Payment</button>
+    <button onclick="testFlashRedirect()">Test Flash Redirect</button>
+    
+    <script>
+        // Check if we have flash data from Laravel
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasFlash = urlParams.get('checkoutData');
+        
+        // Mock flash data for testing (in real app this comes from Laravel session)
+        const mockCheckoutData = {
+            snap_token: '5ca548da-e103-4868-90b2-738225ef31b9',
+            order_id: 'TEST-ORDER-123',
+            client_key: 'Mid-client-8_cTMzNPvLrCRYGw',
+            is_production: false,
+            subscription_id: 999
+        };
+        
+        // Display debug info
+        document.getElementById('debug-info').innerHTML = `
+            <strong>User Agent:</strong> ${navigator.userAgent}<br>
+            <strong>Current URL:</strong> ${window.location.href}<br>
+            <strong>Referrer:</strong> ${document.referrer}<br>
+            <strong>Has URL Params:</strong> ${urlParams.toString()}<br>
+            <strong>Midtrans Available:</strong> ${typeof snap !== 'undefined' ? 'Yes' : 'No'}
+        `;
+        
+        // Check for flash data
+        if (hasFlash) {
+            document.getElementById('flash-data').innerHTML = `
+                <span class="success">✓ Flash data detected from URL params</span><br>
+                <pre>${JSON.stringify(JSON.parse(hasFlash), null, 2)}</pre>
+            `;
+        } else {
+            document.getElementById('flash-data').innerHTML = `
+                <span class="error">✗ No flash data found</span><br>
+                <em>Will use mock data for testing</em><br>
+                <pre>${JSON.stringify(mockCheckoutData, null, 2)}</pre>
+            `;
+        }
+        
+        function testDirectPayment() {
+            console.log('Testing direct payment...');
+            
+            if (typeof snap === 'undefined') {
+                alert('Loading Midtrans Snap script...');
+                loadMidtransScript().then(() => {
+                    doPayment(mockCheckoutData);
+                }).catch(error => {
+                    alert('Failed to load Midtrans: ' + error.message);
+                });
+            } else {
+                doPayment(mockCheckoutData);
+            }
+        }
+        
+        function loadMidtransScript() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+                script.setAttribute('data-client-key', 'Mid-client-8_cTMzNPvLrCRYGw');
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        function doPayment(checkoutData) {
+            console.log('Calling snap.pay with:', checkoutData);
+            
+            snap.pay(checkoutData.snap_token, {
+                onSuccess: function(result) {
+                    console.log('Payment success:', result);
+                    alert('Payment Success: ' + result.order_id);
+                },
+                onPending: function(result) {
+                    console.log('Payment pending:', result);
+                    alert('Payment Pending: ' + result.order_id);
+                },
+                onError: function(result) {
+                    console.log('Payment error:', result);
+                    alert('Payment Error: ' + (result.error_message || 'Unknown error'));
+                },
+                onClose: function() {
+                    console.log('Payment popup closed');
+                    alert('Payment popup closed');
+                }
+            });
+        }
+        
+        function testFlashRedirect() {
+            window.location.href = '/test-flash';
+        }
+        
+        // Auto-load Midtrans on page load
+        window.onload = function() {
+            if (typeof snap === 'undefined') {
+                loadMidtransScript().then(() => {
+                    console.log('Midtrans Snap loaded successfully');
+                }).catch(error => {
+                    console.error('Failed to load Midtrans:', error);
+                });
+            }
+        };
+    </script>
+</body>
+</html>

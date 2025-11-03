@@ -106,7 +106,86 @@ Route::get('/test-midtrans', function () {
         ],
     ]);
 });
+// Subscription routes
 Route::get('packages', [SubscriptionController::class, 'index'])->name('packages.index');
-Route::post('subscriptions/checkout', [SubscriptionController::class, 'createCheckout'])->middleware('auth')->name('subscriptions.checkout');
-Route::post('webhooks/stripe', [SubscriptionController::class, 'webhook'])->name('webhooks.stripe');
-Route::post('webhooks/midtrans', [SubscriptionController::class, 'midtransWebhook'])->name('webhooks.midtrans');
+Route::middleware('auth')->group(function () {
+    Route::get('subscriptions', [SubscriptionController::class, 'page'])->name('subscriptions.index');
+    Route::post('subscriptions/checkout', [SubscriptionController::class, 'createCheckout'])->name('subscriptions.checkout');
+    Route::get('subscriptions/success', [SubscriptionController::class, 'success'])->name('subscription.success');
+    Route::get('subscriptions/error', [SubscriptionController::class, 'error'])->name('subscription.error');
+    Route::get('subscriptions/pending', [SubscriptionController::class, 'pending'])->name('subscription.pending');
+    Route::get('subscriptions/history', [SubscriptionController::class, 'history'])->name('subscription.history');
+    Route::post('subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+    Route::post('subscriptions/cancel-pending', [SubscriptionController::class, 'cancelPending'])->name('subscription.cancel-pending');
+    Route::post('subscriptions/activate-free', [SubscriptionController::class, 'activateFree'])->name('subscription.activate-free');
+});
+
+// Webhook routes (no auth middleware needed for webhooks)
+Route::post('webhooks/midtrans', [\App\Http\Controllers\MidtransWebhookController::class, 'handle'])->name('webhooks.midtrans');
+
+// Test API route for debugging
+Route::post('api/test-checkout', function(Request $request) {
+    try {
+        $user = \App\Models\User::first();
+        $package = \App\Models\Package::find($request->package_id);
+        
+        if (!$package) {
+            return response()->json(['error' => 'Package not found'], 404);
+        }
+        
+        $midtransService = app(\App\Services\MidtransService::class);
+        $result = $midtransService->createSubscriptionPayment($user, $package, $request->duration);
+        
+        return response()->json($result);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+});
+
+// Direct flash test route
+Route::get('test-flash', function() {
+    return redirect()->to('/test-payment.html')->with('checkoutData', [
+        'snap_token' => '5ca548da-e103-4868-90b2-738225ef31b9',
+        'order_id' => 'TEST-ORDER-123',
+        'client_key' => config('midtrans.client_key'),
+        'is_production' => config('midtrans.is_production'),
+        'subscription_id' => 999,
+    ]);
+});
+
+// Public test subscription page (no auth required)
+Route::get('test-subscriptions', function() {
+    $packages = \App\Models\Package::where('is_active', true)->get();
+    
+    // Mock user data for testing
+    $mockUser = (object) [
+        'id' => 999,
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'avatar' => null,
+        'email_verified_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ];
+    
+    return \Inertia\Inertia::render('Subscription/Index', [
+        'packages' => $packages,
+        'userSubscription' => null,
+        'pendingPayment' => null,
+        'auth' => [
+            'user' => $mockUser
+        ]
+    ]);
+});
+
+require_once __DIR__.'/auth.php';
+
+// Load test routes for development
+if (app()->environment(['local', 'staging'])) {
+    require_once __DIR__.'/test.php';
+}
