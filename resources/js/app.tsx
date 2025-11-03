@@ -7,7 +7,7 @@ import 'trix';
 import 'trix/dist/trix.css';
 import { initializeTheme } from './hooks/use-appearance';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'EMKM';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
