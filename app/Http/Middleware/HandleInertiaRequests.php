@@ -39,12 +39,30 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // Get user with current subscription
+        $user = $request->user();
+        if ($user) {
+            // Load current active subscription with package
+            $currentSubscription = $user->subscriptions()
+                ->where('status', 'active')
+                ->where(function($query) {
+                    $query->whereNull('expires_at')
+                          ->orWhere('expires_at', '>', now());
+                })
+                ->with('package')
+                ->latest('created_at')
+                ->first();
+            
+            // Set current subscription as an appended attribute
+            $user->setAttribute('current_subscription', $currentSubscription);
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
             'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),

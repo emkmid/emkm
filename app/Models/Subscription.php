@@ -23,6 +23,9 @@ class Subscription extends Model
         'ends_at',
         'trial_ends_at',
         'cancelled_at',
+        'amount',
+        'expires_at',
+        'transaction_id',
     ];
 
     protected $casts = [

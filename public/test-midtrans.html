@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Midtrans Test</title>
+</head>
+<body>
+    <h1>Midtrans Integration Test</h1>
+    <button id="pay-button">Test Payment</button>
+    
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="Mid-client-8_cTMzNPvLrCRYGw"></script>
+    <script>
+        document.getElementById('pay-button').onclick = function () {
+            console.log('Testing with recent snap token...');
+            
+            // Test dengan snap token yang baru dibuat
+            fetch('http://localhost:8000/api/test-checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    package_id: 2, // Basic package
+                    duration: '1_month'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response:', data);
+                if (data.snap_token) {
+                    snap.pay(data.snap_token, {
+                        onSuccess: function(result) {
+                            console.log('Payment success:', result);
+                        },
+                        onPending: function(result) {
+                            console.log('Payment pending:', result);
+                        },
+                        onError: function(result) {
+                            console.log('Payment error:', result);
+                        }
+                    });
+                } else {
+                    console.error('No snap token received');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        };
+    </script>
+</body>
+</html>

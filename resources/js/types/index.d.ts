@@ -82,5 +82,45 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    role?: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Package {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    features: Record<string, any>;
+    duration_options?: string[];
+    discount_percentage: number;
+    is_popular: boolean;
+    is_active: boolean;
+    stripe_product_id?: string;
+    stripe_price_id?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Subscription {
+    id: number;
+    user_id: number;
+    package_id: number;
+    provider: string;
+    provider_subscription_id?: string;
+    midtrans_order_id?: string;
+    midtrans_transaction_id?: string;
+    midtrans_payment_type?: string;
+    price_cents: number;
+    currency: string;
+    interval: string;
+    status: 'pending' | 'active' | 'expired' | 'cancelled' | 'failed';
+    starts_at: string | null;
+    ends_at: string | null;
+    trial_ends_at: string | null;
+    cancelled_at: string | null;
+    created_at: string;
+    updated_at: string;
+    user?: User;
+    package?: Package;
 }

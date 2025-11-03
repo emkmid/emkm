@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct Midtrans Test</title>
+</head>
+<body>
+    <h1>Direct Midtrans Test</h1>
+    <button id="pay-button">Pay with Snap Token</button>
+    
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="Mid-client-8_cTMzNPvLrCRYGw"></script>
+    <script>
+        document.getElementById('pay-button').onclick = function () {
+            console.log('Attempting direct payment with snap token...');
+            
+            // Gunakan snap token yang baru saja dibuat
+            const snapToken = '23d2b184-6922-420a-8910-a01f0bf8d7b2';
+            
+            console.log('Using snap token:', snapToken);
+            
+            if (typeof snap === 'undefined') {
+                console.error('Midtrans Snap is not loaded!');
+                alert('Midtrans Snap is not loaded!');
+                return;
+            }
+            
+            snap.pay(snapToken, {
+                onSuccess: function(result) {
+                    console.log('Payment success:', result);
+                    alert('Payment success: ' + result.order_id);
+                },
+                onPending: function(result) {
+                    console.log('Payment pending:', result);
+                    alert('Payment pending: ' + result.order_id);
+                },
+                onError: function(result) {
+                    console.log('Payment error:', result);
+                    alert('Payment error: ' + result.error_message);
+                },
+                onClose: function() {
+                    console.log('Payment popup closed');
+                    alert('Payment popup closed');
+                }
+            });
+        };
+        
+        // Test script loading
+        window.onload = function() {
+            console.log('Window loaded');
+            console.log('snap available:', typeof snap !== 'undefined');
+            if (typeof snap !== 'undefined') {
+                console.log('Midtrans Snap loaded successfully!');
+            } else {
+                console.error('Midtrans Snap failed to load!');
+            }
+        };
+    </script>
+</body>
+</html>

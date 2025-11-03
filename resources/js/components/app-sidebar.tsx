@@ -127,8 +127,51 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    // current_subscription comes from backend (appended attribute). Cast to any for flexible access in TSX.
-    const planName = ((auth?.user as any)?.current_subscription?.package?.name as string) ?? 'Free';
+    // Get current subscription info from backend
+    const userSubscription = ((auth?.user as any)?.current_subscription as any);
+    
+    // Determine plan status
+    const getPlanStatus = () => {
+        if (!userSubscription) {
+            return { name: 'Free', status: 'active', color: 'bg-gray-100 text-gray-700' };
+        }
+        
+        const packageName = userSubscription.package?.name || 'Free';
+        const status = userSubscription.status || 'inactive';
+        
+        // Color coding based on plan and status
+        let color = 'bg-gray-100 text-gray-700'; // Default for Free
+        
+        if (status === 'active') {
+            switch (packageName.toLowerCase()) {
+                case 'basic':
+                    color = 'bg-blue-100 text-blue-700';
+                    break;
+                case 'pro':
+                    color = 'bg-purple-100 text-purple-700';
+                    break;
+                case 'enterprise':
+                    color = 'bg-orange-100 text-orange-700';
+                    break;
+                default:
+                    color = 'bg-gray-100 text-gray-700';
+            }
+        } else if (status === 'expired') {
+            color = 'bg-red-100 text-red-700';
+        } else if (status === 'pending') {
+            color = 'bg-yellow-100 text-yellow-700';
+        }
+        
+        return { 
+            name: packageName, 
+            status, 
+            color,
+            expiresAt: userSubscription.expires_at
+        };
+    };
+    
+    const planInfo = getPlanStatus();
+    
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -150,7 +193,28 @@ export function AppSidebar() {
             <SidebarFooter>
                 <div className="px-4 pt-2">
                     <div className="text-xs text-muted-foreground">Plan</div>
-                    <div className="mt-1 inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-medium">{planName}</div>
+                    <div className={`mt-1 inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${planInfo.color}`}>
+                        {planInfo.name}
+                        {planInfo.status === 'expired' && (
+                            <span className="ml-1 text-xs">(Expired)</span>
+                        )}
+                        {planInfo.status === 'pending' && (
+                            <span className="ml-1 text-xs">(Pending)</span>
+                        )}
+                    </div>
+                    {planInfo.status === 'active' && planInfo.name !== 'Free' && planInfo.expiresAt && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                            Berakhir: {new Date(planInfo.expiresAt).toLocaleDateString('id-ID')}
+                        </div>
+                    )}
+                    {(planInfo.status === 'expired' || planInfo.name === 'Free') && (
+                        <Link 
+                            href="/dashboard/packages" 
+                            className="text-xs text-[#23BBB7] hover:underline mt-1 block"
+                        >
+                            Upgrade Plan
+                        </Link>
+                    )}
                 </div>
                 <NavFooter items={footerNavItems} className="mt-2" />
                 <NavUser />

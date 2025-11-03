@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Expense;
+use App\Models\Subscription;
+use App\Observers\SubscriptionObserver;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Vinkla\Hashids\Facades\Hashids;
@@ -25,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register subscription observer
+        Subscription::observe(SubscriptionObserver::class);
+        
         // Register an alias for the subscription middleware so routes can use ->middleware('subscribed')
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware('subscribed', EnsureActiveSubscription::class);
