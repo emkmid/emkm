@@ -680,40 +680,66 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        <div className="-mx-4 flex flex-wrap justify-center">
-                            {plans.map((plan, index) => (
-                                <div className="w-full px-4 md:w-1/2 lg:w-1/3" key={index}>
-                                    <div
-                                        className={`relative z-10 mb-10 overflow-hidden rounded-xl bg-white px-8 py-10 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl sm:p-12 lg:px-6 lg:py-10 xl:p-14 ${plan.popular ? 'border border-[#23BBB7]' : ''}`}
-                                    >
-                                        {plan.popular && (
-                                            <div className="absolute top-4 right-4 rounded-full bg-[#23BBB7] px-4 py-1 text-xs font-semibold text-white">
-                                                Populer
-                                            </div>
-                                        )}
-                                        <span className="text-dark mb-5 block text-xl font-semibold">{plan.title}</span>
-                                        <h2 className="text-dark mb-11 text-4xl font-bold xl:text-[42px] xl:leading-[1.21]">
-                                            <span className="text-xl font-medium text-[#23BBB7]">Rp</span>
-                                            <span className="ml-1 -tracking-[2px]">{plan.price}</span>
-                                            <span className="text-body-color text-base font-normal">/bulan</span>
-                                        </h2>
-                                        <div className="mb-[50px]">
-                                            <h5 className="text-dark mb-5 text-lg font-semibold">Fitur</h5>
-                                            <div className="flex flex-col gap-[14px] text-gray-600">
-                                                {plan.features.map((feature, idx) => (
-                                                    <p key={idx}>{feature}</p>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <a
-                                            href="#"
-                                            className="inline-block rounded-md bg-[#23BBB7] px-7 py-3 text-center text-base font-medium text-white transition hover:bg-[#1a8f85]"
+                        <div className="mx-auto max-w-6xl">
+                            <div className="-mx-4 flex flex-wrap justify-center gap-y-8">
+                                {plans.map((plan, index) => (
+                                    <div className="w-full px-4 md:w-1/2 lg:w-1/3" key={index}>
+                                        <div
+                                            className={`relative z-10 h-full overflow-hidden rounded-xl bg-white px-8 py-10 shadow-lg transition duration-300 hover:-translate-y-2 hover:shadow-2xl sm:p-12 lg:px-8 lg:py-12 xl:px-10 xl:py-14 ${plan.popular ? 'border-2 border-[#23BBB7] shadow-xl' : 'border border-gray-200'}`}
                                         >
-                                            Pilih Paket
-                                        </a>
+                                            {plan.popular && (
+                                                <div className="absolute top-5 right-5 rounded-full bg-[#23BBB7] px-4 py-1.5 text-xs font-bold text-white shadow-md">
+                                                    POPULER
+                                                </div>
+                                            )}
+                                            <div className="mb-8">
+                                                <span className="text-dark mb-4 block text-2xl font-bold">{plan.title}</span>
+                                                <div className="flex items-end gap-1">
+                                                    <h2 className="text-dark text-5xl font-extrabold">
+                                                        {plan.price === 'Rp 0' ? (
+                                                            <span className="text-[#23BBB7]">Gratis</span>
+                                                        ) : (
+                                                            <>
+                                                                <span className="text-2xl font-medium text-[#23BBB7]">Rp</span>
+                                                                <span className="ml-1 -tracking-[2px]">{plan.price.replace('Rp ', '').replace('.000', 'k')}</span>
+                                                            </>
+                                                        )}
+                                                    </h2>
+                                                    {plan.price !== 'Rp 0' && <span className="text-body-color mb-2 text-base font-normal">/bulan</span>}
+                                                </div>
+                                            </div>
+                                            <div className="mb-8 min-h-[200px]">
+                                                <h5 className="text-dark mb-5 text-lg font-bold">Fitur Unggulan</h5>
+                                                <div className="flex flex-col gap-4">
+                                                    {plan.features.map((feature, idx) => (
+                                                        <div key={idx} className="flex items-start gap-3">
+                                                            <svg
+                                                                className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#23BBB7]"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            <p className="text-body-color text-base font-medium leading-relaxed">{feature}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <a
+                                                href="#"
+                                                className={`block w-full rounded-lg px-7 py-4 text-center text-base font-semibold transition duration-300 ${
+                                                    plan.popular
+                                                        ? 'bg-[#23BBB7] text-white shadow-md hover:bg-[#1a8f85] hover:shadow-lg'
+                                                        : 'border-2 border-[#23BBB7] bg-white text-[#23BBB7] hover:bg-[#23BBB7] hover:text-white'
+                                                }`}
+                                            >
+                                                {plan.cta}
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </section>

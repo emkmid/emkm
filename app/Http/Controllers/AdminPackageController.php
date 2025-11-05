@@ -26,11 +26,19 @@ class AdminPackageController extends Controller
 
     public function store(StorePackageRequest $request)
     {
+        // Convert features array to object format
+        $features = [];
+        if ($request->has('features') && is_array($request->features)) {
+            foreach ($request->features as $feature) {
+                $features[$feature] = true;
+            }
+        }
+        
         Package::create([
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
-            'features' => $request->features,
+            'features' => $features,
             'is_active' => $request->is_active ?? true,
         ]);
 
@@ -39,18 +47,45 @@ class AdminPackageController extends Controller
 
     public function edit(Package $package)
     {
+        // Convert features object to array of enabled feature keys for easier handling in frontend
+        $features = $package->features;
+        $featureKeys = [];
+        
+        if (is_array($features)) {
+            foreach ($features as $key => $value) {
+                if ($value === true) {
+                    $featureKeys[] = $key;
+                }
+            }
+        }
+        
         return Inertia::render('dashboard/admin/packages/edit', [
-            'pkg' => $package,
+            'pkg' => [
+                'id' => $package->id,
+                'name' => $package->name,
+                'description' => $package->description,
+                'price' => $package->price,
+                'features' => $featureKeys,
+                'is_active' => $package->is_active,
+            ],
         ]);
     }
 
     public function update(UpdatePackageRequest $request, Package $package)
     {
+        // Convert features array back to object format
+        $features = [];
+        if ($request->has('features') && is_array($request->features)) {
+            foreach ($request->features as $feature) {
+                $features[$feature] = true;
+            }
+        }
+        
         $package->update([
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
-            'features' => $request->features,
+            'features' => $features,
             'is_active' => $request->is_active,
         ]);
 
