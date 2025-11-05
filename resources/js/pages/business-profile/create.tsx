@@ -73,7 +73,7 @@ export default function CreateBusinessProfile() {
         <AppLayout>
             <Head title="Buat Profil Bisnis" />
 
-            <div className="space-y-6 max-w-4xl">
+            <div className="container max-w-5xl mx-auto py-6 space-y-8">
                 {/* Header */}
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" asChild>
@@ -84,71 +84,75 @@ export default function CreateBusinessProfile() {
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Buat Profil Bisnis</h1>
                         <p className="text-muted-foreground mt-1">
-                            Lengkapi informasi bisnis Anda
+                            Lengkapi informasi bisnis Anda untuk keperluan invoice dan dokumen
                         </p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="space-y-6">
-                        {/* Logo Upload */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Logo Bisnis</CardTitle>
-                                <CardDescription>
-                                    Upload logo bisnis Anda (opsional)
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex items-center gap-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Logo Upload */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Logo Bisnis</CardTitle>
+                            <CardDescription>
+                                Upload logo bisnis Anda (opsional, max 2MB)
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                                <div className="flex-shrink-0">
                                     {previewUrl ? (
                                         <div className="relative">
-                                            <img
-                                                src={previewUrl}
-                                                alt="Logo preview"
-                                                className="h-32 w-32 object-contain rounded-lg border-2 border-border"
-                                            />
+                                            <div className="h-32 w-32 rounded-lg border-2 border-border overflow-hidden bg-gray-50">
+                                                <img
+                                                    src={previewUrl}
+                                                    alt="Logo preview"
+                                                    className="h-full w-full object-contain"
+                                                />
+                                            </div>
                                             <Button
                                                 type="button"
                                                 variant="destructive"
                                                 size="icon"
-                                                className="absolute -top-2 -right-2 h-6 w-6"
+                                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                                                 onClick={clearLogo}
                                             >
                                                 <X className="h-4 w-4" />
                                             </Button>
                                         </div>
                                     ) : (
-                                        <div className="h-32 w-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
+                                        <div className="h-32 w-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-gray-50">
                                             <Upload className="h-8 w-8 text-muted-foreground" />
                                         </div>
                                     )}
-                                    <div className="space-y-2">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => fileInputRef.current?.click()}
-                                        >
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            {previewUrl ? 'Ganti Logo' : 'Upload Logo'}
-                                        </Button>
-                                        <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={handleLogoChange}
-                                        />
-                                        <p className="text-sm text-muted-foreground">
-                                            PNG, JPG, atau GIF (max. 2MB)
-                                        </p>
-                                        {errors.logo && (
-                                            <p className="text-sm text-destructive">{errors.logo}</p>
-                                        )}
-                                    </div>
                                 </div>
-                            </CardContent>
-                        </Card>
+                                <div className="flex-1 space-y-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="w-full md:w-auto"
+                                    >
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        {previewUrl ? 'Ganti Logo' : 'Upload Logo'}
+                                    </Button>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleLogoChange}
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        Format: PNG, JPG, atau GIF. Maksimal ukuran file 2MB.
+                                    </p>
+                                    {errors.logo && (
+                                        <p className="text-sm text-destructive">{errors.logo}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
                         {/* Basic Information */}
                         <Card>
@@ -379,18 +383,22 @@ export default function CreateBusinessProfile() {
                         </Card>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-4">
-                            <Button type="submit" size="lg" disabled={processing}>
-                                <Building2 className="mr-2 h-5 w-5" />
-                                {processing ? 'Menyimpan...' : 'Simpan Profil'}
-                            </Button>
-                            <Button variant="outline" size="lg" asChild>
-                                <Link href={route('business-profile.index')}>Batal</Link>
-                            </Button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </AppLayout>
-    );
-}
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <Button type="submit" size="lg" disabled={processing} className="w-full sm:w-auto">
+                                        <Building2 className="mr-2 h-5 w-5" />
+                                        {processing ? 'Menyimpan...' : 'Simpan Profil'}
+                                    </Button>
+                                    <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                                        <Link href={route('business-profile.index')}>Batal</Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </form>
+                </div>
+            </AppLayout>
+        );
+    }
+

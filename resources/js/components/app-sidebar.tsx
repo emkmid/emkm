@@ -75,11 +75,11 @@ const mainNavItems: MainNavItem[] = [
         subItems: [
             {
                 title: 'Kelola Invoice',
-                href: '/invoices',
+                href: '/dashboard/invoices',
             },
             {
                 title: 'Kelola Customer',
-                href: '/customers',
+                href: '/dashboard/customers',
             },
         ],
     },
@@ -87,7 +87,7 @@ const mainNavItems: MainNavItem[] = [
         title: 'Profil Bisnis',
         icon: Building2,
         can: (user) => user?.role === 'user',
-        href: '/business-profile',
+        href: '/dashboard/business-profile',
     },
     {
         title: 'Paket',

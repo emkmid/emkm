@@ -39,9 +39,9 @@ export default function BusinessProfileIndex({ profile }: Props) {
         <AppLayout>
             <Head title="Profil Bisnis" />
 
-            <div className="space-y-6">
+            <div className="container max-w-6xl mx-auto py-6 space-y-8">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Profil Bisnis</h1>
                         <p className="text-muted-foreground mt-1">
@@ -49,14 +49,14 @@ export default function BusinessProfileIndex({ profile }: Props) {
                         </p>
                     </div>
                     {profile ? (
-                        <Button asChild>
+                        <Button asChild className="w-full sm:w-auto">
                             <Link href={route('business-profile.edit')}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit Profil
                             </Link>
                         </Button>
                     ) : (
-                        <Button asChild>
+                        <Button asChild className="w-full sm:w-auto">
                             <Link href={route('business-profile.create')}>
                                 <Building2 className="mr-2 h-4 w-4" />
                                 Buat Profil Bisnis
@@ -66,9 +66,9 @@ export default function BusinessProfileIndex({ profile }: Props) {
                 </div>
 
                 {profile ? (
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-6 lg:grid-cols-2">
                         {/* Logo & Basic Info */}
-                        <Card>
+                        <Card className="h-fit">
                             <CardHeader>
                                 <CardTitle>Informasi Dasar</CardTitle>
                                 <CardDescription>
@@ -79,11 +79,13 @@ export default function BusinessProfileIndex({ profile }: Props) {
                                 {/* Logo */}
                                 {profile.logo_url && (
                                     <div className="flex justify-center">
-                                        <img
-                                            src={profile.logo_url}
-                                            alt={profile.business_name}
-                                            className="h-32 w-32 object-contain rounded-lg border-2 border-border"
-                                        />
+                                        <div className="h-32 w-32 rounded-lg border-2 border-border overflow-hidden bg-gray-50 flex items-center justify-center">
+                                            <img
+                                                src={profile.logo_url}
+                                                alt={profile.business_name}
+                                                className="h-full w-full object-contain p-2"
+                                            />
+                                        </div>
                                     </div>
                                 )}
 
@@ -130,14 +132,14 @@ export default function BusinessProfileIndex({ profile }: Props) {
                         </Card>
 
                         {/* Contact Information */}
-                        <Card>
+                        <Card className="h-fit">
                             <CardHeader>
                                 <CardTitle>Kontak</CardTitle>
                                 <CardDescription>
                                     Informasi kontak bisnis
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent className="space-y-5">
                                 {profile.email && (
                                     <div className="flex items-start gap-3">
                                         <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -201,33 +203,35 @@ export default function BusinessProfileIndex({ profile }: Props) {
 
                         {/* Description */}
                         {profile.description && (
-                            <Card className="md:col-span-2">
+                            <Card className="lg:col-span-2">
                                 <CardHeader>
-                                    <CardTitle>Deskripsi Bisnis</CardTitle>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <FileText className="h-5 w-5" />
+                                        Deskripsi Bisnis
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="flex items-start gap-3">
-                                        <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                        <p className="text-muted-foreground whitespace-pre-line">
-                                            {profile.description}
-                                        </p>
-                                    </div>
+                                    <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                                        {profile.description}
+                                    </p>
                                 </CardContent>
                             </Card>
                         )}
                     </div>
                 ) : (
                     <Card>
-                        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                            <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
-                            <h3 className="text-xl font-semibold mb-2">
+                        <CardContent className="flex flex-col items-center justify-center py-20 text-center px-4">
+                            <div className="rounded-full bg-muted p-6 mb-6">
+                                <Building2 className="h-16 w-16 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-2xl font-semibold mb-3">
                                 Belum Ada Profil Bisnis
                             </h3>
-                            <p className="text-muted-foreground max-w-md mb-6">
+                            <p className="text-muted-foreground max-w-md mb-8 text-base">
                                 Buat profil bisnis Anda untuk menampilkan informasi bisnis pada invoice
                                 dan dokumen lainnya.
                             </p>
-                            <Button asChild size="lg">
+                            <Button asChild size="lg" className="w-full sm:w-auto">
                                 <Link href={route('business-profile.create')}>
                                     <Building2 className="mr-2 h-5 w-5" />
                                     Buat Profil Bisnis

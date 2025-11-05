@@ -116,9 +116,9 @@ export default function EditBusinessProfile({ profile }: Props) {
         <AppLayout>
             <Head title="Edit Profil Bisnis" />
 
-            <div className="space-y-6 max-w-4xl">
+            <div className="container max-w-5xl mx-auto py-6 space-y-8">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" asChild>
                             <Link href={route('business-profile.index')}>
@@ -134,8 +134,8 @@ export default function EditBusinessProfile({ profile }: Props) {
                     </div>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="lg">
-                                <Trash2 className="mr-2 h-5 w-5" />
+                            <Button variant="destructive" size="sm">
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Hapus Profil
                             </Button>
                         </AlertDialogTrigger>
@@ -161,47 +161,51 @@ export default function EditBusinessProfile({ profile }: Props) {
                     </AlertDialog>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Logo Upload */}
                         <Card>
                             <CardHeader>
                                 <CardTitle>Logo Bisnis</CardTitle>
                                 <CardDescription>
-                                    Upload logo bisnis Anda (opsional)
+                                    Upload logo bisnis Anda (opsional, max 2MB)
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex items-center gap-6">
-                                    {previewUrl ? (
-                                        <div className="relative">
-                                            <img
-                                                src={previewUrl}
-                                                alt="Logo preview"
-                                                className="h-32 w-32 object-contain rounded-lg border-2 border-border"
-                                            />
-                                            {data.logo && (
-                                                <Button
-                                                    type="button"
-                                                    variant="destructive"
-                                                    size="icon"
-                                                    className="absolute -top-2 -right-2 h-6 w-6"
-                                                    onClick={clearLogo}
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="h-32 w-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
-                                            <Upload className="h-8 w-8 text-muted-foreground" />
-                                        </div>
-                                    )}
-                                    <div className="space-y-2">
+                                <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                                    <div className="flex-shrink-0">
+                                        {previewUrl ? (
+                                            <div className="relative">
+                                                <div className="h-32 w-32 rounded-lg border-2 border-border overflow-hidden bg-gray-50">
+                                                    <img
+                                                        src={previewUrl}
+                                                        alt="Logo preview"
+                                                        className="h-full w-full object-contain"
+                                                    />
+                                                </div>
+                                                {data.logo && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                                                        onClick={clearLogo}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="h-32 w-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-gray-50">
+                                                <Upload className="h-8 w-8 text-muted-foreground" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 space-y-3">
                                         <Button
                                             type="button"
                                             variant="outline"
                                             onClick={() => fileInputRef.current?.click()}
+                                            className="w-full md:w-auto"
                                         >
                                             <Upload className="mr-2 h-4 w-4" />
                                             {previewUrl ? 'Ganti Logo' : 'Upload Logo'}
@@ -214,7 +218,7 @@ export default function EditBusinessProfile({ profile }: Props) {
                                             onChange={handleLogoChange}
                                         />
                                         <p className="text-sm text-muted-foreground">
-                                            PNG, JPG, atau GIF (max. 2MB)
+                                            Format: PNG, JPG, atau GIF. Maksimal ukuran file 2MB.
                                         </p>
                                         {errors.logo && (
                                             <p className="text-sm text-destructive">{errors.logo}</p>
@@ -453,17 +457,21 @@ export default function EditBusinessProfile({ profile }: Props) {
                         </Card>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-4">
-                            <Button type="submit" size="lg" disabled={processing}>
-                                {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
-                            </Button>
-                            <Button variant="outline" size="lg" asChild>
-                                <Link href={route('business-profile.index')}>Batal</Link>
-                            </Button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </AppLayout>
-    );
-}
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <Button type="submit" size="lg" disabled={processing} className="w-full sm:w-auto">
+                                        {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
+                                    </Button>
+                                    <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                                        <Link href={route('business-profile.index')}>Batal</Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </form>
+                </div>
+            </AppLayout>
+        );
+    }
+

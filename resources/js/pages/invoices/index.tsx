@@ -123,16 +123,16 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
         <AppLayout>
             <Head title="Kelola Invoice" />
 
-            <div className="space-y-6">
+            <div className="container max-w-7xl mx-auto py-6 space-y-8">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Kelola Invoice</h1>
                         <p className="text-muted-foreground mt-1">
                             Manajemen invoice dan pembayaran
                         </p>
                     </div>
-                    <Button asChild>
+                    <Button asChild className="w-full sm:w-auto">
                         <Link href={route('invoices.create')}>
                             <Plus className="mr-2 h-4 w-4" />
                             Buat Invoice
@@ -141,56 +141,64 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
                 </div>
 
                 {/* Stats */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <Card className="hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total Invoice</CardTitle>
-                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <div className="rounded-full bg-blue-100 p-2">
+                                <FileText className="h-4 w-4 text-blue-600" />
+                            </div>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.total}</div>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mt-1">
                                 {formatCurrency(stats.total_amount)}
                             </p>
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Dibayar</CardTitle>
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            <div className="rounded-full bg-green-100 p-2">
+                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            </div>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-green-600">{stats.paid}</div>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mt-1">
                                 {formatCurrency(stats.paid_amount)}
                             </p>
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Belum Dibayar</CardTitle>
-                            <Clock className="h-4 w-4 text-blue-600" />
+                            <div className="rounded-full bg-amber-100 p-2">
+                                <Clock className="h-4 w-4 text-amber-600" />
+                            </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-blue-600">
+                            <div className="text-2xl font-bold text-amber-600">
                                 {stats.draft + stats.sent}
                             </div>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mt-1">
                                 {formatCurrency(stats.unpaid_amount)}
                             </p>
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Terlambat</CardTitle>
-                            <AlertCircle className="h-4 w-4 text-red-600" />
+                            <div className="rounded-full bg-red-100 p-2">
+                                <AlertCircle className="h-4 w-4 text-red-600" />
+                            </div>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-red-600">{stats.overdue}</div>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mt-1">
                                 Perlu ditindaklanjuti
                             </p>
                         </CardContent>
@@ -201,34 +209,42 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Filter Invoice</CardTitle>
+                        <CardDescription>
+                            Cari dan filter invoice berdasarkan kriteria
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex flex-col md:flex-row gap-4">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    type="text"
-                                    placeholder="Cari nomor invoice atau customer..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleFilter()}
-                                    className="pl-10"
-                                />
+                        <div className="flex flex-col gap-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        type="text"
+                                        placeholder="Cari nomor invoice atau customer..."
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleFilter()}
+                                        className="pl-10"
+                                    />
+                                </div>
+                                <Select value={status} onValueChange={setStatus}>
+                                    <SelectTrigger className="w-full sm:w-[200px]">
+                                        <SelectValue placeholder="Semua Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Semua Status</SelectItem>
+                                        <SelectItem value="draft">Draft</SelectItem>
+                                        <SelectItem value="sent">Terkirim</SelectItem>
+                                        <SelectItem value="paid">Dibayar</SelectItem>
+                                        <SelectItem value="overdue">Terlambat</SelectItem>
+                                        <SelectItem value="cancelled">Dibatalkan</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Button onClick={handleFilter} className="w-full sm:w-auto">
+                                    <Search className="mr-2 h-4 w-4" />
+                                    Filter
+                                </Button>
                             </div>
-                            <Select value={status} onValueChange={setStatus}>
-                                <SelectTrigger className="w-full md:w-[200px]">
-                                    <SelectValue placeholder="Semua Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Semua Status</SelectItem>
-                                    <SelectItem value="draft">Draft</SelectItem>
-                                    <SelectItem value="sent">Terkirim</SelectItem>
-                                    <SelectItem value="paid">Dibayar</SelectItem>
-                                    <SelectItem value="overdue">Terlambat</SelectItem>
-                                    <SelectItem value="cancelled">Dibatalkan</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button onClick={handleFilter}>Filter</Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -236,25 +252,29 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
                 {/* Invoice List */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Daftar Invoice</CardTitle>
-                        <CardDescription>
-                            {invoices.total} invoice
-                        </CardDescription>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div>
+                                <CardTitle>Daftar Invoice</CardTitle>
+                                <CardDescription className="mt-1">
+                                    Total {invoices.total} invoice
+                                </CardDescription>
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {invoices.data.length > 0 ? (
-                            <>
-                                <div className="rounded-md border">
+                            <div className="space-y-4">
+                                <div className="rounded-md border overflow-x-auto">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Invoice</TableHead>
-                                                <TableHead>Customer</TableHead>
-                                                <TableHead>Tanggal</TableHead>
-                                                <TableHead>Jatuh Tempo</TableHead>
-                                                <TableHead>Status</TableHead>
-                                                <TableHead className="text-right">Total</TableHead>
-                                                <TableHead className="text-right">Aksi</TableHead>
+                                                <TableHead className="min-w-[140px]">Invoice</TableHead>
+                                                <TableHead className="min-w-[180px]">Customer</TableHead>
+                                                <TableHead className="min-w-[110px]">Tanggal</TableHead>
+                                                <TableHead className="min-w-[140px]">Jatuh Tempo</TableHead>
+                                                <TableHead className="min-w-[120px]">Status</TableHead>
+                                                <TableHead className="text-right min-w-[130px]">Total</TableHead>
+                                                <TableHead className="text-right min-w-[100px]">Aksi</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -263,8 +283,8 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
                                                 const Icon = config.icon;
                                                 
                                                 return (
-                                                    <TableRow key={invoice.id}>
-                                                        <TableCell className="font-medium">
+                                                    <TableRow key={invoice.id} className="hover:bg-muted/50">
+                                                        <TableCell className="font-medium font-mono text-sm">
                                                             {invoice.invoice_number}
                                                         </TableCell>
                                                         <TableCell>
@@ -281,27 +301,28 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
                                                             <div className="space-y-1">
                                                                 <div>{formatDate(invoice.due_date)}</div>
                                                                 {invoice.is_overdue && invoice.status !== 'paid' && (
-                                                                    <div className="text-xs text-red-600">
+                                                                    <div className="text-xs text-red-600 font-medium">
                                                                         Terlambat {Math.abs(invoice.days_until_due)} hari
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Badge className={config.color}>
+                                                            <Badge className={config.color} variant="secondary">
                                                                 <Icon className="mr-1 h-3 w-3" />
                                                                 {config.label}
                                                             </Badge>
                                                         </TableCell>
-                                                        <TableCell className="text-right font-medium">
+                                                        <TableCell className="text-right font-semibold">
                                                             {formatCurrency(invoice.total)}
                                                         </TableCell>
                                                         <TableCell className="text-right">
-                                                            <div className="flex items-center justify-end gap-2">
+                                                            <div className="flex items-center justify-end gap-1">
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
                                                                     asChild
+                                                                    title="Lihat Detail"
                                                                 >
                                                                     <Link href={route('invoices.show', invoice.id)}>
                                                                         <Eye className="h-4 w-4" />
@@ -311,6 +332,7 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
                                                                     variant="ghost"
                                                                     size="sm"
                                                                     asChild
+                                                                    title="Download PDF"
                                                                 >
                                                                     <Link href={route('invoices.pdf', invoice.id)}>
                                                                         <Download className="h-4 w-4" />
@@ -327,7 +349,7 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
 
                                 {/* Pagination */}
                                 {invoices.last_page > 1 && (
-                                    <div className="flex items-center justify-between mt-4">
+                                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
                                         <div className="text-sm text-muted-foreground">
                                             Halaman {invoices.current_page} dari {invoices.last_page}
                                         </div>
@@ -359,15 +381,17 @@ export default function InvoicesIndex({ invoices, filters, stats }: Props) {
                                         </div>
                                     </div>
                                 )}
-                            </>
+                            </div>
                         ) : (
-                            <div className="text-center py-12">
-                                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                                <h3 className="mt-4 text-lg font-semibold">Belum Ada Invoice</h3>
-                                <p className="text-muted-foreground mt-2">
-                                    Mulai buat invoice pertama Anda.
+                            <div className="text-center py-16">
+                                <div className="rounded-full bg-muted p-6 w-fit mx-auto mb-6">
+                                    <FileText className="h-16 w-16 text-muted-foreground" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">Belum Ada Invoice</h3>
+                                <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                                    Mulai buat invoice pertama Anda untuk melacak pembayaran.
                                 </p>
-                                <Button asChild className="mt-4">
+                                <Button asChild size="lg" className="w-full sm:w-auto">
                                     <Link href={route('invoices.create')}>
                                         <Plus className="mr-2 h-4 w-4" />
                                         Buat Invoice
