@@ -86,12 +86,15 @@ class FeatureService
     {
         return Cache::remember(
             "user_package_{$user->id}",
-            now()->addMinutes(10),
+            now()->addMinutes(5), // Reduced from 10 to 5 minutes for faster updates
             function () use ($user) {
                 $subscription = $user->subscriptions()
                     ->where('status', 'active')
                     ->where('ends_at', '>', now())
-                    ->with('package.featureLimits')
+                    ->with(['package.featureLimits' => function ($query) {
+                        // Eager load with fresh pivot data
+                        $query->withPivot(['is_enabled', 'numeric_limit', 'list_values']);
+                    }])
                     ->first();
 
                 return $subscription?->package;

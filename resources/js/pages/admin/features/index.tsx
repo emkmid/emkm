@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Pencil, Plus, Trash2, Save, X, CheckCircle2, XCircle } from 'lucide-react';
+import { Pencil, Plus, Trash2, Save, X, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 // Simple Switch component (since we don't have shadcn switch)
 const Switch = ({ checked, onCheckedChange, disabled }: { 
@@ -106,6 +106,8 @@ export default function Index({ packages, features, featureMatrix }: Props) {
     const [tempEnabled, setTempEnabled] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState<number | null>(null);
+    const [saveDialog, setSaveDialog] = useState(false);
+    const { flash } = usePage().props as any;
 
     const categoryColors: { [key: string]: string } = {
         accounting: 'bg-blue-100 text-blue-800',
@@ -132,6 +134,7 @@ export default function Index({ packages, features, featureMatrix }: Props) {
         if (!editingCell) return;
 
         setIsSaving(true);
+        setSaveDialog(false);
 
         const feature = featureMatrix[editingCell.featureId].feature;
         
@@ -143,24 +146,19 @@ export default function Index({ packages, features, featureMatrix }: Props) {
             list_values: feature.limit_type === 'list' ? tempValue : null,
         };
 
-        try {
-            await router.post(route('admin.features.update-limit'), data, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    alert('Limit berhasil diupdate');
-                    setEditingCell(null);
-                },
-                onError: () => {
-                    alert('Gagal mengupdate limit');
-                },
-                onFinish: () => {
-                    setIsSaving(false);
-                },
-            });
-        } catch (error) {
-            alert('Terjadi kesalahan');
-            setIsSaving(false);
-        }
+        router.post(route('admin.features.update-limit'), data, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setEditingCell(null);
+            },
+            onFinish: () => {
+                setIsSaving(false);
+            },
+        });
+    };
+
+    const handleConfirmSave = () => {
+        setSaveDialog(true);
     };
 
     const handleCancelEdit = () => {
@@ -172,12 +170,8 @@ export default function Index({ packages, features, featureMatrix }: Props) {
     const handleDelete = async (featureId: number) => {
         router.delete(route('admin.features.destroy', featureId), {
             preserveScroll: true,
-            onSuccess: () => {
-                alert('Feature berhasil dihapus');
+            onFinish: () => {
                 setDeleteDialog(null);
-            },
-            onError: () => {
-                alert('Gagal menghapus feature');
             },
         });
     };
@@ -219,12 +213,21 @@ export default function Index({ packages, features, featureMatrix }: Props) {
                     <div className="flex gap-1">
                         <Button
                             size="sm"
-                            onClick={handleSaveCell}
+                            onClick={handleConfirmSave}
                             disabled={isSaving}
-                            className="h-7 px-2"
+                            className="h-7 px-2 bg-[#23BBB7] hover:bg-[#1a8f85]"
                         >
-                            <Save className="h-3 w-3 mr-1" />
-                            Save
+                            {isSaving ? (
+                                <>
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="h-3 w-3 mr-1" />
+                                    Save
+                                </>
+                            )}
                         </Button>
                         <Button
                             size="sm"
@@ -479,6 +482,81 @@ export default function Index({ packages, features, featureMatrix }: Props) {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
+                {/* Save Confirmation Dialog */}
+                <Dialog open={saveDialog} onOpenChange={setSaveDialog}>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Save className="h-5 w-5 text-[#23BBB7]" />
+                                Konfirmasi Perubahan
+                            </DialogTitle>
+                            <DialogDescription>
+                                Apakah Anda yakin ingin menyimpan perubahan ini?
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-3 py-4">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700">Status:</span>
+                                <Badge variant={tempEnabled ? "default" : "secondary"} className={tempEnabled ? "bg-green-500" : ""}>
+                                    {tempEnabled ? 'Enabled' : 'Disabled'}
+                                </Badge>
+                            </div>
+                            {editingCell && featureMatrix[editingCell.featureId].feature.limit_type === 'numeric' && tempEnabled && (
+                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span className="text-sm font-medium text-gray-700">Limit:</span>
+                                    <span className="text-sm font-bold text-gray-900">
+                                        {tempValue === '' || tempValue === '-1' ? '∞ Unlimited' : tempValue}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button 
+                                variant="outline" 
+                                onClick={() => setSaveDialog(false)}
+                                disabled={isSaving}
+                            >
+                                Batal
+                            </Button>
+                            <Button
+                                onClick={handleSaveCell}
+                                disabled={isSaving}
+                                className="bg-[#23BBB7] hover:bg-[#1a8f85]"
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                                        Ya, Simpan
+                                    </>
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Flash Messages */}
+                {flash?.success && (
+                    <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5">
+                        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5" />
+                            <span className="font-medium">{flash.success}</span>
+                        </div>
+                    </div>
+                )}
+                {flash?.error && (
+                    <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5">
+                        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                            <XCircle className="h-5 w-5" />
+                            <span className="font-medium">{flash.error}</span>
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

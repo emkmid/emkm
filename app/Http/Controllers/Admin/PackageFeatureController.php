@@ -246,24 +246,49 @@ class PackageFeatureController extends Controller
             'list_values' => 'nullable|string',
         ]);
 
-        DB::table('package_feature_limits')
-            ->updateOrInsert(
-                [
+        try {
+            // Check if record exists
+            $exists = DB::table('package_feature_limits')
+                ->where('package_id', $validated['package_id'])
+                ->where('package_feature_id', $validated['feature_id'])
+                ->exists();
+
+            if ($exists) {
+                // Update existing record
+                DB::table('package_feature_limits')
+                    ->where('package_id', $validated['package_id'])
+                    ->where('package_feature_id', $validated['feature_id'])
+                    ->update([
+                        'is_enabled' => $validated['is_enabled'],
+                        'numeric_limit' => $validated['numeric_limit'],
+                        'list_values' => $validated['list_values'],
+                        'updated_at' => now(),
+                    ]);
+            } else {
+                // Insert new record
+                DB::table('package_feature_limits')->insert([
                     'package_id' => $validated['package_id'],
                     'package_feature_id' => $validated['feature_id'],
-                ],
-                [
                     'is_enabled' => $validated['is_enabled'],
                     'numeric_limit' => $validated['numeric_limit'],
                     'list_values' => $validated['list_values'],
+                    'created_at' => now(),
                     'updated_at' => now(),
-                ]
-            );
+                ]);
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Limit berhasil diupdate.',
-        ]);
+            // Clear feature cache for all users with this package
+            $this->clearFeatureCacheForPackage($validated['package_id']);
+
+            return back()->with('success', 'Limit berhasil diupdate.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to update limit', [
+                'error' => $e->getMessage(),
+                'data' => $validated
+            ]);
+            return back()->with('error', 'Gagal mengupdate limit: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -314,34 +339,86 @@ class PackageFeatureController extends Controller
         
         try {
             foreach ($validated['updates'] as $update) {
-                DB::table('package_feature_limits')
-                    ->updateOrInsert(
-                        [
-                            'package_id' => $update['package_id'],
-                            'package_feature_id' => $update['feature_id'],
-                        ],
-                        [
+                // Check if record exists
+                $exists = DB::table('package_feature_limits')
+                    ->where('package_id', $update['package_id'])
+                    ->where('package_feature_id', $update['feature_id'])
+                    ->exists();
+
+                if ($exists) {
+                    // Update existing record
+                    DB::table('package_feature_limits')
+                        ->where('package_id', $update['package_id'])
+                        ->where('package_feature_id', $update['feature_id'])
+                        ->update([
                             'is_enabled' => $update['is_enabled'],
                             'numeric_limit' => $update['numeric_limit'],
                             'updated_at' => now(),
-                        ]
-                    );
+                        ]);
+                } else {
+                    // Insert new record
+                    DB::table('package_feature_limits')->insert([
+                        'package_id' => $update['package_id'],
+                        'package_feature_id' => $update['feature_id'],
+                        'is_enabled' => $update['is_enabled'],
+                        'numeric_limit' => $update['numeric_limit'],
+                        'list_values' => null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
             
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => count($validated['updates']) . ' limit berhasil diupdate.',
-            ]);
+            // Clear cache for affected packages
+            $affectedPackages = collect($validated['updates'])->pluck('package_id')->unique();
+            foreach ($affectedPackages as $packageId) {
+                $this->clearFeatureCacheForPackage($packageId);
+            }
+
+            return back()->with('success', count($validated['updates']) . ' limit berhasil diupdate.');
             
         } catch (\Exception $e) {
             DB::rollBack();
             
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupdate limits: ' . $e->getMessage(),
-            ], 500);
+            \Log::error('Failed to bulk update limits', [
+                'error' => $e->getMessage(),
+                'updates' => $validated['updates'] ?? []
+            ]);
+            
+            return back()->with('error', 'Gagal mengupdate limits: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Clear feature cache for all users with a specific package.
+     */
+    private function clearFeatureCacheForPackage(int $packageId): void
+    {
+        try {
+            // Get all users with active subscriptions to this package
+            $userIds = DB::table('subscriptions')
+                ->where('package_id', $packageId)
+                ->where('status', 'active')
+                ->where('ends_at', '>', now())
+                ->pluck('user_id')
+                ->unique();
+
+            // Clear cache for each user
+            foreach ($userIds as $userId) {
+                \Cache::forget("user_package_{$userId}");
+            }
+
+            \Log::info('Cleared feature cache for package', [
+                'package_id' => $packageId,
+                'affected_users' => $userIds->count()
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to clear feature cache', [
+                'package_id' => $packageId,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

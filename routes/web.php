@@ -86,10 +86,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('hpp', fn () => Inertia::render('dashboard/user/hpp/index'))->name('hpp.index')->middleware('subscribed');
         Route::get('hpp/hasil', fn () => Inertia::render('dashboard/user/hpp/result'))->name('hpp.hasil')->middleware('subscribed');
 
-        Route::resource('expenses', ExpenseController::class);
-        Route::resource('incomes', IncomeController::class);
-        Route::resource('debts', DebtController::class);
-        Route::resource('receivables', ReceivableController::class);
+        // Transaction routes - protected by accounting.transactions feature
+        Route::middleware(['feature:accounting.transactions'])->group(function () {
+            Route::resource('expenses', ExpenseController::class);
+            Route::resource('incomes', IncomeController::class);
+            Route::resource('debts', DebtController::class);
+            Route::resource('receivables', ReceivableController::class);
+        });
 
         Route::resource('expense-category', ExpenseCategoryController::class);
         Route::resource('income-category', IncomeCategoryController::class);

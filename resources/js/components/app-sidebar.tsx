@@ -30,7 +30,7 @@ const mainNavItems: MainNavItem[] = [
     {
         title: 'Transaction',
         icon: NotebookText,
-        can: (user) => user?.role === 'user',
+        can: (user, features) => user?.role === 'user' && (features?.['accounting.transactions'] ?? false),
         subItems: [
             {
                 title: 'Pengeluaran',

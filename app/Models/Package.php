@@ -55,6 +55,7 @@ class Package extends Model
      */
     public function hasFeature(string $featureKey): bool
     {
+        // Use fresh query to avoid stale cache
         $feature = $this->featureLimits()
             ->where('feature_key', $featureKey)
             ->wherePivot('is_enabled', true)
