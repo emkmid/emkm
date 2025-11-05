@@ -62,28 +62,6 @@ class PackageSeeder extends Seeder
                 'is_popular' => false,
                 'is_active' => true,
             ],
-            [
-                'name' => 'Enterprise',
-                'description' => 'Enterprise plan for large businesses',
-                'price' => 200000, // IDR 200,000
-                'features' => [
-                    'products' => true,
-                    'transactions' => true,
-                    'reports' => true,
-                    'hpp' => true,
-                    'priority_support' => true,
-                    'max_products' => 'unlimited',
-                    'max_transactions' => 'unlimited',
-                    'advanced_reports' => true,
-                    'api_access' => true,
-                    'white_label' => true,
-                    'custom_integration' => true,
-                ],
-                'duration_options' => ['1_month', '3_months', '6_months', '1_year'],
-                'discount_percentage' => 10, // 10% additional discount
-                'is_popular' => false,
-                'is_active' => true,
-            ],
         ];
 
         foreach ($packages as $pkg) {

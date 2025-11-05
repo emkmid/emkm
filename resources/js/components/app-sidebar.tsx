@@ -177,9 +177,6 @@ export function AppSidebar() {
                 case 'pro':
                     color = 'bg-purple-100 text-purple-700';
                     break;
-                case 'enterprise':
-                    color = 'bg-orange-100 text-orange-700';
-                    break;
                 default:
                     color = 'bg-gray-100 text-gray-700';
             }
