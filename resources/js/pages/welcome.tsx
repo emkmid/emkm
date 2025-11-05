@@ -1,7 +1,16 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -12,6 +21,43 @@ export default function Welcome() {
     const darkBlueColor = '#23627C';
     const softBlueColor = '#D3EDFF';
     const orangeColor = '#FFA14A';
+
+    const [formData, setFormData] = useState({
+        fullName: '',
+        email: '',
+        phone: '',
+        message: '',
+    });
+
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertType, setAlertType] = useState<'success' | 'error' | null>(null);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzwf2sghll0-ruWfnkhng_5V8J0N5azt4Q6FNnFLIRkyzwu7nhvjeO25bn0QHhf0A/exec';
+
+        try {
+            await fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                mode: 'no-cors',
+            });
+
+            // langsung anggap sukses
+            setAlertType('success');
+            setAlertOpen(true);
+            setFormData({ fullName: '', email: '', phone: '', message: '' });
+        } catch (error) {
+            console.error('Error:', error);
+            setAlertType('error');
+            setAlertOpen(true);
+        }
+    };
 
     const handleAnimationComplete = () => {
         console.log('All letters have animated!');
@@ -1799,13 +1845,12 @@ export default function Welcome() {
                             <div className="w-full px-4 lg:w-5/12 xl:w-4/12">
                                 <div
                                     className="wow fadeInUp shadow-testimonial dark:bg-dark-2 rounded-lg bg-white px-8 py-10 sm:px-10 sm:py-12 md:p-[60px] lg:p-10 lg:px-10 lg:py-12 2xl:p-[60px] dark:shadow-none"
-                                    data-wow-delay=".2s
-              "
+                                    data-wow-delay=".2s."
                                 >
                                     <h3 className="text-dark mb-8 text-2xl font-semibold md:text-[28px] md:leading-[1.42] dark:text-white">
                                         Kirim kami Pesan
                                     </h3>
-                                    <form>
+                                    <form onSubmit={handleSubmit}>
                                         <div className="mb-[22px]">
                                             <label htmlFor="fullName" className="text-body-color dark:text-dark-6 mb-4 block text-sm">
                                                 Nama Lengkap*
@@ -1814,6 +1859,8 @@ export default function Welcome() {
                                                 type="text"
                                                 name="fullName"
                                                 placeholder="Adam Gelius"
+                                                value={formData.fullName}
+                                                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                                 className="text-body-color placeholder:text-body-color/60 dark:border-dark-3 dark:text-dark-6 w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 focus:border-primary focus:outline-hidden"
                                             />
                                         </div>
@@ -1825,6 +1872,8 @@ export default function Welcome() {
                                                 type="email"
                                                 name="email"
                                                 placeholder="example@yourmail.com"
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                 className="text-body-color placeholder:text-body-color/60 dark:border-dark-3 dark:text-dark-6 w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 focus:border-primary focus:outline-hidden"
                                             />
                                         </div>
@@ -1835,7 +1884,9 @@ export default function Welcome() {
                                             <input
                                                 type="text"
                                                 name="phone"
+                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                 placeholder="+62 832 1234 1234"
+                                                value={formData.phone}
                                                 className="text-body-color placeholder:text-body-color/60 dark:border-dark-3 dark:text-dark-6 w-full border-0 border-b border-[#f1f1f1] bg-transparent pb-3 focus:border-primary focus:outline-hidden"
                                             />
                                         </div>
@@ -1847,6 +1898,8 @@ export default function Welcome() {
                                                 name="message"
                                                 rows={1}
                                                 placeholder="Ketikan pesan mu disini"
+                                                value={formData.message}
+                                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                                 className="text-body-color placeholder:text-body-color/60 dark:border-dark-3 dark:text-dark-6 w-full resize-none border-0 border-b border-[#f1f1f1] bg-transparent pb-3 focus:border-primary focus:outline-hidden"
                                             ></textarea>
                                         </div>
@@ -1865,6 +1918,24 @@ export default function Welcome() {
                     </div>
                 </section>
                 {/* End of Contact */}
+
+                {/* Alert Dialog */}
+                <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>{alertType === 'success' ? 'Pesan Berhasil Dikirim 🎉' : 'Terjadi Kesalahan 😕'}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {alertType === 'success'
+                                    ? 'Terima kasih! Pesanmu sudah kami terima dan akan segera kami tanggapi.'
+                                    : 'Gagal mengirim pesan. Silakan periksa koneksi internetmu atau coba lagi nanti.'}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogAction onClick={() => setAlertOpen(false)}>Oke</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                {/* End of Alert Dialog */}
 
                 {/* Footer */}
                 <footer className="wow fadeInUp relative z-10 bg-[#090E34] pt-20 lg:pt-[100px]" data-wow-delay=".15s">
