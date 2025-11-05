@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Customer;
 use App\Models\InvoiceItem;
 use App\Models\Product;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,6 +15,12 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
+    protected FeatureService $featureService;
+
+    public function __construct(FeatureService $featureService)
+    {
+        $this->featureService = $featureService;
+    }
     /**
      * Display a listing of invoices.
      */
@@ -64,27 +71,54 @@ class InvoiceController extends Controller
      */
     public function create(): Response
     {
-        $customers = Customer::where('user_id', auth()->id())
+        $user = auth()->user();
+
+        // Check if user has access to invoice feature
+        if (!$this->featureService->hasAccess($user, 'invoices.create')) {
+            return Inertia::render('invoices/index', [
+                'invoices' => [],
+                'filters' => [],
+                'stats' => $this->getInvoiceStats($user->id),
+            ])->with('error', 'Upgrade ke paket Basic untuk membuat invoice.');
+        }
+
+        // Check invoice limit for current month
+        $currentMonth = now()->startOfMonth();
+        $invoiceCount = $user->invoices()
+            ->where('invoice_date', '>=', $currentMonth)
+            ->count();
+
+        if ($this->featureService->hasReachedLimit($user, 'invoices.max_count', $invoiceCount)) {
+            $limit = $this->featureService->getLimit($user, 'invoices.max_count');
+            return redirect()
+                ->route('invoices.index')
+                ->with('error', "Anda telah mencapai batas {$limit} invoice bulan ini. Upgrade ke Pro untuk unlimited invoice.");
+        }
+
+        $customers = Customer::where('user_id', $user->id)
             ->select('id', 'name', 'company_name', 'email')
             ->orderBy('name')
             ->get()
             ->map(function ($customer) {
                 return [
                     'id' => $customer->id,
-                    'name' => $customer->display_name,
+                    'name' => $customer->name,
+                    'company_name' => $customer->company_name,
                     'email' => $customer->email,
+                    'display_name' => $customer->display_name,
                 ];
             });
 
-        $products = Product::where('user_id', auth()->id())
-            ->select('id', 'name', 'price')
-            ->orderBy('name')
-            ->get();
+        $limit = $this->featureService->getLimit($user, 'invoices.max_count');
 
         return Inertia::render('invoices/create', [
             'customers' => $customers,
-            'products' => $products,
-            'nextInvoiceNumber' => Invoice::generateInvoiceNumber(),
+            'quota' => [
+                'current' => $invoiceCount,
+                'limit' => $limit,
+                'remaining' => $this->featureService->getRemainingQuota($user, 'invoices.max_count', $invoiceCount),
+                'is_unlimited' => $limit === -1,
+            ],
         ]);
     }
 
@@ -93,6 +127,25 @@ class InvoiceController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        // Double check feature access
+        if (!$this->featureService->hasAccess($user, 'invoices.create')) {
+            abort(403, 'Anda tidak memiliki akses ke fitur ini.');
+        }
+
+        // Check limit again (prevent race condition)
+        $currentMonth = now()->startOfMonth();
+        $invoiceCount = $user->invoices()
+            ->where('invoice_date', '>=', $currentMonth)
+            ->count();
+
+        if ($this->featureService->hasReachedLimit($user, 'invoices.max_count', $invoiceCount)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Limit invoice tercapai. Upgrade untuk membuat lebih banyak invoice.');
+        }
+
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'invoice_date' => 'required|date',

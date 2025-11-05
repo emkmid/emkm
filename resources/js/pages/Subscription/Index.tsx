@@ -1,11 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
+import FeatureComparisonTable from '@/components/feature-comparison-table';
 import { Package, Subscription } from '@/types';
+
+interface PackageFeature {
+    id: number;
+    feature_key: string;
+    feature_name: string;
+    description: string | null;
+    category: string;
+    limit_type: 'boolean' | 'numeric' | 'list';
+    sort_order: number;
+}
+
+interface FeatureLimit {
+    is_enabled: boolean;
+    numeric_limit: number | null;
+    list_values: string | null;
+}
+
+interface FeatureComparison {
+    [category: string]: Array<{
+        feature: PackageFeature;
+        limits: {
+            [packageId: number]: FeatureLimit;
+        };
+    }>;
+}
 
 interface Props {
     packages: Package[];
     userSubscription?: Subscription;
+    featureComparison: FeatureComparison;
     pendingPayment?: {
         subscription_id: number;
         package_name: string;
@@ -29,7 +56,7 @@ interface DurationOption {
     discount?: number;
 }
 
-export default function SubscriptionIndex({ packages, userSubscription, pendingPayment, checkoutData }: Props) {
+export default function SubscriptionIndex({ packages, userSubscription, featureComparison, pendingPayment, checkoutData }: Props) {
     const { flash, errors } = usePage().props as any;
     const [loading, setLoading] = useState<string | null>(null);
     const [selectedDurations, setSelectedDurations] = useState<{ [key: number]: string }>({});
@@ -621,6 +648,14 @@ export default function SubscriptionIndex({ packages, userSubscription, pendingP
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Feature Comparison Table */}
+                            {featureComparison && Object.keys(featureComparison).length > 0 && (
+                                <FeatureComparisonTable 
+                                    packages={packages} 
+                                    featureComparison={featureComparison} 
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BusinessProfile;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -10,19 +11,46 @@ use Inertia\Inertia;
 
 class BusinessProfileController extends Controller
 {
+    protected FeatureService $featureService;
+
+    public function __construct(FeatureService $featureService)
+    {
+        $this->featureService = $featureService;
+    }
+
     public function index()
     {
-        $profile = Auth::user()->businessProfile;
+        $user = Auth::user();
+        
+        // Check if user has access to business profile feature
+        if (!$this->featureService->hasAccess($user, 'business_profile')) {
+            return Inertia::render('business-profile/index', [
+                'profile' => null,
+                'hasAccess' => false,
+            ])->with('error', 'Upgrade ke paket Basic untuk membuat profil bisnis.');
+        }
+
+        $profile = $user->businessProfile;
 
         return Inertia::render('business-profile/index', [
             'profile' => $profile,
+            'hasAccess' => true,
         ]);
     }
 
     public function create()
     {
+        $user = Auth::user();
+
+        // Check feature access
+        if (!$this->featureService->hasAccess($user, 'business_profile')) {
+            return redirect()
+                ->route('business-profile.index')
+                ->with('error', 'Upgrade ke paket Basic untuk membuat profil bisnis.');
+        }
+
         // Redirect if profile already exists
-        if (Auth::user()->businessProfile) {
+        if ($user->businessProfile) {
             return redirect()->route('business-profile.edit');
         }
 
@@ -31,8 +59,15 @@ class BusinessProfileController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        // Check feature access
+        if (!$this->featureService->hasAccess($user, 'business_profile')) {
+            abort(403, 'Anda tidak memiliki akses ke fitur ini.');
+        }
+
         // Check if profile already exists
-        if (Auth::user()->businessProfile) {
+        if ($user->businessProfile) {
             return redirect()->route('business-profile.edit')
                 ->with('error', 'Business profile already exists. Please edit instead.');
         }

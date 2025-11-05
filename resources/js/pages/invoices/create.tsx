@@ -26,6 +26,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { QuotaDisplay } from '@/components/feature-limits';
 import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 
@@ -45,11 +46,19 @@ interface InvoiceItem {
     amount: number;
 }
 
-interface Props {
-    customers: Customer[];
+interface Quota {
+    current: number;
+    limit: number;
+    remaining: number;
+    is_unlimited: boolean;
 }
 
-export default function CreateInvoice({ customers }: Props) {
+interface Props {
+    customers: Customer[];
+    quota?: Quota;
+}
+
+export default function CreateInvoice({ customers, quota }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         customer_id: '',
         invoice_date: new Date().toISOString().split('T')[0],
@@ -137,19 +146,50 @@ export default function CreateInvoice({ customers }: Props) {
 
             <div className="container max-w-6xl mx-auto py-6 space-y-8">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <Button variant="ghost" size="sm" asChild className="mb-2">
-                            <Link href={route('invoices.index')}>
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Kembali
-                            </Link>
-                        </Button>
-                        <h1 className="text-3xl font-bold tracking-tight">Buat Invoice</h1>
-                        <p className="text-muted-foreground mt-1">
-                            Buat invoice baru untuk customer
-                        </p>
+                <div className="flex flex-col gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <Button variant="ghost" size="sm" asChild className="mb-2">
+                                <Link href={route('invoices.index')}>
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Kembali
+                                </Link>
+                            </Button>
+                            <h1 className="text-3xl font-bold tracking-tight">Buat Invoice</h1>
+                            <p className="text-muted-foreground mt-1">
+                                Buat invoice baru untuk customer
+                            </p>
+                        </div>
+                        
+                        {/* Display Quota if available */}
+                        {quota && (
+                            <Card className="sm:w-auto">
+                                <CardContent className="pt-6">
+                                    <QuotaDisplay
+                                        current={quota.current}
+                                        limit={quota.limit}
+                                        remaining={quota.remaining}
+                                        isUnlimited={quota.is_unlimited}
+                                        featureName="Invoice"
+                                    />
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
+                    
+                    {/* Warning if approaching limit */}
+                    {quota && !quota.is_unlimited && quota.remaining <= 5 && quota.remaining > 0 && (
+                        <Card className="border-amber-200 bg-amber-50">
+                            <CardContent className="pt-4">
+                                <p className="text-sm text-amber-800">
+                                    ⚠️ Hanya {quota.remaining} invoice tersisa bulan ini. 
+                                    <Link href={route('packages.index')} className="ml-2 underline font-medium">
+                                        Upgrade ke Pro untuk unlimited invoice
+                                    </Link>
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
 
                 <form onSubmit={(e) => handleSubmit(e)}>

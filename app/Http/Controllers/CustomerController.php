@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -10,6 +11,12 @@ use Illuminate\Http\RedirectResponse;
 
 class CustomerController extends Controller
 {
+    protected FeatureService $featureService;
+
+    public function __construct(FeatureService $featureService)
+    {
+        $this->featureService = $featureService;
+    }
     /**
      * Display a listing of customers.
      */
@@ -41,7 +48,36 @@ class CustomerController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('customers/create');
+        $user = auth()->user();
+
+        // Check if user has access to create customers
+        if (!$this->featureService->hasAccess($user, 'customers.create')) {
+            return redirect()
+                ->route('customers.index')
+                ->with('error', 'Upgrade ke paket Basic untuk mengelola customer.');
+        }
+
+        // Check customer limit
+        $customerCount = $user->customers()->count();
+        
+        if ($this->featureService->hasReachedLimit($user, 'customers.max_count', $customerCount)) {
+            $limit = $this->featureService->getLimit($user, 'customers.max_count');
+            
+            return redirect()
+                ->route('customers.index')
+                ->with('error', "Anda telah mencapai batas {$limit} customer. Upgrade ke Pro untuk unlimited customer.");
+        }
+
+        $limit = $this->featureService->getLimit($user, 'customers.max_count');
+
+        return Inertia::render('customers/create', [
+            'quota' => [
+                'current' => $customerCount,
+                'limit' => $limit,
+                'remaining' => $this->featureService->getRemainingQuota($user, 'customers.max_count', $customerCount),
+                'is_unlimited' => $limit === -1,
+            ],
+        ]);
     }
 
     /**
@@ -49,6 +85,21 @@ class CustomerController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        // Double check feature access
+        if (!$this->featureService->hasAccess($user, 'customers.create')) {
+            abort(403, 'Anda tidak memiliki akses ke fitur ini.');
+        }
+
+        // Check limit again
+        $customerCount = $user->customers()->count();
+        if ($this->featureService->hasReachedLimit($user, 'customers.max_count', $customerCount)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Limit customer tercapai. Upgrade untuk menambah lebih banyak customer.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -63,7 +114,7 @@ class CustomerController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $customer = $request->user()->customers()->create($validated);
+        $customer = $user->customers()->create($validated);
 
         return redirect()->route('customers.show', $customer)
             ->with('success', 'Customer berhasil ditambahkan.');

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Package extends Model
@@ -37,6 +38,46 @@ class Package extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Get feature limits for this package
+     */
+    public function featureLimits(): BelongsToMany
+    {
+        return $this->belongsToMany(PackageFeature::class, 'package_feature_limits')
+            ->withPivot(['is_enabled', 'numeric_limit', 'list_values'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if package has a specific feature enabled
+     */
+    public function hasFeature(string $featureKey): bool
+    {
+        $feature = $this->featureLimits()
+            ->where('feature_key', $featureKey)
+            ->wherePivot('is_enabled', true)
+            ->first();
+
+        return $feature !== null;
+    }
+
+    /**
+     * Get numeric limit for a feature
+     */
+    public function getFeatureLimit(string $featureKey): ?int
+    {
+        $feature = $this->featureLimits()
+            ->where('feature_key', $featureKey)
+            ->first();
+
+        if (!$feature || !$feature->pivot->is_enabled) {
+            return 0;
+        }
+
+        // -1 means unlimited
+        return $feature->pivot->numeric_limit ?? null;
     }
 
     /**

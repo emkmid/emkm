@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminPackageController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\PackageFeatureController;
 use App\Http\Controllers\BusinessProfileController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Dashboard\AdminDashboardController;
@@ -109,6 +110,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('payments/export', [\App\Http\Controllers\AdminPaymentController::class, 'exportNotifications'])->name('admin.payments.export');
             Route::get('subscriptions/list', [\App\Http\Controllers\AdminPaymentController::class, 'subscriptionsList'])->name('admin.subscriptions.list');
             Route::resource('notifications', AdminNotificationController::class)->except(['show']);
+            
+            // Package Features Management
+            Route::get('features', [PackageFeatureController::class, 'index'])->name('admin.features.index');
+            Route::get('features/create', [PackageFeatureController::class, 'create'])->name('admin.features.create');
+            Route::post('features', [PackageFeatureController::class, 'store'])->name('admin.features.store');
+            Route::get('features/{feature}/edit', [PackageFeatureController::class, 'edit'])->name('admin.features.edit');
+            Route::put('features/{feature}', [PackageFeatureController::class, 'update'])->name('admin.features.update');
+            Route::delete('features/{feature}', [PackageFeatureController::class, 'destroy'])->name('admin.features.destroy');
+            Route::post('features/update-limit', [PackageFeatureController::class, 'updateLimit'])->name('admin.features.update-limit');
+            Route::post('features/bulk-update', [PackageFeatureController::class, 'bulkUpdate'])->name('admin.features.bulk-update');
             
             // Backup routes
             Route::get('backups', [BackupController::class, 'index'])->name('admin.backups.index');
