@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Package extends Model
 {
@@ -29,6 +30,14 @@ class Package extends Model
         'stripe_product_id' => 'string',
         'stripe_price_id' => 'string',
     ];
+
+    /**
+     * Get all subscriptions for this package
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
 
     /**
      * Get available duration options
