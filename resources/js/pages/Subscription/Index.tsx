@@ -1,11 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
+import FeatureComparisonTable from '@/components/feature-comparison-table';
 import { Package, Subscription } from '@/types';
+
+interface PackageFeature {
+    id: number;
+    feature_key: string;
+    feature_name: string;
+    description: string | null;
+    category: string;
+    limit_type: 'boolean' | 'numeric' | 'list';
+    sort_order: number;
+}
+
+interface FeatureLimit {
+    is_enabled: boolean;
+    numeric_limit: number | null;
+    list_values: string | null;
+}
+
+interface FeatureComparison {
+    [category: string]: Array<{
+        feature: PackageFeature;
+        limits: {
+            [packageId: number]: FeatureLimit;
+        };
+    }>;
+}
 
 interface Props {
     packages: Package[];
     userSubscription?: Subscription;
+    featureComparison: FeatureComparison;
     pendingPayment?: {
         subscription_id: number;
         package_name: string;
@@ -29,7 +56,7 @@ interface DurationOption {
     discount?: number;
 }
 
-export default function SubscriptionIndex({ packages, userSubscription, pendingPayment, checkoutData }: Props) {
+export default function SubscriptionIndex({ packages, userSubscription, featureComparison, pendingPayment, checkoutData }: Props) {
     const { flash, errors } = usePage().props as any;
     const [loading, setLoading] = useState<string | null>(null);
     const [selectedDurations, setSelectedDurations] = useState<{ [key: number]: string }>({});
@@ -454,14 +481,14 @@ export default function SubscriptionIndex({ packages, userSubscription, pendingP
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                                 {packages.map((pkg) => (
                                     <div 
                                         key={pkg.id} 
-                                        className={`relative bg-white border-2 rounded-lg p-6 ${
+                                        className={`relative bg-white border-2 rounded-lg p-6 flex flex-col ${
                                             pkg.is_popular 
-                                                ? 'border-blue-500 shadow-lg transform scale-105' 
-                                                : 'border-gray-200'
+                                                ? 'border-blue-500 shadow-xl transform scale-105' 
+                                                : 'border-gray-200 shadow-md'
                                         }`}
                                     >
                                         {pkg.is_popular && (
@@ -472,18 +499,18 @@ export default function SubscriptionIndex({ packages, userSubscription, pendingP
                                             </div>
                                         )}
 
-                                        <div className="text-center">
-                                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                        <div className="text-center flex-1 flex flex-col">
+                                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
                                                 {pkg.name}
                                             </h3>
-                                            <p className="text-gray-600 mb-4">
+                                            <p className="text-gray-600 mb-6 text-sm">
                                                 {pkg.description}
                                             </p>
 
                                             {pkg.name !== 'Free' && (
-                                                <div className="mb-4">
+                                                <div className="mb-6">
                                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                        Durasi
+                                                        Pilih Durasi
                                                     </label>
                                                     <select
                                                         value={selectedDurations[pkg.id] || '1_month'}
@@ -491,7 +518,7 @@ export default function SubscriptionIndex({ packages, userSubscription, pendingP
                                                             ...selectedDurations,
                                                             [pkg.id]: e.target.value
                                                         })}
-                                                        className="w-full p-2 border border-gray-300 rounded-md"
+                                                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     >
                                                         {durationOptions
                                                             .filter(option => (pkg.duration_options || ['1_month']).includes(option.value))
@@ -506,41 +533,41 @@ export default function SubscriptionIndex({ packages, userSubscription, pendingP
                                                 </div>
                                             )}
 
-                                            <div className="mb-6">
+                                            <div className="mb-8 py-4 border-y border-gray-200">
                                                 {pkg.price === 0 ? (
-                                                    <div className="text-3xl font-bold text-gray-900">
+                                                    <div className="text-4xl font-bold text-gray-900">
                                                         GRATIS
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        <div className="text-3xl font-bold text-gray-900">
+                                                        <div className="text-4xl font-bold text-gray-900">
                                                             {formatPrice(calculateDiscountedPrice(
                                                                 pkg, 
                                                                 selectedDurations[pkg.id] || '1_month'
                                                             ))}
                                                         </div>
-                                                        <div className="text-sm text-gray-500">
+                                                        <div className="text-sm text-gray-500 mt-2">
                                                             per {durationOptions.find(d => d.value === (selectedDurations[pkg.id] || '1_month'))?.label}
                                                         </div>
                                                         {pkg.discount_percentage > 0 && (
-                                                            <div className="text-sm text-green-600 font-medium">
-                                                                Diskon {pkg.discount_percentage}%
+                                                            <div className="text-sm text-green-600 font-medium mt-1">
+                                                                Hemat {pkg.discount_percentage}%
                                                             </div>
                                                         )}
                                                     </div>
                                                 )}
                                             </div>
 
-                                            <ul className="text-left mb-6 space-y-2">
+                                            <ul className="text-left mb-8 space-y-3 flex-1">
                                                 {Object.entries(pkg.features).map(([feature, enabled]) => (
                                                     <li 
                                                         key={feature}
-                                                        className={`flex items-center ${
+                                                        className={`flex items-start ${
                                                             enabled ? 'text-gray-900' : 'text-gray-400'
                                                         }`}
                                                     >
                                                         <svg 
-                                                            className={`w-4 h-4 mr-2 ${
+                                                            className={`w-5 h-5 mr-3 mt-0.5 flex-shrink-0 ${
                                                                 enabled ? 'text-green-500' : 'text-gray-300'
                                                             }`}
                                                             fill="currentColor" 
@@ -552,17 +579,19 @@ export default function SubscriptionIndex({ packages, userSubscription, pendingP
                                                                 clipRule="evenodd" 
                                                             />
                                                         </svg>
-                                                        {feature === 'products' && 'Manajemen Produk'}
-                                                        {feature === 'transactions' && 'Transaksi'}
-                                                        {feature === 'reports' && 'Laporan'}
-                                                        {feature === 'hpp' && 'Harga Pokok Penjualan'}
-                                                        {feature === 'priority_support' && 'Support Prioritas'}
-                                                        {feature === 'advanced_reports' && 'Laporan Lanjutan'}
-                                                        {feature === 'api_access' && 'Akses API'}
-                                                        {feature === 'white_label' && 'White Label'}
-                                                        {feature === 'custom_integration' && 'Integrasi Custom'}
-                                                        {typeof enabled === 'string' && `${feature}: ${enabled}`}
-                                                        {typeof enabled === 'number' && `${feature}: ${enabled}`}
+                                                        <span className="text-sm">
+                                                            {feature === 'products' && 'Manajemen Produk'}
+                                                            {feature === 'transactions' && 'Transaksi'}
+                                                            {feature === 'reports' && 'Laporan'}
+                                                            {feature === 'hpp' && 'Harga Pokok Penjualan'}
+                                                            {feature === 'priority_support' && 'Support Prioritas'}
+                                                            {feature === 'advanced_reports' && 'Laporan Lanjutan'}
+                                                            {feature === 'api_access' && 'Akses API'}
+                                                            {feature === 'white_label' && 'White Label'}
+                                                            {feature === 'custom_integration' && 'Integrasi Custom'}
+                                                            {typeof enabled === 'string' && `${feature}: ${enabled}`}
+                                                            {typeof enabled === 'number' && `${feature}: ${enabled}`}
+                                                        </span>
                                                     </li>
                                                 ))}
                                             </ul>
@@ -573,9 +602,9 @@ export default function SubscriptionIndex({ packages, userSubscription, pendingP
                                                     loading === pkg.id.toString() || 
                                                     (userSubscription?.status === 'active' && pkg.name !== 'Free')
                                                 }
-                                                className={`w-full py-2 px-4 rounded-md font-medium ${
+                                                className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
                                                     pkg.is_popular
-                                                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
                                                         : 'bg-gray-800 hover:bg-gray-900 text-white'
                                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                                             >
@@ -621,6 +650,14 @@ export default function SubscriptionIndex({ packages, userSubscription, pendingP
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Feature Comparison Table */}
+                            {featureComparison && Object.keys(featureComparison).length > 0 && (
+                                <FeatureComparisonTable 
+                                    packages={packages} 
+                                    featureComparison={featureComparison} 
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Package;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -36,16 +40,62 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        DB::beginTransaction();
 
-        event(new Registered($user));
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
 
-        Auth::login($user);
+            // Auto-assign Free package to new user
+            $freePackage = Package::where('name', 'Free')
+                ->where('is_active', true)
+                ->first();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+            if ($freePackage) {
+                Subscription::create([
+                    'user_id' => $user->id,
+                    'package_id' => $freePackage->id,
+                    'provider' => 'internal',
+                    'status' => 'active',
+                    'price_cents' => 0,
+                    'currency' => 'IDR',
+                    'interval' => '1_year',
+                    'starts_at' => now(),
+                    'ends_at' => now()->addYear(),
+                ]);
+
+                Log::info('Free package auto-assigned to new user', [
+                    'user_id' => $user->id,
+                    'package_id' => $freePackage->id,
+                ]);
+            } else {
+                Log::warning('Free package not found for auto-assignment', [
+                    'user_id' => $user->id,
+                ]);
+            }
+
+            event(new Registered($user));
+
+            DB::commit();
+
+            Auth::login($user);
+
+            return redirect()->intended(route('dashboard', absolute: false));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('User registration failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()->withErrors([
+                'email' => 'Registration failed. Please try again.',
+            ])->withInput($request->except('password', 'password_confirmation'));
+        }
     }
 }

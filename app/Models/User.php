@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,7 +11,12 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Auditable;
+
+    /**
+     * Fields to audit (empty means all fields will be audited)
+     */
+    protected $auditableFields = ['name', 'email', 'role'];
 
     /**
      * The attributes that are mass assignable.
@@ -103,6 +109,37 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Article::class, 'article_likes')
                     ->withTimestamps();
+    }
+
+    public function userNotifications()
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->hasMany(UserNotification::class)->unread();
+    }
+
+    public function businessProfile()
+    {
+        return $this->hasOne(BusinessProfile::class);
+    }
+
+    /**
+     * Get all customers for this user.
+     */
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    /**
+     * Get all invoices for this user.
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     /**

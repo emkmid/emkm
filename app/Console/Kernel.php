@@ -13,7 +13,31 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Run subscription expiry checks daily at 6 AM
+        // Expire subscriptions daily at midnight
+        $schedule->command('subscriptions:expire')
+            ->daily()
+            ->at('00:00')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                Log::info('Subscription expiry check completed');
+            })
+            ->onFailure(function () {
+                Log::error('Subscription expiry check failed');
+            });
+
+        // Send subscription reminders daily at 9:00 AM
+        $schedule->command('subscriptions:remind')
+            ->daily()
+            ->at('09:00')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                Log::info('Subscription reminders sent');
+            })
+            ->onFailure(function () {
+                Log::error('Subscription reminder job failed');
+            });
+
+        // Run subscription expiry checks daily at 6 AM (backup check)
         $schedule->command('subscription:check-expiry')
             ->daily()
             ->at('06:00')
@@ -39,6 +63,19 @@ class Kernel extends ConsoleKernel
                 ]);
             }
         })->hourly()->name('auto-cancel-expired-payments');
+
+        // Clean up old notifications (older than 30 days)
+        $schedule->call(function () {
+            \App\Models\UserNotification::where('created_at', '<', now()->subDays(30))
+                ->whereNotNull('read_at')
+                ->delete();
+        })->weekly()->sundays()->at('02:00');
+
+        // Clean up old payment notifications (older than 90 days)
+        $schedule->call(function () {
+            \App\Models\PaymentNotification::where('created_at', '<', now()->subDays(90))
+                ->delete();
+        })->monthly();
     }
 
     /**

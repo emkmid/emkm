@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Models\Article;
 use App\Services\ArticleImageUploader;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,12 @@ use Inertia\Inertia;
 
 class ArticleController extends Controller
 {
+    protected FeatureService $featureService;
+
+    public function __construct(FeatureService $featureService)
+    {
+        $this->featureService = $featureService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -31,7 +38,46 @@ class ArticleController extends Controller
      */
     public function create()
     {
-        return Inertia::render('dashboard/admin/education/article/create');
+        $user = auth()->user();
+
+        // Check if user has access to create articles
+        if (!$this->featureService->hasAccess($user, 'articles.create')) {
+            return redirect()
+                ->route('articles.index')
+                ->with('error', 'Fitur artikel tidak tersedia di paket Anda.');
+        }
+
+        // Check article limit
+        $articleCount = $user->articles()->count();
+        
+        if ($this->featureService->hasReachedLimit($user, 'articles.max_count', $articleCount)) {
+            $limit = $this->featureService->getLimit($user, 'articles.max_count');
+            
+            return redirect()
+                ->route('articles.index')
+                ->with('error', "Anda telah mencapai batas {$limit} artikel. Upgrade untuk membuat lebih banyak artikel.")
+                ->with('upgrade_prompt', [
+                    'feature' => 'More Articles',
+                    'current_limit' => $limit,
+                    'basic_limit' => 50,
+                    'pro_limit' => 'Unlimited',
+                ]);
+        }
+
+        // Check if user can upload images
+        $canUploadImages = $this->featureService->hasAccess($user, 'articles.images');
+
+        $limit = $this->featureService->getLimit($user, 'articles.max_count');
+
+        return Inertia::render('dashboard/admin/education/article/create', [
+            'canUploadImages' => $canUploadImages,
+            'quota' => [
+                'current' => $articleCount,
+                'limit' => $limit,
+                'remaining' => $this->featureService->getRemainingQuota($user, 'articles.max_count', $articleCount),
+                'is_unlimited' => $limit === -1,
+            ],
+        ]);
     }
 
     /**
@@ -39,12 +85,34 @@ class ArticleController extends Controller
      */
     public function store(StoreArticleRequest $request)
     {
+        $user = $request->user();
+
+        // Double check feature access
+        if (!$this->featureService->hasAccess($user, 'articles.create')) {
+            abort(403, 'Anda tidak memiliki akses ke fitur ini.');
+        }
+
+        // Check limit again
+        $articleCount = $user->articles()->count();
+        if ($this->featureService->hasReachedLimit($user, 'articles.max_count', $articleCount)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Limit artikel tercapai. Upgrade untuk membuat lebih banyak artikel.');
+        }
+
         $validatedData = $request->validated();
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $user->id;
         $validatedData['reading_time'] = $this->calculateReadingTime($validatedData['content_html']);
 
+        // Only allow thumbnail upload if user has access
         if ($request->hasFile('thumbnail_path')) {
-            $validatedData['thumbnail_path'] = $request->file('thumbnail_path')->store('article-images');
+            if ($this->featureService->hasAccess($user, 'articles.images')) {
+                $validatedData['thumbnail_path'] = $request->file('thumbnail_path')->store('article-images');
+            } else {
+                return redirect()
+                    ->back()
+                    ->with('error', 'Upgrade ke paket Basic untuk upload gambar artikel.');
+            }
         }
 
         Article::create($validatedData);

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Package;
+use App\Models\PackageFeature;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -48,10 +50,49 @@ class SubscriptionController extends Controller
             ];
         }
 
+        // Get all features grouped by category
+        $features = PackageFeature::orderBy('category')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('category');
+
+        // Build feature comparison matrix
+        $featureComparison = [];
+        foreach ($features as $category => $categoryFeatures) {
+            $featureComparison[$category] = [];
+            
+            foreach ($categoryFeatures as $feature) {
+                $featureLimits = [];
+                
+                foreach ($packages as $package) {
+                    $limit = DB::table('package_feature_limits')
+                        ->where('package_id', $package->id)
+                        ->where('package_feature_id', $feature->id)
+                        ->first();
+                    
+                    $featureLimits[$package->id] = $limit ? [
+                        'is_enabled' => $limit->is_enabled,
+                        'numeric_limit' => $limit->numeric_limit,
+                        'list_values' => $limit->list_values,
+                    ] : [
+                        'is_enabled' => false,
+                        'numeric_limit' => null,
+                        'list_values' => null,
+                    ];
+                }
+                
+                $featureComparison[$category][] = [
+                    'feature' => $feature,
+                    'limits' => $featureLimits,
+                ];
+            }
+        }
+
         return Inertia::render('Subscription/Index', [
             'packages' => $packages,
             'userSubscription' => $userSubscription,
             'pendingPayment' => $pendingPaymentData,
+            'featureComparison' => $featureComparison,
         ]);
     }
 

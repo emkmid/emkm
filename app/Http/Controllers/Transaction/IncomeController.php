@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ChartOfAccount;
 use App\Models\Income;
 use App\Models\IncomeCategory;
+use App\Services\FeatureService;
 use App\Services\JournalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,12 @@ use Illuminate\Support\Facades\Gate;
 
 class IncomeController extends Controller
 {
+    protected FeatureService $featureService;
+
+    public function __construct(FeatureService $featureService)
+    {
+        $this->featureService = $featureService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -33,12 +40,38 @@ class IncomeController extends Controller
      */
     public function create(): Response
     {
+        $user = auth()->user();
+
+        // Check transaction limit for current month
+        $currentMonth = now()->startOfMonth();
+        $transactionCount = $user->expenses()
+            ->where('date', '>=', $currentMonth)
+            ->count() + $user->incomes()
+            ->where('date', '>=', $currentMonth)
+            ->count();
+
+        if ($this->featureService->hasReachedLimit($user, 'accounting.max_transactions', $transactionCount)) {
+            $limit = $this->featureService->getLimit($user, 'accounting.max_transactions');
+            
+            return redirect()
+                ->route('incomes.index')
+                ->with('error', "Anda telah mencapai batas {$limit} transaksi bulan ini. Upgrade ke Pro untuk unlimited transaksi.");
+        }
+
         $categories = IncomeCategory::whereNull('user_id')
             ->orWhere('user_id', auth()->id())
             ->get();
 
+        $limit = $this->featureService->getLimit($user, 'accounting.max_transactions');
+
         return Inertia::render('dashboard/user/income/create', [
             'categories' => $categories,
+            'quota' => [
+                'current' => $transactionCount,
+                'limit' => $limit,
+                'remaining' => $this->featureService->getRemainingQuota($user, 'accounting.max_transactions', $transactionCount),
+                'is_unlimited' => $limit === -1,
+            ],
         ]);
     }
 
@@ -47,6 +80,22 @@ class IncomeController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+
+        // Check transaction limit again
+        $currentMonth = now()->startOfMonth();
+        $transactionCount = $user->expenses()
+            ->where('date', '>=', $currentMonth)
+            ->count() + $user->incomes()
+            ->where('date', '>=', $currentMonth)
+            ->count();
+
+        if ($this->featureService->hasReachedLimit($user, 'accounting.max_transactions', $transactionCount)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Limit transaksi tercapai. Upgrade untuk membuat lebih banyak transaksi.');
+        }
+
         $validated = $request->validate([
             'date' => 'required|date',
             'income_category_id' => 'required|exists:income_categories,id',
@@ -54,7 +103,7 @@ class IncomeController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $income = Auth::user()->incomes()->create($validated);
+        $income = $user->incomes()->create($validated);
 
         $category = IncomeCategory::with('account')->findOrFail($validated['income_category_id']);
         $pendapatanAccount = $category->account;

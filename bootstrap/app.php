@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckFeatureAccess;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\MustBeAdmin;
@@ -36,7 +37,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'mustBeAdmin' => MustBeAdmin::class
+            'mustBeAdmin' => MustBeAdmin::class,
+            'feature' => CheckFeatureAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

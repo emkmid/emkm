@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, Book, BookOpen, Calculator, CreditCard, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
+import { Bell, Book, BookOpen, Building2, Calculator, CreditCard, FileText, LayoutGrid, NotebookText, Package, Users, UserSquare, Settings } from 'lucide-react';
 
 const mainNavItems: MainNavItem[] = [
     {
@@ -30,7 +30,7 @@ const mainNavItems: MainNavItem[] = [
     {
         title: 'Transaction',
         icon: NotebookText,
-        can: (user) => user?.role === 'user',
+        can: (user, features) => user?.role === 'user' && (features?.['accounting.transactions'] ?? false),
         subItems: [
             {
                 title: 'Pengeluaran',
@@ -53,7 +53,7 @@ const mainNavItems: MainNavItem[] = [
     {
         title: 'Report',
         icon: BookOpen,
-        can: (user) => user?.role === 'user',
+        can: (user, features) => user?.role === 'user' && (features?.['accounting.reports'] ?? false),
         subItems: [
             { title: 'Jurnal Umum', href: '/dashboard/reports/journal' },
             { title: 'Buku Besar', href: '/dashboard/reports/ledger' },
@@ -67,6 +67,28 @@ const mainNavItems: MainNavItem[] = [
         icon: Calculator,
         can: (user) => user?.role === 'user',
         href: '/dashboard/hpp',
+    },
+    {
+        title: 'Invoices',
+        icon: FileText,
+        can: (user, features) => user?.role === 'user' && (features?.['invoices.create'] ?? false),
+        subItems: [
+            {
+                title: 'Kelola Invoice',
+                href: '/dashboard/invoices',
+            },
+            {
+                title: 'Kelola Customer',
+                href: '/dashboard/customers',
+                can: (user, features) => features?.['customers.create'] ?? false,
+            },
+        ],
+    },
+    {
+        title: 'Profil Bisnis',
+        icon: Building2,
+        can: (user, features) => user?.role === 'user' && (features?.['business_profile'] ?? false),
+        href: '/dashboard/business-profile',
     },
     {
         title: 'Paket',
@@ -91,6 +113,12 @@ const mainNavItems: MainNavItem[] = [
         icon: Package,
         can: (user) => user?.role === 'admin',
         href: '/dashboard/admin/packages',
+    },
+    {
+        title: 'Kelola Features',
+        icon: Settings,
+        can: (user) => user?.role === 'admin',
+        href: '/dashboard/admin/features',
     },
     {
         title: 'Kelola Notifikasi',
@@ -150,9 +178,6 @@ export function AppSidebar() {
                 case 'pro':
                     color = 'bg-purple-100 text-purple-700';
                     break;
-                case 'enterprise':
-                    color = 'bg-orange-100 text-orange-700';
-                    break;
                 default:
                     color = 'bg-gray-100 text-gray-700';
             }
@@ -204,7 +229,11 @@ export function AppSidebar() {
                     </div>
                     {planInfo.status === 'active' && planInfo.name !== 'Free' && planInfo.expiresAt && (
                         <div className="text-xs text-muted-foreground mt-1">
-                            Berakhir: {new Date(planInfo.expiresAt).toLocaleDateString('id-ID')}
+                            Berakhir: {new Date(planInfo.expiresAt).toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                            })}
                         </div>
                     )}
                     {(planInfo.status === 'expired' || planInfo.name === 'Free') && (
