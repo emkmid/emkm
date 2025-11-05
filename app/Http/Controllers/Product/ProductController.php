@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Services\FeatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -12,6 +13,13 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
+    protected FeatureService $featureService;
+
+    public function __construct(FeatureService $featureService)
+    {
+        $this->featureService = $featureService;
+    }
+
     /**
      * Menampilkan daftar produk milik pengguna.
      */
@@ -29,6 +37,11 @@ class ProductController extends Controller
      */
     public function create(): Response
     {
+        $user = auth()->user();
+
+        // Products tidak punya limit, tapi bisa ditambahkan kalau perlu
+        // Untuk saat ini, semua user bisa create unlimited products
+        
         return Inertia::render('dashboard/user/product/create', [
             'categories' => ProductCategory::whereNull('user_id')->orWhere('user_id', auth()->id())->get(['id', 'name']),
         ]);

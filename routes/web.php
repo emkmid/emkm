@@ -94,12 +94,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('receivables', ReceivableController::class);
         });
 
+        // Category routes - available to all authenticated users
         Route::resource('expense-category', ExpenseCategoryController::class);
         Route::resource('income-category', IncomeCategoryController::class);
-
-        Route::resource('products', ProductController::class);
         Route::resource('product-category', ProductCategoryController::class);
 
+        // Product routes - available to all authenticated users
+        Route::resource('products', ProductController::class);
+
+        // Reports routes - protected by accounting.reports feature
         Route::prefix('reports')->middleware(['feature:accounting.reports'])->group(function () {
             Route::get('journal', [JournalController::class, 'index'])->name('journal.index');
             Route::get('ledger',[AccountingReportController::class, 'ledger'])->name('reports.ledger');
@@ -111,8 +114,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Admin
         Route::prefix('admin')->middleware(['mustBeAdmin', 'web'])->group(function() {
             Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+            
+            // Article management (admin only)
             Route::resource('articles', ArticleController::class);
             Route::post('uploads/article-media', [ArticleController::class, 'upload'])->name('articles.upload')->middleware('throttle:20,1');
+            
             Route::resource('users', AdminUserController::class)->except(['show']);
             Route::post('users/{user}/subscribe', [AdminSubscriptionController::class, 'store'])->name('admin.users.subscribe');
             Route::resource('packages', AdminPackageController::class)->except(['show'])->names('admin.packages');
@@ -134,14 +140,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('features/update-limit', [PackageFeatureController::class, 'updateLimit'])->name('admin.features.update-limit');
             Route::post('features/bulk-update', [PackageFeatureController::class, 'bulkUpdate'])->name('admin.features.bulk-update');
             
-            // Backup routes
+            // Backup routes (admin only, no user package restrictions)
             Route::get('backups', [BackupController::class, 'index'])->name('admin.backups.index');
             Route::post('backups', [BackupController::class, 'create'])->name('admin.backups.create');
             Route::get('backups/{backup}/download', [BackupController::class, 'download'])->name('admin.backups.download');
             Route::post('backups/{backup}/restore', [BackupController::class, 'restore'])->name('admin.backups.restore');
             Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->name('admin.backups.destroy');
             
-            // Audit Log routes
+            // Audit Log routes (admin only, no user package restrictions)
             Route::get('audit-logs', [AuditLogController::class, 'index'])->name('admin.audit-logs.index');
             Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('admin.audit-logs.show');
         });
@@ -187,7 +193,9 @@ Route::middleware('auth')->group(function () {
 });
 
 // Webhook routes (no auth middleware needed for webhooks)
-Route::post('webhooks/midtrans', [\App\Http\Controllers\MidtransWebhookController::class, 'handle'])->name('webhooks.midtrans');
+Route::post('webhooks/midtrans', [\App\Http\Controllers\MidtransWebhookController::class, 'handle'])
+    ->name('webhooks.midtrans')
+    ->middleware('throttle:100,1'); // Rate limit: 100 requests per minute
 
 // Test API route for debugging
 Route::post('api/test-checkout', function(Request $request) {

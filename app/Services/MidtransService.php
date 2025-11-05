@@ -347,13 +347,47 @@ class MidtransService
                 'ends_at' => $subscription->ends_at,
             ]);
 
-            // Send activation notification (if notification class exists)
+            // Send activation notification email
             try {
-                if (class_exists(\App\Notifications\SubscriptionActivatedNotification::class)) {
-                    $subscription->user->notify(new \App\Notifications\SubscriptionActivatedNotification($subscription));
-                }
+                \Mail::to($subscription->user)->send(
+                    new \App\Mail\SubscriptionActivatedMail($subscription)
+                );
             } catch (\Exception $e) {
-                \Log::warning('Failed to send subscription activation notification', [
+                \Log::warning('Failed to send activation email', [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Send payment success email
+            try {
+                $amount = $subscription->price_cents / 100;
+                \Mail::to($subscription->user)->send(
+                    new \App\Mail\PaymentSuccessMail(
+                        $subscription,
+                        $subscription->midtrans_transaction_id ?? 'N/A',
+                        $amount
+                    )
+                );
+            } catch (\Exception $e) {
+                \Log::warning('Failed to send payment success email', [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Create in-app notification
+            try {
+                \App\Models\UserNotification::create([
+                    'user_id' => $subscription->user_id,
+                    'type' => 'success',
+                    'title' => 'Subscription Activated',
+                    'message' => "Your {$subscription->package->name} subscription is now active!",
+                    'action_text' => 'View Dashboard',
+                    'action_url' => route('dashboard'),
+                ]);
+            } catch (\Exception $e) {
+                \Log::warning('Failed to create in-app notification', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
                 ]);
