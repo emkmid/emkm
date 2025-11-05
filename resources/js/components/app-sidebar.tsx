@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, Book, BookOpen, Building2, Calculator, CreditCard, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
+import { Bell, Book, BookOpen, Building2, Calculator, CreditCard, FileText, LayoutGrid, NotebookText, Package, Users, UserSquare } from 'lucide-react';
 
 const mainNavItems: MainNavItem[] = [
     {
@@ -67,6 +67,21 @@ const mainNavItems: MainNavItem[] = [
         icon: Calculator,
         can: (user) => user?.role === 'user',
         href: '/dashboard/hpp',
+    },
+    {
+        title: 'Invoices',
+        icon: FileText,
+        can: (user) => user?.role === 'user',
+        subItems: [
+            {
+                title: 'Kelola Invoice',
+                href: '/invoices',
+            },
+            {
+                title: 'Kelola Customer',
+                href: '/customers',
+            },
+        ],
     },
     {
         title: 'Profil Bisnis',

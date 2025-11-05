@@ -127,6 +127,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all customers for this user.
+     */
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    /**
+     * Get all invoices for this user.
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
      * User subscriptions (history). A user can have many subscriptions over time.
      */
     public function subscriptions()

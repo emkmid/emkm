@@ -7,10 +7,12 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\BusinessProfileController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Dashboard\AdminDashboardController;
 use App\Http\Controllers\Dashboard\UserDashboardController;
 use App\Http\Controllers\Education\ArticleController;
 use App\Http\Controllers\Education\EducationController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
@@ -56,6 +58,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('business-profile/edit', [BusinessProfileController::class, 'edit'])->name('business-profile.edit');
         Route::post('business-profile/update', [BusinessProfileController::class, 'update'])->name('business-profile.update');
         Route::delete('business-profile', [BusinessProfileController::class, 'destroy'])->name('business-profile.destroy');
+
+        // Customers
+        Route::resource('customers', CustomerController::class);
+        Route::get('customers-list', [CustomerController::class, 'list'])->name('customers.list');
+
+        // Invoices
+        Route::resource('invoices', InvoiceController::class);
+        Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+        Route::post('invoices/{invoice}/mark-sent', [InvoiceController::class, 'markAsSent'])->name('invoices.mark-sent');
+        Route::post('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
 
         // Packages page for users
         Route::get('packages', [\App\Http\Controllers\SubscriptionController::class, 'page'])->name('dashboard.packages');
