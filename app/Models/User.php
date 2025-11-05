@@ -121,6 +121,11 @@ class User extends Authenticatable
         return $this->hasMany(UserNotification::class)->unread();
     }
 
+    public function businessProfile()
+    {
+        return $this->hasOne(BusinessProfile::class);
+    }
+
     /**
      * User subscriptions (history). A user can have many subscriptions over time.
      */

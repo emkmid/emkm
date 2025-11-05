@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminPackageController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\BusinessProfileController;
 use App\Http\Controllers\Dashboard\AdminDashboardController;
 use App\Http\Controllers\Dashboard\UserDashboardController;
 use App\Http\Controllers\Education\ArticleController;
@@ -47,6 +48,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('notifications/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
         Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
         Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+        // Business Profile
+        Route::get('business-profile', [BusinessProfileController::class, 'index'])->name('business-profile.index');
+        Route::get('business-profile/create', [BusinessProfileController::class, 'create'])->name('business-profile.create');
+        Route::post('business-profile', [BusinessProfileController::class, 'store'])->name('business-profile.store');
+        Route::get('business-profile/edit', [BusinessProfileController::class, 'edit'])->name('business-profile.edit');
+        Route::post('business-profile/update', [BusinessProfileController::class, 'update'])->name('business-profile.update');
+        Route::delete('business-profile', [BusinessProfileController::class, 'destroy'])->name('business-profile.destroy');
 
         // Packages page for users
         Route::get('packages', [\App\Http\Controllers\SubscriptionController::class, 'page'])->name('dashboard.packages');

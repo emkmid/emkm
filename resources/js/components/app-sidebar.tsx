@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, Book, BookOpen, Calculator, CreditCard, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
+import { Bell, Book, BookOpen, Building2, Calculator, CreditCard, LayoutGrid, NotebookText, Package, Users } from 'lucide-react';
 
 const mainNavItems: MainNavItem[] = [
     {
@@ -67,6 +67,12 @@ const mainNavItems: MainNavItem[] = [
         icon: Calculator,
         can: (user) => user?.role === 'user',
         href: '/dashboard/hpp',
+    },
+    {
+        title: 'Profil Bisnis',
+        icon: Building2,
+        can: (user) => user?.role === 'user',
+        href: '/business-profile',
     },
     {
         title: 'Paket',
