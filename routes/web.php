@@ -4,6 +4,8 @@ use App\Http\Controllers\AccountingReportController;
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\AdminPackageController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Dashboard\AdminDashboardController;
 use App\Http\Controllers\Dashboard\UserDashboardController;
 use App\Http\Controllers\Education\ArticleController;
@@ -78,6 +80,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('payments/export', [\App\Http\Controllers\AdminPaymentController::class, 'exportNotifications'])->name('admin.payments.export');
             Route::get('subscriptions/list', [\App\Http\Controllers\AdminPaymentController::class, 'subscriptionsList'])->name('admin.subscriptions.list');
             Route::resource('notifications', AdminNotificationController::class)->except(['show']);
+            
+            // Backup routes
+            Route::get('backups', [BackupController::class, 'index'])->name('admin.backups.index');
+            Route::post('backups', [BackupController::class, 'create'])->name('admin.backups.create');
+            Route::get('backups/{backup}/download', [BackupController::class, 'download'])->name('admin.backups.download');
+            Route::post('backups/{backup}/restore', [BackupController::class, 'restore'])->name('admin.backups.restore');
+            Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->name('admin.backups.destroy');
+            
+            // Audit Log routes
+            Route::get('audit-logs', [AuditLogController::class, 'index'])->name('admin.audit-logs.index');
+            Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('admin.audit-logs.show');
         });
     });
 });

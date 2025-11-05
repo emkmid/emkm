@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use App\Traits\HasHashid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class Income extends Model
 {
-    use HasFactory, HasHashid;
+    use HasFactory, HasHashid, Auditable;
 
     /**
      * The attributes that are mass assignable.
