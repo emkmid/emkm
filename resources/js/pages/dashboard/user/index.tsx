@@ -12,10 +12,20 @@ import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 
 export default function DashboardUser() {
-    const { summary, incomeExpenseTrends, expenseCategories, recentTransactions, overdueReceivables, upcomingDebts, lowStockProducts } = usePage()
-        .props as any;
+    const { 
+        summary, 
+        counts,
+        subscription,
+        incomeExpenseTrends, 
+        expenseCategories, 
+        recentTransactions, 
+        overdueReceivables, 
+        upcomingDebts, 
+        lowStockProducts,
+        selectedPeriod: initialPeriod
+    } = usePage().props as any;
 
-    const [selectedPeriod, setSelectedPeriod] = useState('current_month');
+    const [selectedPeriod, setSelectedPeriod] = useState(initialPeriod || 'current_month');
     const [isLoading, setIsLoading] = useState(false);
 
     const handlePeriodChange = (value: string) => {
@@ -89,7 +99,40 @@ export default function DashboardUser() {
     return (
         <AppLayout>
             <Head title="Dashboard" />
-            <div className="flex flex-col gap-6 p-4">
+            <div className="flex flex-col gap-6 p-6">
+                {/* Header with Subscription Info */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                        <p className="text-muted-foreground">
+                            Selamat datang kembali! Berikut adalah ringkasan bisnis Anda.
+                        </p>
+                    </div>
+                    {subscription && (
+                        <div className="flex items-center gap-3">
+                            <div className="text-right">
+                                <p className="text-sm font-medium">{subscription.package_name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    {subscription.days_remaining !== null && subscription.days_remaining >= 0 
+                                        ? `${subscription.days_remaining} hari tersisa`
+                                        : subscription.status === 'active' ? 'Aktif' : subscription.status}
+                                </p>
+                            </div>
+                            <span
+                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                                    subscription.status === 'active'
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                        : subscription.status === 'trial'
+                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                }`}
+                            >
+                                {subscription.status}
+                            </span>
+                        </div>
+                    )}
+                </div>
+
                 <Breadcrumbs breadcrumbs={[{ title: 'Dashboard', href: '' }]} />
 
                 {/* Period Filter */}
@@ -109,88 +152,154 @@ export default function DashboardUser() {
                 </div>
 
                 {/* KPI cards */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card className="md:col-span-1">
-                        <CardHeader>
-                            <CardTitle>Saldo Kas</CardTitle>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Saldo Kas</CardTitle>
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             {isLoading ? (
                                 <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                             ) : (
-                                <div className="text-xl font-bold">Rp {(summary.cash || 0).toLocaleString()}</div>
+                                <>
+                                    <div className="text-2xl font-bold">Rp {(summary.cash || 0).toLocaleString()}</div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Saldo kas saat ini
+                                    </p>
+                                </>
                             )}
                         </CardContent>
                     </Card>
                     <Card className="md:col-span-1">
-                        <CardHeader>
-                            <CardTitle>Pendapatan (Bulan)</CardTitle>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Pendapatan</CardTitle>
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             {isLoading ? (
                                 <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                             ) : (
-                                <div className="text-xl font-bold text-green-600">Rp {(summary.income || 0).toLocaleString()}</div>
+                                <>
+                                    <div className="text-2xl font-bold text-green-600">Rp {(summary.income || 0).toLocaleString()}</div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Periode terpilih
+                                    </p>
+                                </>
                             )}
                         </CardContent>
                     </Card>
                     <Card className="md:col-span-1">
-                        <CardHeader>
-                            <CardTitle>Biaya (Bulan)</CardTitle>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Biaya</CardTitle>
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             {isLoading ? (
                                 <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                             ) : (
-                                <div className="text-xl font-bold text-red-600">Rp {(summary.expense || 0).toLocaleString()}</div>
+                                <>
+                                    <div className="text-2xl font-bold text-red-600">Rp {(summary.expense || 0).toLocaleString()}</div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Periode terpilih
+                                    </p>
+                                </>
                             )}
                         </CardContent>
                     </Card>
                     <Card className="md:col-span-1">
-                        <CardHeader>
-                            <CardTitle>Laba (Bulan)</CardTitle>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Laba/Rugi</CardTitle>
+                            <BarChart3 className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             {isLoading ? (
                                 <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                             ) : (
-                                <div className="text-xl font-bold text-blue-600">Rp {(summary.profit || 0).toLocaleString()}</div>
+                                <>
+                                    <div className={`text-2xl font-bold ${summary.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                        Rp {(summary.profit || 0).toLocaleString()}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        {summary.profit >= 0 ? 'Laba' : 'Rugi'} periode terpilih
+                                    </p>
+                                </>
                             )}
                         </CardContent>
                     </Card>
-                    <Card className="md:col-span-1">
-                        <CardHeader>
-                            <CardTitle>Piutang Overdue</CardTitle>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Transaksi</CardTitle>
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{counts?.transactions || 0}</div>
+                            <p className="text-xs text-muted-foreground">
+                                {counts?.incomes || 0} income, {counts?.expenses || 0} expense
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Produk</CardTitle>
+                            <Package className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{counts?.products || 0}</div>
+                            <p className="text-xs text-muted-foreground">
+                                Produk terdaftar
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Piutang Overdue</CardTitle>
+                            <FileText className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             {isLoading ? (
                                 <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                             ) : (
-                                <div className="text-lg font-semibold text-amber-600">
-                                    Rp{' '}
-                                    {(overdueReceivables?.sum
-                                        ? overdueReceivables.sum
-                                        : overdueReceivables?.reduce((s: any, r: any) => s + (parseFloat(r.amount) - parseFloat(r.paid_amount)), 0) || 0
-                                    ).toLocaleString()}
-                                </div>
+                                <>
+                                    <div className="text-2xl font-bold text-amber-600">
+                                        {overdueReceivables?.length || 0}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Rp{' '}
+                                        {(overdueReceivables?.reduce
+                                            ? overdueReceivables.reduce((s: any, r: any) => s + (parseFloat(r.amount) - parseFloat(r.paid_amount)), 0)
+                                            : 0
+                                        ).toLocaleString()}
+                                    </p>
+                                </>
                             )}
                         </CardContent>
                     </Card>
-                    <Card className="md:col-span-1">
-                        <CardHeader>
-                            <CardTitle>Hutang 30 hari</CardTitle>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Hutang 30 Hari</CardTitle>
+                            <FileText className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             {isLoading ? (
                                 <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                             ) : (
-                                <div className="text-lg font-semibold text-rose-600">
-                                    Rp{' '}
-                                    {(upcomingDebts?.reduce
-                                        ? upcomingDebts.reduce((s: any, d: any) => s + (parseFloat(d.amount) - parseFloat(d.paid_amount)), 0)
-                                        : 0
-                                    ).toLocaleString()}
-                                </div>
+                                <>
+                                    <div className="text-2xl font-bold text-rose-600">
+                                        {upcomingDebts?.length || 0}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Rp{' '}
+                                        {(upcomingDebts?.reduce
+                                            ? upcomingDebts.reduce((s: any, d: any) => s + (parseFloat(d.amount) - parseFloat(d.paid_amount)), 0)
+                                            : 0
+                                        ).toLocaleString()}
+                                    </p>
+                                </>
                             )}
                         </CardContent>
                     </Card>

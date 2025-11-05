@@ -19,6 +19,7 @@ class UserDashboardController extends Controller
     public function index(Request $request)
     {
         $userId = Auth::id();
+        $user = Auth::user();
         $today = Carbon::today();
         $period = $request->get('period', 'current_month');
 
@@ -118,6 +119,7 @@ class UserDashboardController extends Controller
             ->join('chart_of_accounts as coa', 'coa.id', '=', 'journal_entries.account_id')
             ->where('journals.user_id', $userId)
             ->where('coa.type', 'biaya')
+            ->whereBetween('journals.date', [$startOfPeriod, $endOfPeriod])
             ->select('coa.name as name', DB::raw('SUM(journal_entries.amount) as value'))
             ->groupBy('coa.name')
             ->orderByDesc('value')
@@ -158,6 +160,24 @@ class UserDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // 8) Total counts
+        $totalProducts = Product::where('user_id', $userId)->count();
+        $totalExpenses = $user->expenses()->count();
+        $totalIncomes = $user->incomes()->count();
+        $totalTransactions = $totalExpenses + $totalIncomes;
+
+        // 9) Subscription info
+        $subscription = $user->currentSubscription;
+        $subscriptionStatus = null;
+        if ($subscription) {
+            $subscriptionStatus = [
+                'package_name' => $subscription->package->name ?? 'Unknown',
+                'status' => $subscription->status,
+                'ends_at' => $subscription->ends_at?->format('Y-m-d'),
+                'days_remaining' => $subscription->ends_at ? max(0, Carbon::now()->diffInDays($subscription->ends_at, false)) : null,
+            ];
+        }
+
         return Inertia::render('dashboard/user/index', [
             'summary' => [
                 'cash' => (float) $cash,
@@ -165,12 +185,20 @@ class UserDashboardController extends Controller
                 'expense' => (float) $expense,
                 'profit' => (float) $profit,
             ],
+            'counts' => [
+                'products' => $totalProducts,
+                'transactions' => $totalTransactions,
+                'expenses' => $totalExpenses,
+                'incomes' => $totalIncomes,
+            ],
+            'subscription' => $subscriptionStatus,
             'incomeExpenseTrends' => $trends,
             'expenseCategories' => $expenseCategories,
             'recentTransactions' => $recentTransactions,
             'overdueReceivables' => $overdueReceivables,
             'upcomingDebts' => $upcomingDebts,
             'lowStockProducts' => $lowStockProducts,
+            'selectedPeriod' => $period,
         ]);
     }
 }
