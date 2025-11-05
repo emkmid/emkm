@@ -53,22 +53,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
         // Business Profile
-        Route::get('business-profile', [BusinessProfileController::class, 'index'])->name('business-profile.index');
-        Route::get('business-profile/create', [BusinessProfileController::class, 'create'])->name('business-profile.create');
-        Route::post('business-profile', [BusinessProfileController::class, 'store'])->name('business-profile.store');
-        Route::get('business-profile/edit', [BusinessProfileController::class, 'edit'])->name('business-profile.edit');
-        Route::post('business-profile/update', [BusinessProfileController::class, 'update'])->name('business-profile.update');
-        Route::delete('business-profile', [BusinessProfileController::class, 'destroy'])->name('business-profile.destroy');
+        Route::middleware(['feature:business_profile'])->group(function () {
+            Route::get('business-profile', [BusinessProfileController::class, 'index'])->name('business-profile.index');
+            Route::get('business-profile/create', [BusinessProfileController::class, 'create'])->name('business-profile.create');
+            Route::post('business-profile', [BusinessProfileController::class, 'store'])->name('business-profile.store');
+            Route::get('business-profile/edit', [BusinessProfileController::class, 'edit'])->name('business-profile.edit');
+            Route::post('business-profile/update', [BusinessProfileController::class, 'update'])->name('business-profile.update');
+            Route::delete('business-profile', [BusinessProfileController::class, 'destroy'])->name('business-profile.destroy');
+        });
 
         // Customers
-        Route::resource('customers', CustomerController::class);
-        Route::get('customers-list', [CustomerController::class, 'list'])->name('customers.list');
+        Route::middleware(['feature:customers.create'])->group(function () {
+            Route::resource('customers', CustomerController::class);
+            Route::get('customers-list', [CustomerController::class, 'list'])->name('customers.list');
+        });
 
         // Invoices
-        Route::resource('invoices', InvoiceController::class);
-        Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
-        Route::post('invoices/{invoice}/mark-sent', [InvoiceController::class, 'markAsSent'])->name('invoices.mark-sent');
-        Route::post('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
+        Route::middleware(['feature:invoices.create'])->group(function () {
+            Route::resource('invoices', InvoiceController::class);
+            Route::post('invoices/{invoice}/mark-sent', [InvoiceController::class, 'markAsSent'])->name('invoices.mark-sent');
+            Route::post('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
+        });
+        
+        // Invoice PDF Export (separate feature)
+        Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])
+            ->name('invoices.pdf')
+            ->middleware(['feature:invoices.pdf_export']);
 
         // Packages page for users
         Route::get('packages', [\App\Http\Controllers\SubscriptionController::class, 'page'])->name('dashboard.packages');
@@ -87,7 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('products', ProductController::class);
         Route::resource('product-category', ProductCategoryController::class);
 
-        Route::prefix('reports')->group(function () {
+        Route::prefix('reports')->middleware(['feature:accounting.reports'])->group(function () {
             Route::get('journal', [JournalController::class, 'index'])->name('journal.index');
             Route::get('ledger',[AccountingReportController::class, 'ledger'])->name('reports.ledger');
             Route::get('trial-balance', [AccountingReportController::class, 'trialBalance'])->name('reports.trial-balance');

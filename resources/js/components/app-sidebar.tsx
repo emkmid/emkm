@@ -53,7 +53,7 @@ const mainNavItems: MainNavItem[] = [
     {
         title: 'Report',
         icon: BookOpen,
-        can: (user) => user?.role === 'user',
+        can: (user, features) => user?.role === 'user' && (features?.['accounting.reports'] ?? false),
         subItems: [
             { title: 'Jurnal Umum', href: '/dashboard/reports/journal' },
             { title: 'Buku Besar', href: '/dashboard/reports/ledger' },
@@ -71,7 +71,7 @@ const mainNavItems: MainNavItem[] = [
     {
         title: 'Invoices',
         icon: FileText,
-        can: (user) => user?.role === 'user',
+        can: (user, features) => user?.role === 'user' && (features?.['invoices.create'] ?? false),
         subItems: [
             {
                 title: 'Kelola Invoice',
@@ -80,13 +80,14 @@ const mainNavItems: MainNavItem[] = [
             {
                 title: 'Kelola Customer',
                 href: '/dashboard/customers',
+                can: (user, features) => features?.['customers.create'] ?? false,
             },
         ],
     },
     {
         title: 'Profil Bisnis',
         icon: Building2,
-        can: (user) => user?.role === 'user',
+        can: (user, features) => user?.role === 'user' && (features?.['business_profile'] ?? false),
         href: '/dashboard/business-profile',
     },
     {
@@ -228,7 +229,11 @@ export function AppSidebar() {
                     </div>
                     {planInfo.status === 'active' && planInfo.name !== 'Free' && planInfo.expiresAt && (
                         <div className="text-xs text-muted-foreground mt-1">
-                            Berakhir: {new Date(planInfo.expiresAt).toLocaleDateString('id-ID')}
+                            Berakhir: {new Date(planInfo.expiresAt).toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                            })}
                         </div>
                     )}
                     {(planInfo.status === 'expired' || planInfo.name === 'Free') && (

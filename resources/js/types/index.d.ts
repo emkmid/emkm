@@ -3,6 +3,7 @@ import type { Config } from 'ziggy-js';
 
 export interface Auth {
     user: User;
+    features?: Record<string, boolean>;
 }
 
 export interface BreadcrumbItem {
@@ -54,7 +55,7 @@ export interface MainNavItem {
     isActive?: boolean;
     href?: string;
     subItems?: SubItems[];
-    can?: (user: User) => boolean;
+    can?: (user: User, features?: Record<string, boolean>) => boolean;
 }
 
 export interface SubItems {
@@ -62,7 +63,7 @@ export interface SubItems {
     icon?: LucideIcon | null;
     isActive?: boolean;
     href: string;
-    can?: (user: User) => boolean;
+    can?: (user: User, features?: Record<string, boolean>) => boolean;
 }
 
 export interface SharedData {

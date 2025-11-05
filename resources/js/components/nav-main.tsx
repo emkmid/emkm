@@ -19,6 +19,7 @@ export function NavMain({ items = [] }: { items: MainNavItem[] }) {
     const currentPath = page.url;
     const { auth } = page.props as any;
     const user = auth.user;
+    const features = auth.features || {};
 
     return (
         <SidebarGroup className="px-2 py-0">
@@ -26,7 +27,7 @@ export function NavMain({ items = [] }: { items: MainNavItem[] }) {
             <SidebarMenu>
                 {items
                     // filter parent berdasarkan can
-                    .filter((item) => !item.can || item.can(user))
+                    .filter((item) => !item.can || item.can(user, features))
                     .map((item) => {
                         const hasSubItems = item.subItems?.length && item.subItems.length > 0;
 
@@ -47,7 +48,7 @@ export function NavMain({ items = [] }: { items: MainNavItem[] }) {
                                     <CollapsibleContent>
                                         <SidebarMenuSub>
                                             {item.subItems
-                                                ?.filter((sub) => !sub.can || sub.can(user))
+                                                ?.filter((sub) => !sub.can || sub.can(user, features))
                                                 .map((subItem) => {
                                                     const isSubActive = currentPath.startsWith(subItem.href);
                                                     return (

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\FeatureService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -41,6 +42,8 @@ class HandleInertiaRequests extends Middleware
 
         // Get user with current subscription
         $user = $request->user();
+        $featureAccess = [];
+        
         if ($user) {
             // Load current active subscription with package
             $currentSubscription = $user->subscriptions()
@@ -58,6 +61,32 @@ class HandleInertiaRequests extends Middleware
             
             // Get unread notification count
             $unreadNotificationCount = $user->unreadNotifications()->count();
+            
+            // Get feature access
+            $featureService = app(FeatureService::class);
+            $featureAccess = [
+                // Accounting features
+                'accounting.transactions' => $featureService->hasAccess($user, 'accounting.transactions'),
+                'accounting.reports' => $featureService->hasAccess($user, 'accounting.reports'),
+                'accounting.journal' => $featureService->hasAccess($user, 'accounting.journal'),
+                
+                // Articles features
+                'articles.create' => $featureService->hasAccess($user, 'articles.create'),
+                
+                // Branding features
+                'business_profile' => $featureService->hasAccess($user, 'business_profile'),
+                
+                // Customer features
+                'customers.create' => $featureService->hasAccess($user, 'customers.create'),
+                
+                // Invoice features
+                'invoices.create' => $featureService->hasAccess($user, 'invoices.create'),
+                'invoices.pdf_export' => $featureService->hasAccess($user, 'invoices.pdf_export'),
+                'invoices.email_send' => $featureService->hasAccess($user, 'invoices.email_send'),
+                
+                // Advanced features
+                'backup' => $featureService->hasAccess($user, 'backup'),
+            ];
         } else {
             $unreadNotificationCount = 0;
         }
@@ -69,6 +98,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
                 'unreadNotificationCount' => $unreadNotificationCount,
+                'features' => $featureAccess,
             ],
             'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
