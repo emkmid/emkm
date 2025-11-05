@@ -111,6 +111,16 @@ class User extends Authenticatable
                     ->withTimestamps();
     }
 
+    public function userNotifications()
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->hasMany(UserNotification::class)->unread();
+    }
+
     /**
      * User subscriptions (history). A user can have many subscriptions over time.
      */

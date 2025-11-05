@@ -55,6 +55,11 @@ class HandleInertiaRequests extends Middleware
             
             // Set current subscription as an appended attribute
             $user->setAttribute('current_subscription', $currentSubscription);
+            
+            // Get unread notification count
+            $unreadNotificationCount = $user->unreadNotifications()->count();
+        } else {
+            $unreadNotificationCount = 0;
         }
 
         return [
@@ -63,6 +68,7 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $user,
+                'unreadNotificationCount' => $unreadNotificationCount,
             ],
             'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
