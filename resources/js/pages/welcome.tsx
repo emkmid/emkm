@@ -107,15 +107,15 @@ export default function Welcome() {
 
                         {/* Action Buttons (Desktop) */}
                         <div className="hidden items-center space-x-4 sm:flex">
-                            <a href="signin.html" className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition">
+                            <Link href="/login" className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition">
                                 Sign In
-                            </a>
-                            <a
-                                href="signup.html"
+                            </Link>
+                            <Link
+                                href="/register"
                                 className="rounded-md border border-[#23627C] bg-white px-5 py-2 text-base font-medium text-[#23627C] transition hover:bg-[#23627C] hover:text-white"
                             >
                                 Sign Up
-                            </a>
+                            </Link>
                         </div>
 
                         {/* Hamburger Button (Mobile) */}
@@ -165,15 +165,15 @@ export default function Welcome() {
 
                             {/* Mobile Action Buttons */}
                             <div className="flex flex-col space-y-3 pt-4">
-                                <a href="signin.html" className="rounded-md bg-primary px-6 py-2 text-base font-medium text-white transition">
+                                <Link href="/login" className="rounded-md bg-primary px-6 py-2 text-base font-medium text-white transition">
                                     Sign In
-                                </a>
-                                <a
-                                    href="signup.html"
+                                </Link>
+                                <Link
+                                    href="/register"
                                     className="rounded-md border border-[#23627C] bg-white/80 px-6 py-2 text-base font-medium text-[#23627C] transition hover:bg-[#23627C] hover:text-white"
                                 >
                                     Sign Up
-                                </a>
+                                </Link>
                             </div>
                         </nav>
                     </div>
@@ -222,49 +222,69 @@ export default function Welcome() {
                                             </a>
                                         </li>
                                     </ul>
-                                    <div>
-                                        <p className="mb-4 text-center text-base font-medium text-white">Berkerja sama dan disponsori oleh</p>
-                                        <div className="wow fadeInUp flex items-center justify-center gap-4 text-center" data-wow-delay=".3s">
-                                            <a href="#" className="group duration-300 ease-in-out" target="_blank">
-                                                <img
-                                                    src="/images/rb-logo.png"
-                                                    alt="Rumah BUMN Logo"
-                                                    className="h-8 w-auto opacity-60 grayscale filter transition group-hover:opacity-100 group-hover:grayscale-0"
-                                                />
-                                            </a>
-                                            <a href="#" className="group duration-300 ease-in-out" target="_blank">
-                                                <img
-                                                    src="/images/p2pmw-logo.png"
-                                                    alt="p2mw"
-                                                    className="h-8 w-auto opacity-60 grayscale filter transition group-hover:opacity-100 group-hover:grayscale-0"
-                                                />
-                                            </a>
+                                    
+                                    {/* Partner Section - Improved UI/UX */}
+                                    <div className="mt-16 mb-8">
+                                        <div className="mx-auto max-w-3xl">
+                                            {/* Header dengan better typography & spacing */}
+                                            <div className="mb-8 text-center">
+                                                <span className="mb-3 inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/90 backdrop-blur-sm">
+                                                    Partnership
+                                                </span>
+                                                <h3 className="text-xl font-semibold text-white sm:text-2xl">
+                                                    Bekerja Sama & Disponsori Oleh
+                                                </h3>
+                                            </div>
 
-                                            {/* <a href="#" className="text-white/60 duration-300 ease-in-out hover:text-white" target="_blank">
-                                                <svg
-                                                    className="fill-current"
-                                                    width="41"
-                                                    height="26"
-                                                    viewBox="0 0 41 26"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
+                                            {/* Logo Container dengan better layout & interaction */}
+                                            <div 
+                                                className="wow fadeInUp flex flex-wrap items-center justify-center gap-8 md:gap-12" 
+                                                data-wow-delay=".3s"
+                                            >
+                                                {/* Rumah BUMN Logo */}
+                                                <a 
+                                                    href="#" 
+                                                    className="group relative flex items-center justify-center rounded-xl bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:scale-105 hover:shadow-xl" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
                                                 >
-                                                    <mask
-                                                        id="mask0_2005_10783"
-                                                        style={{ maskType: 'luminance' }}
-                                                        maskUnits="userSpaceOnUse"
-                                                        x="0"
-                                                        y="0"
-                                                        width="41"
-                                                        height="26"
-                                                    >
-                                                        <path d="M0.521393 0.949463H40.5214V25.0135H0.521393V0.949463Z" />
-                                                    </mask>
-                                                    <g mask="url(#mask0_2005_10783)">
-                                                        <path d="M20.5214 0.980713C15.1882 0.980713 11.8546 3.64743 10.5214 8.98071C12.5214 6.31399 14.8546 5.31399 17.5214 5.98071C19.043 6.36103 20.1302 7.46495 21.3342 8.68667C23.295 10.6771 25.5642 12.9807 30.5214 12.9807C35.8546 12.9807 39.1882 10.314 40.5214 4.98071C38.5214 7.64743 36.1882 8.64743 33.5214 7.98071C31.9998 7.60039 30.9126 6.49651 29.7086 5.27479C27.7478 3.28431 25.4786 0.980713 20.5214 0.980713ZM10.5214 12.9807C5.18819 12.9807 1.85459 15.6474 0.521393 20.9807C2.52139 18.314 4.85459 17.314 7.52139 17.9807C9.04299 18.361 10.1302 19.465 11.3342 20.6867C13.295 22.6771 15.5642 24.9807 20.5214 24.9807C25.8546 24.9807 29.1882 22.314 30.5214 16.9807C28.5214 19.6474 26.1882 20.6474 23.5214 19.9807C21.9998 19.6004 20.9126 18.4965 19.7086 17.2748C17.7478 15.2843 15.4786 12.9807 10.5214 12.9807Z" />
-                                                    </g>
-                                                </svg>
-                                            </a> */}
+                                                    <div className="relative">
+                                                        <img
+                                                            src="/images/rb-logo.png"
+                                                            alt="Rumah BUMN"
+                                                            className="h-12 w-auto object-contain opacity-90 transition-all duration-300 group-hover:opacity-100 sm:h-14 md:h-16"
+                                                        />
+                                                        {/* Glow effect on hover */}
+                                                        <div className="absolute inset-0 -z-10 rounded-xl bg-white/0 blur-xl transition-all duration-300 group-hover:bg-white/20"></div>
+                                                    </div>
+                                                </a>
+
+                                                {/* Divider */}
+                                                <div className="hidden h-12 w-px bg-white/20 md:block"></div>
+
+                                                {/* P2PMW Logo */}
+                                                <a 
+                                                    href="#" 
+                                                    className="group relative flex items-center justify-center rounded-xl bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:scale-105 hover:shadow-xl" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <div className="relative">
+                                                        <img
+                                                            src="/images/p2pmw-logo.png"
+                                                            alt="P2MW Program"
+                                                            className="h-12 w-auto object-contain opacity-90 transition-all duration-300 group-hover:opacity-100 sm:h-14 md:h-16"
+                                                        />
+                                                        {/* Glow effect on hover */}
+                                                        <div className="absolute inset-0 -z-10 rounded-xl bg-white/0 blur-xl transition-all duration-300 group-hover:bg-white/20"></div>
+                                                    </div>
+                                                </a>
+                                            </div>
+
+                                            {/* Optional: Supporting text */}
+                                            <p className="mt-8 text-center text-sm text-white/70">
+                                                Didukung oleh institusi terpercaya untuk pengembangan UMKM Indonesia
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
