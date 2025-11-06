@@ -1,15 +1,14 @@
 'use client';
 
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import ExportButtons from '@/components/ExportButtons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { BarChart3, DollarSign, Download, DownloadIcon, FileText, FileSpreadsheet, Package } from 'lucide-react';
+import { BarChart3, DollarSign, Package, FileText } from 'lucide-react';
 import { useState } from 'react';
-import jsPDF from 'jspdf';
-import * as XLSX from 'xlsx';
 
 export default function DashboardUser() {
     const { 
@@ -70,30 +69,6 @@ export default function DashboardUser() {
                 preserveState: false,
             });
         }
-    };
-
-    const exportToPDF = () => {
-        const doc = new jsPDF();
-        doc.text('Dashboard Report', 20, 20);
-        doc.text(`Saldo Kas: Rp ${(summary.cash || 0).toLocaleString()}`, 20, 40);
-        doc.text(`Pendapatan (Bulan): Rp ${(summary.income || 0).toLocaleString()}`, 20, 50);
-        doc.text(`Biaya (Bulan): Rp ${(summary.expense || 0).toLocaleString()}`, 20, 60);
-        doc.text(`Laba (Bulan): Rp ${(summary.profit || 0).toLocaleString()}`, 20, 70);
-        doc.save(`dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`);
-    };
-
-    const exportToExcel = () => {
-        const data = [
-            ['Metric', 'Value'],
-            ['Saldo Kas', summary.cash || 0],
-            ['Pendapatan (Bulan)', summary.income || 0],
-            ['Biaya (Bulan)', summary.expense || 0],
-            ['Laba (Bulan)', summary.profit || 0],
-        ];
-        const ws = XLSX.utils.aoa_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Dashboard');
-        XLSX.writeFile(wb, `dashboard-report-${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
     return (
@@ -310,22 +285,7 @@ export default function DashboardUser() {
                     <Card className="md:col-span-2">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle>Tren Pendapatan & Biaya</CardTitle>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={exportToPDF}
-                                    className="flex items-center gap-2 px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                                >
-                                    <FileText className="h-4 w-4" />
-                                    PDF
-                                </button>
-                                <button
-                                    onClick={exportToExcel}
-                                    className="flex items-center gap-2 px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
-                                >
-                                    <FileSpreadsheet className="h-4 w-4" />
-                                    Excel
-                                </button>
-                            </div>
+                            <ExportButtons summary={summary} />
                         </CardHeader>
                         <CardContent>
                             {isLoading ? (

@@ -11,6 +11,7 @@ use App\Models\Receivable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -22,6 +23,23 @@ class UserDashboardController extends Controller
         $user = Auth::user();
         $today = Carbon::today();
         $period = $request->get('period', 'current_month');
+
+        // Cache key based on user and period
+        $cacheKey = "dashboard_{$userId}_{$period}_" . now()->format('YmdH');
+        
+        // Cache dashboard data for 5 minutes (300 seconds)
+        $dashboardData = Cache::remember($cacheKey, 300, function() use ($userId, $user, $today, $period) {
+            return $this->getDashboardData($userId, $user, $today, $period);
+        });
+
+        return Inertia::render('dashboard/user/index', $dashboardData);
+    }
+
+    /**
+     * Get dashboard data (cached method)
+     */
+    private function getDashboardData($userId, $user, $today, $period)
+    {
 
         // Calculate date range based on period
         switch ($period) {
@@ -178,7 +196,7 @@ class UserDashboardController extends Controller
             ];
         }
 
-        return Inertia::render('dashboard/user/index', [
+        return [
             'summary' => [
                 'cash' => (float) $cash,
                 'income' => (float) $income,
@@ -199,6 +217,6 @@ class UserDashboardController extends Controller
             'upcomingDebts' => $upcomingDebts,
             'lowStockProducts' => $lowStockProducts,
             'selectedPeriod' => $period,
-        ]);
+        ];
     }
 }
