@@ -269,66 +269,152 @@ export default function Welcome() {
                                         </li>
                                     </ul>
 
-                                    {/* Partner Section - Improved UI/UX */}
+                                    {/* Partner Section - Horizontal Compact Design */}
                                     <div className="mt-16 mb-8">
-                                        <div className="mx-auto max-w-3xl">
-                                            {/* Header dengan better typography & spacing */}
-                                            <div className="mb-8 text-center">
-                                                <span className="mb-3 inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wider text-white/90 uppercase backdrop-blur-sm">
-                                                    Partnership
-                                                </span>
-                                                <h3 className="text-xl font-semibold text-white sm:text-2xl">Bekerja Sama & Disponsori Oleh</h3>
+                                        <div className="relative mx-auto max-w-6xl">
+                                            {/* Header Section - More Compact */}
+                                            <div className="wow fadeInUp mb-8 text-center" data-wow-delay=".2s">
+                                                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-md">
+                                                    <svg className="h-3 w-3 text-[#FFA14A]" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                    <span className="text-xs font-semibold tracking-wide text-white/95 uppercase">
+                                                        Trusted Partnership
+                                                    </span>
+                                                </div>
+                                                <h3 className="mb-2 text-xl font-bold text-white sm:text-2xl">
+                                                    Didukung & Disponsori Oleh
+                                                </h3>
                                             </div>
 
-                                            {/* Logo Container dengan better layout & interaction */}
-                                            <div
-                                                className="wow fadeInUp flex flex-wrap items-center justify-center gap-8 md:gap-12"
-                                                data-wow-delay=".3s"
-                                            >
-                                                {/* Rumah BUMN Logo */}
-                                                <a
-                                                    href="#"
-                                                    className="group relative flex items-center justify-center rounded-xl bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:shadow-xl"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
+                                            {/* Horizontal Partner Cards */}
+                                            <div className="wow fadeInUp relative" data-wow-delay=".3s">
+                                                {/* Background with gradient border */}
+                                                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-white/5 via-white/10 to-white/5 p-6 backdrop-blur-xl md:p-8">
+                                                    {/* Decorative gradient overlay */}
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-[#23BBB7]/10 via-transparent to-[#FFA14A]/10 opacity-50"></div>
+                                                    
+                                                    {/* Content - Horizontal Layout */}
                                                     <div className="relative">
-                                                        <img
-                                                            src="/images/rb-logo.png"
-                                                            alt="Rumah BUMN"
-                                                            className="h-12 w-auto object-contain opacity-90 transition-all duration-300 group-hover:opacity-100 sm:h-14 md:h-16"
-                                                        />
-                                                        {/* Glow effect on hover */}
-                                                        <div className="absolute inset-0 -z-10 rounded-xl bg-white/0 blur-xl transition-all duration-300 group-hover:bg-white/20"></div>
-                                                    </div>
-                                                </a>
+                                                        {/* Partners Container - Horizontal Flex */}
+                                                        <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:gap-12 lg:gap-16">
+                                                            {/* Rumah BUMN - Horizontal Card */}
+                                                            <a
+                                                                href="#"
+                                                                className="group relative flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-white/30 hover:bg-white/15 hover:shadow-xl md:w-auto md:flex-1 md:max-w-sm"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                {/* Glow Effect */}
+                                                                <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-[#23BBB7]/0 to-[#23BBB7]/0 opacity-0 blur-lg transition-all duration-300 group-hover:from-[#23BBB7]/20 group-hover:to-[#23BBB7]/5 group-hover:opacity-100"></div>
+                                                                
+                                                                {/* Logo */}
+                                                                <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 p-2">
+                                                                    <img
+                                                                        src="/images/rb-logo.png"
+                                                                        alt="Rumah BUMN"
+                                                                        className="h-full w-auto object-contain opacity-90 transition-all duration-300 group-hover:scale-110 group-hover:opacity-100"
+                                                                    />
+                                                                </div>
+                                                                
+                                                                {/* Info */}
+                                                                <div className="flex-1">
+                                                                    <div className="mb-1 inline-flex rounded-full bg-[#23BBB7]/20 px-2 py-0.5 text-xs font-semibold text-white">
+                                                                        Strategic Partner
+                                                                    </div>
+                                                                    <h4 className="text-base font-bold text-white">Rumah BUMN</h4>
+                                                                    <p className="text-xs text-white/60">Ekosistem Kewirausahaan</p>
+                                                                </div>
 
-                                                {/* Divider */}
-                                                <div className="hidden h-12 w-px bg-white/20 md:block"></div>
+                                                                {/* Arrow Icon */}
+                                                                <svg className="h-5 w-5 flex-shrink-0 text-[#23BBB7] opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                                </svg>
+                                                            </a>
 
-                                                {/* P2PMW Logo */}
-                                                <a
-                                                    href="#"
-                                                    className="group relative flex items-center justify-center rounded-xl bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:shadow-xl"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <div className="relative">
-                                                        <img
-                                                            src="/images/p2pmw-logo.png"
-                                                            alt="P2MW Program"
-                                                            className="h-12 w-auto object-contain opacity-90 transition-all duration-300 group-hover:opacity-100 sm:h-14 md:h-16"
-                                                        />
-                                                        {/* Glow effect on hover */}
-                                                        <div className="absolute inset-0 -z-10 rounded-xl bg-white/0 blur-xl transition-all duration-300 group-hover:bg-white/20"></div>
+                                                            {/* Divider - Vertical line */}
+                                                            <div className="hidden h-16 w-px bg-white/20 md:block"></div>
+
+                                                            {/* P2MW - Horizontal Card */}
+                                                            <a
+                                                                href="#"
+                                                                className="group relative flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-white/30 hover:bg-white/15 hover:shadow-xl md:w-auto md:flex-1 md:max-w-sm"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                {/* Glow Effect */}
+                                                                <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-[#FFA14A]/0 to-[#FFA14A]/0 opacity-0 blur-lg transition-all duration-300 group-hover:from-[#FFA14A]/20 group-hover:to-[#FFA14A]/5 group-hover:opacity-100"></div>
+                                                                
+                                                                {/* Logo */}
+                                                                <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 p-2">
+                                                                    <img
+                                                                        src="/images/p2pmw-logo.png"
+                                                                        alt="P2MW Program"
+                                                                        className="h-full w-auto object-contain opacity-90 transition-all duration-300 group-hover:scale-110 group-hover:opacity-100"
+                                                                    />
+                                                                </div>
+                                                                
+                                                                {/* Info */}
+                                                                <div className="flex-1">
+                                                                    <div className="mb-1 inline-flex rounded-full bg-[#FFA14A]/20 px-2 py-0.5 text-xs font-semibold text-white">
+                                                                        Funding Partner
+                                                                    </div>
+                                                                    <h4 className="text-base font-bold text-white">P2MW Program</h4>
+                                                                    <p className="text-xs text-white/60">Kemendikbudristek</p>
+                                                                </div>
+
+                                                                {/* Arrow Icon */}
+                                                                <svg className="h-5 w-5 flex-shrink-0 text-[#FFA14A] opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                                </svg>
+                                                            </a>
+                                                        </div>
+
+                                                        {/* Trust Indicators - Horizontal & Compact */}
+                                                        {/* <div className="mt-6 flex flex-wrap items-center justify-center gap-6 border-t border-white/10 pt-6 sm:gap-8">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                                                                    <svg className="h-4 w-4 text-[#23BBB7]" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-semibold text-white">Terverifikasi</p>
+                                                                    <p className="text-xs text-white/50">Partnership Resmi</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="hidden h-8 w-px bg-white/20 sm:block"></div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                                                                    <svg className="h-4 w-4 text-[#FFA14A]" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-semibold text-white">1000+ UMKM</p>
+                                                                    <p className="text-xs text-white/50">Telah Terbantu</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="hidden h-8 w-px bg-white/20 sm:block"></div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                                                                    <svg className="h-4 w-4 text-[#23BBB7]" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-semibold text-white">Akses Premium</p>
+                                                                    <p className="text-xs text-white/50">Fitur Eksklusif</p>
+                                                                </div>
+                                                            </div>
+                                                        </div> */}
                                                     </div>
-                                                </a>
+                                                </div>
                                             </div>
-
-                                            {/* Optional: Supporting text */}
-                                            <p className="mt-8 text-center text-sm text-white/70">
-                                                Didukung oleh institusi terpercaya untuk pengembangan UMKM Indonesia
-                                            </p>
                                         </div>
                                     </div>
                                 </div>
