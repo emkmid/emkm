@@ -111,6 +111,32 @@ export default function Welcome() {
     return (
         <>
             <Head title="Welcome" />
+            <style>{`
+                html {
+                    scroll-behavior: smooth;
+                }
+                
+                /* Smooth fade-in animation for sections */
+                @keyframes smoothFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                section {
+                    animation: smoothFadeIn 0.8s ease-out;
+                }
+                
+                /* Smooth transitions for all interactive elements */
+                a, button {
+                    transition: all 0.3s ease-in-out;
+                }
+            `}</style>
             <div className="min-h-screen bg-white text-gray-800">
                 {/* Navbar */}
                 <header
@@ -228,7 +254,11 @@ export default function Welcome() {
                 {/* End of Navbar */}
 
                 {/* Hero Section */}
-                <div id="home" className="relative overflow-hidden pt-[120px] md:pt-[130px] lg:pt-[160px]" style={{ backgroundColor: '#23627C' }}>
+                <div 
+                    id="home" 
+                    className="relative overflow-hidden pt-[120px] md:pt-[130px] lg:pt-[160px] transition-all duration-700 ease-in-out" 
+                    style={{ backgroundColor: '#23627C' }}
+                >
                     <div className="container mx-auto px-4">
                         <div className="-mx-4 flex flex-wrap items-center">
                             <div className="w-full px-4">
@@ -601,7 +631,12 @@ export default function Welcome() {
                 {/* End of Hero */}
 
                 {/* Features */}
-                <section className="pt-20 pb-8 lg:pt-[120px] lg:pb-[70px]" id="fitur">
+                <section 
+                    className="pt-20 pb-8 lg:pt-[120px] lg:pb-[70px] transition-all duration-700 ease-in-out" 
+                    id="fitur"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                >
                     <div className="container mx-auto px-4">
                         <div className="-mx-4 flex flex-wrap">
                             <div className="w-full px-4">
@@ -748,7 +783,12 @@ export default function Welcome() {
                 {/* End of Features */}
 
                 {/* About Us */}
-                <section id="about" className="bg-gray-100 pt-20 pb-8 lg:pt-[120px] lg:pb-[70px]">
+                <section 
+                    id="about" 
+                    className="bg-gray-100 pt-20 pb-8 lg:pt-[120px] lg:pb-[70px] transition-all duration-700 ease-in-out"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                >
                     <div className="container mx-auto px-4">
                         <div className="wow fadeInUp" data-wow-delay=".2s">
                             <div className="-mx-4 flex flex-wrap items-center">
@@ -793,7 +833,12 @@ export default function Welcome() {
                 </section>
 
                 {/* Pricing Section */}
-                <section id="pricing" className="relative z-20 overflow-hidden bg-white pt-20 pb-12 lg:pt-[120px] lg:pb-[90px]">
+                <section 
+                    id="pricing" 
+                    className="relative z-20 overflow-hidden bg-white pt-20 pb-12 lg:pt-[120px] lg:pb-[90px] transition-all duration-700 ease-in-out"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                >
                     <div className="container mx-auto px-4">
                         <div className="-mx-4 flex flex-wrap">
                             <div className="w-full px-4">
@@ -885,7 +930,11 @@ export default function Welcome() {
                 {/* End of Pricing */}
 
                 {/* CTA */}
-                <section className="relative z-10 overflow-hidden bg-primary py-20 lg:py-[115px]">
+                <section 
+                    className="relative z-10 overflow-hidden bg-primary py-20 lg:py-[115px] transition-all duration-700 ease-in-out"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                >
                     <div className="container mx-auto px-4">
                         <div className="relative overflow-hidden">
                             <div className="-mx-4 flex flex-wrap items-stretch">
@@ -941,7 +990,12 @@ export default function Welcome() {
                 {/* End Of CTA */}
 
                 {/* Our Founder */}
-                <section id="team" className="pt-20 pb-8 lg:pt-[120px] lg:pb-[70px]">
+                <section 
+                    id="team" 
+                    className="pt-20 pb-8 lg:pt-[120px] lg:pb-[70px] transition-all duration-700 ease-in-out"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                >
                     <div className="container mx-auto px-4">
                         <div className="wow fadeInUp" data-wow-delay=".2s">
                             <div className="-mx-4 flex flex-wrap items-center lg:flex-row-reverse">
@@ -1056,7 +1110,12 @@ export default function Welcome() {
                 {/* End of Our Founder */}
 
                 {/* Team */}
-                <section id="team" className="overflow-hidden bg-gray-100 pt-20 pb-12 lg:pt-[120px] lg:pb-[90px]">
+                <section 
+                    id="team" 
+                    className="overflow-hidden bg-gray-100 pt-20 pb-12 lg:pt-[120px] lg:pb-[90px] transition-all duration-700 ease-in-out"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                >
                     <div className="container mx-auto px-4">
                         <div className="-mx-4 flex flex-wrap">
                             <div className="w-full px-4">
@@ -1876,7 +1935,11 @@ export default function Welcome() {
                 {/* End of Team */}
 
                 {/* FAQ */}
-                <section className="relative z-20 mb-20 overflow-hidden bg-white pt-20 lg:pt-[120px] lg:pb-[50px]">
+                <section 
+                    className="relative z-20 mb-20 overflow-hidden bg-white pt-20 lg:pt-[120px] lg:pb-[50px] transition-all duration-700 ease-in-out"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                >
                     <div className="container mx-auto px-4">
                         <div className="-mx-4 flex flex-wrap">
                             <div className="w-full px-4">
@@ -1929,7 +1992,12 @@ export default function Welcome() {
                 {/* End of FAQ */}
 
                 {/* Contact */}
-                <section id="contact" className="relative py-20 md:py-[120px]">
+                <section 
+                    id="contact" 
+                    className="relative py-20 md:py-[120px] transition-all duration-700 ease-in-out"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                >
                     <div className="-700 absolute inset-0 h-1/2 bg-[#E9F9FF] lg:h-[45%] xl:h-1/2"></div>
                     <div className="absolute inset-0 top-1/2 bg-white"></div>
                     <div className="relative container mx-auto px-4">
