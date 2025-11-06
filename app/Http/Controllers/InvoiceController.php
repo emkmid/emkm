@@ -26,8 +26,13 @@ class InvoiceController extends Controller
      */
     public function index(Request $request): Response
     {
+        // Eager load relationships with specific columns to reduce payload
         $query = Invoice::where('user_id', $request->user()->id)
-            ->with(['customer', 'items']);
+            ->with([
+                'customer:id,name,company_name,email',
+                'items:id,invoice_id,description,quantity,unit_price'
+            ])
+            ->select(['id', 'user_id', 'customer_id', 'invoice_number', 'invoice_date', 'due_date', 'status', 'subtotal', 'tax_amount', 'discount_amount', 'total', 'created_at']);
 
         // Filter by status
         if ($status = $request->input('status')) {

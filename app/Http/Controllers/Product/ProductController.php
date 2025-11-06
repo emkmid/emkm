@@ -23,13 +23,25 @@ class ProductController extends Controller
     /**
      * Menampilkan daftar produk milik pengguna.
      */
-    public function index(): Response
+    public function index()
     {
-        $products = auth()->user()->products()->with('product_category')->latest()->paginate(5);
+        $user = auth()->user();
 
-        return Inertia::render('dashboard/user/product/index', [
-            'products' => $products,
-        ]);
+        // Check limit before showing index
+        $productCount = $user->products()->count();
+        if ($this->featureService->hasReachedLimit($user, 'products.max_count', $productCount)) {
+            $limit = $this->featureService->getLimit($user, 'products.max_count');
+            // Allow viewing existing products, just show warning
+        }
+
+        // Eager load relationships to prevent N+1 queries
+        $products = auth()->user()->products()
+            ->with(['product_category:id,name'])
+            ->select(['id', 'user_id', 'product_category_id', 'name', 'price', 'stock', 'description', 'created_at'])
+            ->latest()
+            ->paginate(5);
+
+        return Inertia::render('dashboard/user/product/index', compact('products'));
     }
 
     /**

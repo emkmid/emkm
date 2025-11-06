@@ -20,6 +20,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Query Logging
+    |--------------------------------------------------------------------------
+    |
+    | Enable query logging to track slow queries and excessive query counts.
+    | Only active when APP_DEBUG=true for performance monitoring.
+    |
+    */
+
+    'log_queries' => env('DB_LOG_QUERIES', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Database Connections
     |--------------------------------------------------------------------------
     |

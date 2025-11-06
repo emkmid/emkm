@@ -26,13 +26,23 @@ class IncomeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        $incomes = Auth::user()->incomes()->with('income_category')->latest()->paginate(5);
+        $user = Auth::user();
 
-        return Inertia::render('dashboard/user/income/index', [
-            'incomes' => $incomes,
-        ]);
+        // Check if user has access to transaction feature
+        if (!$this->featureService->hasAccess($user, 'accounting.transactions')) {
+            return redirect()->route('dashboard')->with('error', 'Upgrade untuk mengakses fitur transaksi.');
+        }
+
+        // Eager load relationships to prevent N+1 queries
+        $incomes = Auth::user()->incomes()
+            ->with(['income_category:id,name,user_id'])
+            ->select(['id', 'user_id', 'income_category_id', 'description', 'amount', 'date', 'created_at'])
+            ->latest()
+            ->paginate(5);
+
+        return Inertia::render('dashboard/user/income/index', compact('incomes'));
     }
 
     /**
