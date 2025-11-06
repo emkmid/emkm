@@ -1,9 +1,7 @@
-import { Navbar } from '@/components/navbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { SkipLink } from '@/components/ui/skip-link';
 import { useArticleFilter } from '@/hooks/useArticleFilter';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -12,11 +10,11 @@ import 'aos/dist/aos.css';
 import { ArrowRight, BookOpen, Calendar, Clock, Search, Star, User } from 'lucide-react';
 import moment from 'moment';
 import 'moment/locale/id';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Education() {
-    const { auth } = usePage().props;
-    const { articles } = usePage<{
+    const { auth, articles } = usePage<{
+        auth: { user: any };
         articles: {
             data: {
                 id: number;
@@ -45,11 +43,15 @@ export default function Education() {
         hasActiveFilters,
     } = useArticleFilter({ articles: articles.data });
 
+    const [scrolled, setScrolled] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+
     moment.locale('id'); // Set locale to Indonesian
 
     useEffect(() => {
         AOS.init({ duration: 800, once: true });
         const handleScroll = () => {
+            setScrolled(window.scrollY > 10);
             document.querySelectorAll('.reveal').forEach((el) => {
                 const elementTop = el.getBoundingClientRect().top;
                 if (elementTop < window.innerHeight - 50) {
@@ -71,63 +73,203 @@ export default function Education() {
 
             <div className="min-h-screen bg-background text-foreground">
                 {/* Navbar */}
-                <Navbar auth={auth} className="sticky top-0 z-50">
-                    <NavigationMenuItem>
-                        <NavigationMenuLink asChild className="hover:bg-[#23627C]">
+                <header
+                    className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
+                        scrolled ? 'bg-white/70 shadow-sm backdrop-blur-md' : 'bg-transparent'
+                    }`}
+                >
+                    <div className="container mx-auto flex items-center justify-between px-6 py-4">
+                        {/* Logo */}
+                        <Link href={route('home')} className="flex items-center space-x-2">
+                            <img src="/images/emkm.png" alt="logo" className="h-10 w-auto" />
+                        </Link>
+
+                        {/* Desktop Menu */}
+                        <nav className="hidden items-center space-x-8 lg:flex">
                             <Link
                                 href={route('home')}
-                                className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200"
+                                className={`text-base font-medium transition ${
+                                    scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
+                                }`}
                             >
-                                Beranda
+                                Home
                             </Link>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                        <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                            <Link href="#" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
-                                Tentang Kami
-                            </Link>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                        <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                            <Link href="#" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
+                            <a
+                                href="#"
+                                className={`text-base font-medium transition ${
+                                    scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
+                                }`}
+                            >
                                 Fitur
-                            </Link>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                        <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                            <Link
-                                href="#harga"
-                                className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200"
+                            </a>
+                            <a
+                                href="#"
+                                className={`text-base font-medium transition ${
+                                    scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
+                                }`}
                             >
-                                Harga
+                                About
+                            </a>
+                            <a
+                                href="#"
+                                className={`text-base font-medium transition ${
+                                    scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
+                                }`}
+                            >
+                                Pricing
+                            </a>
+                            <a
+                                href="#"
+                                className={`text-base font-medium transition ${
+                                    scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
+                                }`}
+                            >
+                                Team
+                            </a>
+                            <a
+                                href="#"
+                                className={`text-base font-medium transition ${
+                                    scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
+                                }`}
+                            >
+                                Contact
+                            </a>
+                            <Link
+                                href={route('education.article.index')}
+                                className={`text-base font-medium transition ${
+                                    scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
+                                }`}
+                            >
+                                Education
                             </Link>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
+                        </nav>
 
-                    <NavigationMenuItem>
-                        <NavigationMenuTrigger className="bg-transparent text-gray-600 hover:bg-[#23627C]">Edukasi</NavigationMenuTrigger>
-                        <NavigationMenuContent className="!bg-white">
-                            <ul className="grid w-[200px] gap-4 bg-white text-gray-600">
-                                <li>
-                                    <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                                        <Link href={route('education.article.index')} className="block rounded-md px-3 py-2">
-                                            Artikel
+                        {/* Action Buttons (Desktop) */}
+                        <div className="hidden items-center space-x-4 sm:flex">
+                            {auth.user ? (
+                                <Link
+                                    href={route('dashboard')}
+                                    className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition"
+                                >
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link href={route('login')} className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition">
+                                        Sign In
+                                    </Link>
+                                    <Link
+                                        href={route('register')}
+                                        className="rounded-md border border-[#23627C] bg-white px-5 py-2 text-base font-medium text-[#23627C] transition hover:bg-[#23627C] hover:text-white"
+                                    >
+                                        Sign Up
+                                    </Link>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Hamburger Button (Mobile) */}
+                        <button onClick={() => setIsOpen(!isOpen)} className="block text-gray-700 focus:outline-none lg:hidden">
+                            {isOpen ? (
+                                // Icon Close
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            ) : (
+                                // Icon Hamburger
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Mobile Menu */}
+                    <div
+                        className={`absolute top-full left-0 w-full bg-white/70 shadow-md backdrop-blur-md transition-all duration-300 lg:hidden ${
+                            isOpen ? 'max-h-screen opacity-100' : 'max-h-0 overflow-hidden opacity-0'
+                        }`}
+                    >
+                        <nav className="flex flex-col space-y-4 px-6 py-6 text-left">
+                            <Link
+                                href={route('home')}
+                                onClick={() => setIsOpen(false)}
+                                className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
+                            >
+                                Home
+                            </Link>
+                            <a
+                                href="#"
+                                onClick={() => setIsOpen(false)}
+                                className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
+                            >
+                                Fitur
+                            </a>
+                            <a
+                                href="#"
+                                onClick={() => setIsOpen(false)}
+                                className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
+                            >
+                                About
+                            </a>
+                            <a
+                                href="#"
+                                onClick={() => setIsOpen(false)}
+                                className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
+                            >
+                                Pricing
+                            </a>
+                            <a
+                                href="#"
+                                onClick={() => setIsOpen(false)}
+                                className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
+                            >
+                                Team
+                            </a>
+                            <a
+                                href="#"
+                                onClick={() => setIsOpen(false)}
+                                className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
+                            >
+                                Contact
+                            </a>
+                            <Link
+                                href={route('education.article.index')}
+                                onClick={() => setIsOpen(false)}
+                                className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
+                            >
+                                Education
+                            </Link>
+
+                            {/* Mobile Action Buttons */}
+                            <div className="flex flex-col space-y-3 pt-4">
+                                {auth.user ? (
+                                    <Link
+                                        href={route('dashboard')}
+                                        className="rounded-md bg-primary px-6 py-2 text-base font-medium text-white transition"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href={route('login')}
+                                            className="rounded-md bg-primary px-6 py-2 text-base font-medium text-white transition"
+                                        >
+                                            Sign In
                                         </Link>
-                                    </NavigationMenuLink>
-                                </li>
-                            </ul>
-                        </NavigationMenuContent>
-                    </NavigationMenuItem>
-
-                    <NavigationMenuItem>
-                        <NavigationMenuLink asChild className="bg-[#23627C] transition hover:bg-[#23BBB7]">
-                            <Link href={route('login')}>Daftar Sekarang</Link>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
-                </Navbar>
+                                        <Link
+                                            href={route('register')}
+                                            className="rounded-md border border-[#23627C] bg-white/80 px-6 py-2 text-base font-medium text-[#23627C] transition hover:bg-[#23627C] hover:text-white"
+                                        >
+                                            Sign Up
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
+                        </nav>
+                    </div>
+                </header>
 
                 {/* Enhanced Hero Section */}
                 <section className="relative overflow-hidden bg-gradient-to-br from-[#D3EDFF] via-[#E8F4FD] to-[#F0F9FF] py-20 md:py-28">
