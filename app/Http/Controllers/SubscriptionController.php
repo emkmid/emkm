@@ -24,27 +24,48 @@ class SubscriptionController extends Controller
      */
     public function page()
     {
+        // Clear user cache to get fresh subscription data
+        if (Auth::check()) {
+            \Cache::forget("user_package_" . Auth::id());
+        }
+        
         $packages = Package::where('is_active', true)->get();
+        
+        // Auto-cancel old pending subscriptions (older than 1 hour)
+        Auth::user()->subscriptions()
+            ->where('status', 'pending')
+            ->where('created_at', '<', now()->subHour())
+            ->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+            ]);
+        
         $userSubscription = Auth::user()->subscriptions()
             ->where('status', 'active')
             ->with('package')
             ->first();
 
         // Check for pending payment within last 10 minutes
-        $pendingPayment = Auth::user()->subscriptions()
-            ->where('status', 'pending')
-            ->where('created_at', '>', now()->subMinutes(10))
-            ->with('package')
-            ->latest()
-            ->first();
+        // Don't show pending modal if user already has an active subscription
+        $pendingPayment = null;
+        
+        if (!$userSubscription) {
+            $pendingPayment = Auth::user()->subscriptions()
+                ->where('status', 'pending')
+                ->where('created_at', '>', now()->subMinutes(10))
+                ->with('package')
+                ->latest()
+                ->first();
+        }
 
         $pendingPaymentData = null;
         if ($pendingPayment) {
+            $amount = $pendingPayment->price_cents / 100; // Convert cents to rupiah
             $pendingPaymentData = [
                 'subscription_id' => $pendingPayment->id,
                 'package_name' => $pendingPayment->package->name,
-                'amount' => $pendingPayment->amount,
-                'order_id' => $pendingPayment->provider_subscription_id,
+                'amount' => $amount,
+                'order_id' => $pendingPayment->midtrans_order_id ?? $pendingPayment->provider_subscription_id,
                 'snap_token' => $pendingPayment->snap_token ?? null,
                 'created_at' => $pendingPayment->created_at->toISOString(),
             ];
@@ -140,28 +161,73 @@ class SubscriptionController extends Controller
             // Check if user already has active subscription
             $activeSubscription = $user->subscriptions()
                 ->where('status', 'active')
+                ->with('package')
                 ->first();
 
             if ($activeSubscription) {
-                $errorData = [
-                    'message' => 'Anda sudah memiliki subscription aktif.',
-                    'error_code' => 'ACTIVE_SUBSCRIPTION_EXISTS',
-                    'data' => [
-                        'current_subscription' => [
-                            'package_name' => $activeSubscription->package->name ?? 'Unknown',
-                            'ends_at' => $activeSubscription->ends_at,
+                // Allow upgrade from Free package to paid package
+                $currentPackage = $activeSubscription->package;
+                
+                // If current package is Free and target package is paid, allow it (upgrade)
+                if ($currentPackage->price == 0 && $package->price > 0) {
+                    // Cancel the free subscription to allow paid upgrade
+                    $activeSubscription->update([
+                        'status' => 'cancelled',
+                        'cancelled_at' => now(),
+                        'ends_at' => now(), // End immediately
+                    ]);
+                    
+                    \Log::info('Free subscription cancelled for upgrade', [
+                        'user_id' => $user->id,
+                        'old_package' => $currentPackage->name,
+                        'new_package' => $package->name,
+                        'subscription_id' => $activeSubscription->id,
+                    ]);
+                } 
+                // If both are paid packages or trying to downgrade, block it
+                elseif ($currentPackage->price > 0 && $package->price > 0) {
+                    $errorData = [
+                        'message' => 'Anda sudah memiliki paket berbayar aktif. Silakan tunggu hingga masa berlaku habis atau hubungi admin untuk mengganti paket.',
+                        'error_code' => 'ACTIVE_PAID_SUBSCRIPTION_EXISTS',
+                        'data' => [
+                            'current_subscription' => [
+                                'package_name' => $currentPackage->name,
+                                'ends_at' => $activeSubscription->ends_at,
+                            ]
                         ]
-                    ]
-                ];
+                    ];
 
-                if ($request->header('X-Inertia')) {
-                    return redirect()->back()->withErrors(['subscription' => $errorData['message']])->with('error_details', $errorData);
+                    if ($request->header('X-Inertia')) {
+                        return redirect()->back()->withErrors(['subscription' => $errorData['message']])->with('error_details', $errorData);
+                    }
+
+                    return response()->json([
+                        'success' => false,
+                        ...$errorData
+                    ], 400);
                 }
+                // If trying to "downgrade" from paid to free, block it
+                elseif ($currentPackage->price > 0 && $package->price == 0) {
+                    $errorData = [
+                        'message' => 'Tidak dapat downgrade ke paket gratis saat memiliki paket berbayar aktif.',
+                        'error_code' => 'DOWNGRADE_NOT_ALLOWED',
+                        'data' => [
+                            'current_subscription' => [
+                                'package_name' => $currentPackage->name,
+                                'ends_at' => $activeSubscription->ends_at,
+                            ]
+                        ]
+                    ];
 
-                return response()->json([
-                    'success' => false,
-                    ...$errorData
-                ], 400);
+                    if ($request->header('X-Inertia')) {
+                        return redirect()->back()->withErrors(['subscription' => $errorData['message']])->with('error_details', $errorData);
+                    }
+
+                    return response()->json([
+                        'success' => false,
+                        ...$errorData
+                    ], 400);
+                }
             }
 
             // Check for recent pending subscription (prevent spam)
@@ -451,6 +517,11 @@ class SubscriptionController extends Controller
      */
     public function success(Request $request)
     {
+        // Clear user cache to ensure fresh data
+        if (Auth::check()) {
+            \Cache::forget("user_package_" . Auth::id());
+        }
+        
         return Inertia::render('Subscription/Success', [
             'order_id' => $request->order_id,
             'transaction_id' => $request->transaction_id,

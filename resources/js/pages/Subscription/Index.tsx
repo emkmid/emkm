@@ -189,9 +189,17 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
         setLoading(pkg.id.toString());
         setError('');
 
+        console.log('=== SUBSCRIBE DEBUG ===');
+        console.log('Package:', pkg);
+        console.log('Duration:', duration);
+        console.log('User subscription:', userSubscription);
+        console.log('Is current package:', userSubscription?.package?.id === pkg.id);
+        console.log('Can upgrade:', userSubscription?.package?.price === 0 && pkg.price > 0);
+
         try {
             // Handle free package separately
             if (pkg.price === 0) {
+                console.log('Activating free package...');
                 // Call free package activation endpoint
                 router.post('/subscriptions/activate-free', {
                     package_id: pkg.id,
@@ -242,6 +250,12 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
                         switch (errors.error_code) {
                             case 'ACTIVE_SUBSCRIPTION_EXISTS':
                                 setError(`Anda sudah memiliki subscription aktif (${errors.data?.current_subscription?.package_name || 'Unknown'})`);
+                                break;
+                            case 'ACTIVE_PAID_SUBSCRIPTION_EXISTS':
+                                setError(errors.message || 'Anda sudah memiliki paket berbayar aktif.');
+                                break;
+                            case 'DOWNGRADE_NOT_ALLOWED':
+                                setError(errors.message || 'Tidak dapat downgrade ke paket gratis.');
                                 break;
                             case 'RECENT_PENDING_PAYMENT':
                                 setError('Anda memiliki pembayaran yang sedang diproses. Silakan tunggu beberapa menit.');
@@ -466,12 +480,37 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
                             </h1>
 
                             {userSubscription && userSubscription.status === 'active' && (
-                                <div className="mb-8 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-                                    <p className="font-medium">Anda sudah memiliki subscription aktif</p>
-                                    <p className="text-sm">
-                                        Paket: {userSubscription.package?.name} | 
-                                        Berakhir: {userSubscription.ends_at ? new Date(userSubscription.ends_at).toLocaleDateString('id-ID') : 'Tidak terbatas'}
-                                    </p>
+                                <div className={`mb-8 p-4 border rounded-lg ${
+                                    userSubscription.package?.price === 0 
+                                        ? 'bg-blue-50 border-blue-400 text-blue-800' 
+                                        : 'bg-green-100 border-green-400 text-green-700'
+                                }`}>
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="font-medium">
+                                                {userSubscription.package?.price === 0 
+                                                    ? '🎁 Anda menggunakan paket gratis' 
+                                                    : '✅ Anda sudah memiliki subscription aktif'
+                                                }
+                                            </p>
+                                            <p className="text-sm mt-1">
+                                                Paket: <strong>{userSubscription.package?.name}</strong> | 
+                                                Berakhir: <strong>{userSubscription.ends_at ? new Date(userSubscription.ends_at).toLocaleDateString('id-ID') : 'Tidak terbatas'}</strong>
+                                            </p>
+                                            {userSubscription.package?.price === 0 && (
+                                                <p className="text-sm mt-2 font-medium">
+                                                    💡 Upgrade ke paket berbayar untuk mendapatkan fitur lebih lengkap!
+                                                </p>
+                                            )}
+                                        </div>
+                                        {(userSubscription.package?.price ?? 0) > 0 && (
+                                            <div className="ml-4">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
+                                                    Premium
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
@@ -482,19 +521,39 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                                {packages.map((pkg) => (
+                                {packages.map((pkg) => {
+                                    const isCurrentPackage = userSubscription?.package?.id === pkg.id;
+                                    const canUpgrade = userSubscription?.package?.price === 0 && pkg.price > 0;
+                                    
+                                    return (
                                     <div 
                                         key={pkg.id} 
                                         className={`relative bg-white border-2 rounded-lg p-6 flex flex-col ${
                                             pkg.is_popular 
                                                 ? 'border-blue-500 shadow-xl transform scale-105' 
                                                 : 'border-gray-200 shadow-md'
-                                        }`}
+                                        } ${isCurrentPackage ? 'bg-gray-50' : ''}`}
                                     >
-                                        {pkg.is_popular && (
+                                        {pkg.is_popular && !isCurrentPackage && (
                                             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                                                 <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
                                                     Terpopuler
+                                                </span>
+                                            </div>
+                                        )}
+                                        
+                                        {isCurrentPackage && (
+                                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                                <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                                    Paket Aktif
+                                                </span>
+                                            </div>
+                                        )}
+                                        
+                                        {canUpgrade && !isCurrentPackage && (
+                                            <div className="absolute -top-3 right-4">
+                                                <span className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-medium animate-pulse">
+                                                    🚀 Upgrade
                                                 </span>
                                             </div>
                                         )}
@@ -600,11 +659,14 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
                                                 onClick={() => handleSubscribe(pkg)}
                                                 disabled={
                                                     loading === pkg.id.toString() || 
-                                                    (userSubscription?.status === 'active' && pkg.name !== 'Free')
+                                                    isCurrentPackage ||
+                                                    ((userSubscription?.package?.price ?? 0) > 0 && pkg.price > 0) // Disable if both are paid packages
                                                 }
                                                 className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
-                                                    pkg.is_popular
+                                                    pkg.is_popular && !isCurrentPackage
                                                         ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
+                                                        : isCurrentPackage
+                                                        ? 'bg-gray-400 text-white cursor-not-allowed'
                                                         : 'bg-gray-800 hover:bg-gray-900 text-white'
                                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                                             >
@@ -616,13 +678,18 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
                                                         </svg>
                                                         Memproses...
                                                     </div>
+                                                ) : isCurrentPackage ? (
+                                                    'Paket Aktif'
+                                                ) : canUpgrade ? (
+                                                    '🚀 Upgrade Sekarang'
                                                 ) : (
                                                     pkg.name === 'Free' ? 'Gunakan Gratis' : 'Berlangganan'
                                                 )}
                                             </button>
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
                             <div className="mt-12 text-center">

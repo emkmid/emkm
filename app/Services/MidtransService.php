@@ -58,10 +58,24 @@ class MidtransService
             // Check for existing active subscription
             $existingSubscription = $user->subscriptions()
                 ->where('status', 'active')
+                ->with('package')
                 ->first();
 
             if ($existingSubscription) {
-                throw new \Exception("User already has an active subscription");
+                // Allow upgrade from Free package to paid package
+                $currentPackage = $existingSubscription->package;
+                
+                if ($currentPackage->price == 0 && $package->price > 0) {
+                    // Will be handled in controller - cancel free subscription before creating new one
+                    \Log::info('Preparing upgrade from Free to paid package', [
+                        'user_id' => $user->id,
+                        'from_package' => $currentPackage->name,
+                        'to_package' => $package->name,
+                    ]);
+                } else {
+                    // Block if both are paid packages or trying to downgrade
+                    throw new \Exception("User already has an active " . $currentPackage->name . " subscription");
+                }
             }
 
             $orderId = 'SUB-' . $user->id . '-' . $package->id . '-' . time();
@@ -334,10 +348,23 @@ class MidtransService
     private function activateSubscription(Subscription $subscription)
     {
         try {
+            // Cancel any other active/pending subscriptions for this user
+            Subscription::where('user_id', $subscription->user_id)
+                ->where('id', '!=', $subscription->id)
+                ->whereIn('status', ['pending', 'active'])
+                ->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                ]);
+            
             $subscription->update([
                 'status' => 'active',
                 'starts_at' => now(),
+                'activated_at' => now(), // Set activated_at timestamp
             ]);
+            
+            // Clear user package cache (without tags - for file/database cache driver)
+            \Cache::forget("user_package_{$subscription->user_id}");
 
             \Log::info('Subscription activated successfully', [
                 'subscription_id' => $subscription->id,
