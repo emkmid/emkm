@@ -12,7 +12,23 @@ import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { FormEvent, useEffect, useState } from 'react';
 
-export default function Welcome() {
+interface Package {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+    price: number;
+    price_formatted: string;
+    is_popular: boolean;
+    features: any;
+    trial_days: number;
+}
+
+interface WelcomeProps {
+    packages: Package[];
+}
+
+export default function Welcome({ packages }: WelcomeProps) {
     const { auth } = usePage<SharedData>().props;
     const [scrolled, setScrolled] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -71,32 +87,60 @@ export default function Welcome() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const plans = [
-        {
-            title: 'Free',
-            price: 'Rp 0',
-            features: ['Pencatatan Dasar', 'Laporan Harian', 'Akses Edukasi'],
-            cta: 'Coba Sekarang',
-            variant: 'outline',
-            popular: false,
-        },
-        {
-            title: 'Basic',
-            price: 'Rp 29.000',
-            features: ['Semua Fitur Free', 'Laporan Bulanan', 'Notifikasi Otomatis'],
-            cta: 'Coba Gratis 14 Hari',
-            variant: 'blue',
-            popular: true,
-        },
-        {
-            title: 'Pro',
-            price: 'Rp 59.000',
-            features: ['Semua Fitur Basic', 'Grafik & Simulasi', 'Dukungan Prioritas'],
-            cta: 'Mulai Langganan',
-            variant: 'outline',
-            popular: false,
-        },
-    ];
+    // Helper function to get feature list for display
+    const getPackageFeatures = (pkg: Package) => {
+        const features: string[] = [];
+        
+        if (pkg.features) {
+            // Get all enabled features
+            Object.entries(pkg.features).forEach(([key, value]) => {
+                if (value === true || value === 1) {
+                    // Map feature keys to readable names
+                    const featureNames: { [key: string]: string } = {
+                        'products': 'Manajemen Produk',
+                        'transactions': 'Pencatatan Transaksi',
+                        'reports': 'Laporan Keuangan',
+                        'hpp': 'Hitung HPP Otomatis',
+                        'priority_support': 'Support Prioritas',
+                        'advanced_reports': 'Laporan Lanjutan',
+                        'api_access': 'Akses API',
+                        'white_label': 'White Label',
+                        'custom_integration': 'Integrasi Custom',
+                    };
+                    
+                    if (featureNames[key]) {
+                        features.push(featureNames[key]);
+                    }
+                } else if (typeof value === 'string' || typeof value === 'number') {
+                    features.push(`${key}: ${value}`);
+                }
+            });
+        }
+        
+        // Fallback: if no features, add basic description
+        if (features.length === 0) {
+            if (pkg.price === 0) {
+                features.push('Pencatatan Dasar', 'Laporan Harian', 'Akses Edukasi');
+            } else if (pkg.name.toLowerCase().includes('basic')) {
+                features.push('Semua Fitur Free', 'Laporan Bulanan', 'Notifikasi Otomatis');
+            } else {
+                features.push('Semua Fitur Basic', 'Grafik & Analisis', 'Dukungan Prioritas');
+            }
+        }
+        
+        return features;
+    };
+
+    // Helper function to get CTA text
+    const getCtaText = (pkg: Package) => {
+        if (pkg.price === 0) {
+            return 'Coba Sekarang';
+        } else if (pkg.trial_days > 0) {
+            return `Coba Gratis ${pkg.trial_days} Hari`;
+        } else {
+            return 'Mulai Langganan';
+        }
+    };
 
     const navItems = [
         { label: 'Home', href: '#home' },
@@ -272,12 +316,12 @@ export default function Welcome() {
                                     </p>
                                     <ul className="mb-10 flex flex-wrap items-center justify-center gap-5">
                                         <li>
-                                            <a
-                                                href="https://links.tailgrids.com/play-download"
+                                            <Link
+                                                href={auth.user ? "/subscriptions" : "/register"}
                                                 className="text-dark shadow-1 hover:bg-gray-2 hover:text-body-color inline-flex items-center justify-center rounded-md bg-white px-7 py-[14px] text-center text-base font-medium transition duration-300 ease-in-out"
                                             >
                                                 Daftar Paket
-                                            </a>
+                                            </Link>
                                         </li>
                                         <li>
                                             <a
@@ -329,21 +373,13 @@ export default function Welcome() {
                                                         {/* Partners Container - Horizontal Flex */}
                                                         <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:gap-12 lg:gap-16">
                                                             {/* Rumah BUMN - Horizontal Card */}
-                                                            <a
-                                                                href="#"
-                                                                className="group relative flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-white/30 hover:bg-white/15 hover:shadow-xl md:w-auto md:flex-1 md:max-w-sm"
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                {/* Glow Effect */}
-                                                                <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-[#23BBB7]/0 to-[#23BBB7]/0 opacity-0 blur-lg transition-all duration-300 group-hover:from-[#23BBB7]/20 group-hover:to-[#23BBB7]/5 group-hover:opacity-100"></div>
-                                                                
+                                                            <div className="relative flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:w-auto md:flex-1 md:max-w-sm">
                                                                 {/* Logo */}
                                                                 <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 p-2">
                                                                     <img
                                                                         src="/images/rb-logo.png"
                                                                         alt="Rumah BUMN"
-                                                                        className="h-full w-auto object-contain opacity-90 transition-all duration-300 group-hover:scale-110 group-hover:opacity-100"
+                                                                        className="h-full w-auto object-contain opacity-90"
                                                                     />
                                                                 </div>
                                                                 
@@ -355,32 +391,19 @@ export default function Welcome() {
                                                                     <h4 className="text-base font-bold text-white">Rumah BUMN</h4>
                                                                     <p className="text-xs text-white/60">Ekosistem Kewirausahaan</p>
                                                                 </div>
-
-                                                                {/* Arrow Icon */}
-                                                                <svg className="h-5 w-5 flex-shrink-0 text-[#23BBB7] opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                                </svg>
-                                                            </a>
+                                                            </div>
 
                                                             {/* Divider - Vertical line */}
                                                             <div className="hidden h-16 w-px bg-white/20 md:block"></div>
 
                                                             {/* P2MW - Horizontal Card */}
-                                                            <a
-                                                                href="#"
-                                                                className="group relative flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-white/30 hover:bg-white/15 hover:shadow-xl md:w-auto md:flex-1 md:max-w-sm"
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                {/* Glow Effect */}
-                                                                <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-[#FFA14A]/0 to-[#FFA14A]/0 opacity-0 blur-lg transition-all duration-300 group-hover:from-[#FFA14A]/20 group-hover:to-[#FFA14A]/5 group-hover:opacity-100"></div>
-                                                                
+                                                            <div className="relative flex w-full items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm md:w-auto md:flex-1 md:max-w-sm">
                                                                 {/* Logo */}
                                                                 <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 p-2">
                                                                     <img
                                                                         src="/images/p2pmw-logo.png"
                                                                         alt="P2MW Program"
-                                                                        className="h-full w-auto object-contain opacity-90 transition-all duration-300 group-hover:scale-110 group-hover:opacity-100"
+                                                                        className="h-full w-auto object-contain opacity-90"
                                                                     />
                                                                 </div>
                                                                 
@@ -392,12 +415,7 @@ export default function Welcome() {
                                                                     <h4 className="text-base font-bold text-white">P2MW Program</h4>
                                                                     <p className="text-xs text-white/60">Kemendikbudristek</p>
                                                                 </div>
-
-                                                                {/* Arrow Icon */}
-                                                                <svg className="h-5 w-5 flex-shrink-0 text-[#FFA14A] opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                                </svg>
-                                                            </a>
+                                                            </div>
                                                         </div>
 
                                                         {/* Trust Indicators - Horizontal & Compact */}
@@ -857,72 +875,80 @@ export default function Welcome() {
 
                         <div className="mx-auto max-w-6xl">
                             <div className="-mx-4 flex flex-wrap justify-center gap-y-8">
-                                {plans.map((plan, index) => (
-                                    <div className="w-full px-4 md:w-1/2 lg:w-1/3" key={index}>
-                                        <div
-                                            className={`relative z-10 h-full overflow-hidden rounded-xl bg-white px-8 py-10 shadow-lg transition duration-300 hover:-translate-y-2 hover:shadow-2xl sm:p-12 lg:px-8 lg:py-12 xl:px-10 xl:py-14 ${plan.popular ? 'border-2 border-[#23BBB7] shadow-xl' : 'border border-gray-200'}`}
-                                        >
-                                            {plan.popular && (
-                                                <div className="absolute top-5 right-5 rounded-full bg-[#23BBB7] px-4 py-1.5 text-xs font-bold text-white shadow-md">
-                                                    POPULER
-                                                </div>
-                                            )}
-                                            <div className="mb-8">
-                                                <span className="text-dark mb-4 block text-2xl font-bold">{plan.title}</span>
-                                                <div className="flex items-end gap-1">
-                                                    <h2 className="text-dark text-5xl font-extrabold">
-                                                        {plan.price === 'Rp 0' ? (
-                                                            <span className="text-[#23BBB7]">Gratis</span>
-                                                        ) : (
-                                                            <>
-                                                                <span className="text-2xl font-medium text-[#23BBB7]">Rp</span>
-                                                                <span className="ml-1 -tracking-[2px]">
-                                                                    {plan.price.replace('Rp ', '').replace('.000', 'k')}
-                                                                </span>
-                                                            </>
-                                                        )}
-                                                    </h2>
-                                                    {plan.price !== 'Rp 0' && (
-                                                        <span className="text-body-color mb-2 text-base font-normal">/bulan</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="mb-8 min-h-[200px]">
-                                                <h5 className="text-dark mb-5 text-lg font-bold">Fitur Unggulan</h5>
-                                                <div className="flex flex-col gap-4">
-                                                    {plan.features.map((feature, idx) => (
-                                                        <div key={idx} className="flex items-start gap-3">
-                                                            <svg
-                                                                className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#23BBB7]"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2.5}
-                                                                    d="M5 13l4 4L19 7"
-                                                                />
-                                                            </svg>
-                                                            <p className="text-body-color text-base leading-relaxed font-medium">{feature}</p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <a
-                                                href="#"
-                                                className={`block w-full rounded-lg px-7 py-4 text-center text-base font-semibold transition duration-300 ${
-                                                    plan.popular
-                                                        ? 'bg-[#23BBB7] text-white shadow-md hover:bg-[#1a8f85] hover:shadow-lg'
-                                                        : 'border-2 border-[#23BBB7] bg-white text-[#23BBB7] hover:bg-[#23BBB7] hover:text-white'
-                                                }`}
+                                {packages.map((pkg, index) => {
+                                    const features = getPackageFeatures(pkg);
+                                    const ctaText = getCtaText(pkg);
+                                    
+                                    return (
+                                        <div className="w-full px-4 md:w-1/2 lg:w-1/3" key={pkg.id}>
+                                            <div
+                                                className={`relative z-10 h-full overflow-hidden rounded-xl bg-white px-8 py-10 shadow-lg transition duration-300 hover:-translate-y-2 hover:shadow-2xl sm:p-12 lg:px-8 lg:py-12 xl:px-10 xl:py-14 ${pkg.is_popular ? 'border-2 border-[#23BBB7] shadow-xl' : 'border border-gray-200'}`}
                                             >
-                                                {plan.cta}
-                                            </a>
+                                                {pkg.is_popular && (
+                                                    <div className="absolute top-5 right-5 rounded-full bg-[#23BBB7] px-4 py-1.5 text-xs font-bold text-white shadow-md">
+                                                        POPULER
+                                                    </div>
+                                                )}
+                                                <div className="mb-8">
+                                                    <span className="text-dark mb-4 block text-2xl font-bold">{pkg.name}</span>
+                                                    <div className="flex items-end gap-1">
+                                                        <h2 className="text-dark text-5xl font-extrabold">
+                                                            {pkg.price === 0 ? (
+                                                                <span className="text-[#23BBB7]">Gratis</span>
+                                                            ) : (
+                                                                <>
+                                                                    <span className="text-2xl font-medium text-[#23BBB7]">Rp</span>
+                                                                    <span className="ml-1 -tracking-[2px]">
+                                                                        {pkg.price >= 1000 
+                                                                            ? Math.floor(pkg.price / 1000) + 'k'
+                                                                            : pkg.price
+                                                                        }
+                                                                    </span>
+                                                                </>
+                                                            )}
+                                                        </h2>
+                                                        {pkg.price > 0 && (
+                                                            <span className="text-body-color mb-2 text-base font-normal">/bulan</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="mb-8 min-h-[200px]">
+                                                    <h5 className="text-dark mb-5 text-lg font-bold">Fitur Unggulan</h5>
+                                                    <div className="flex flex-col gap-4">
+                                                        {features.map((feature, idx) => (
+                                                            <div key={idx} className="flex items-start gap-3">
+                                                                <svg
+                                                                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#23BBB7]"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2.5}
+                                                                        d="M5 13l4 4L19 7"
+                                                                    />
+                                                                </svg>
+                                                                <p className="text-body-color text-base leading-relaxed font-medium">{feature}</p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <Link
+                                                    href={auth.user ? "/subscriptions" : "/register"}
+                                                    className={`block w-full rounded-lg px-7 py-4 text-center text-base font-semibold transition duration-300 ${
+                                                        pkg.is_popular
+                                                            ? 'bg-[#23BBB7] text-white shadow-md hover:bg-[#1a8f85] hover:shadow-lg'
+                                                            : 'border-2 border-[#23BBB7] bg-white text-[#23BBB7] hover:bg-[#23BBB7] hover:text-white'
+                                                    }`}
+                                                >
+                                                    {ctaText}
+                                                </Link>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -949,12 +975,12 @@ export default function Welcome() {
                                             Kami hadir untuk membantu pelaku UMKM tumbuh lebih cepat melalui solusi digital yang mudah, praktis, dan
                                             terjangkau.
                                         </p>
-                                        <a
-                                            href="javascript:void(0)"
+                                        <Link
+                                            href={auth.user ? "/subscriptions" : "/register"}
                                             className="inline-block rounded-md bg-[#ffffff40] px-7 py-3 text-center text-base font-medium text-white transition hover:bg-[#1a8f85]"
                                         >
                                             Coba Gratis
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>

@@ -31,9 +31,30 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use App\Models\Package;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    // Ambil semua package yang aktif, urutkan berdasarkan harga
+    $packages = Package::where('is_active', true)
+        ->orderBy('price', 'asc')
+        ->get()
+        ->map(function ($package) {
+            return [
+                'id' => $package->id,
+                'name' => $package->name,
+                'slug' => $package->slug,
+                'description' => $package->description,
+                'price' => $package->price,
+                'price_formatted' => 'Rp ' . number_format($package->price, 0, ',', '.'),
+                'is_popular' => $package->is_popular ?? false,
+                'features' => $package->features ?? [],
+                'trial_days' => $package->trial_days,
+            ];
+        });
+
+    return Inertia::render('welcome', [
+        'packages' => $packages,
+    ]);
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
