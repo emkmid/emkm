@@ -46,6 +46,18 @@ class Kernel extends ConsoleKernel
                 Log::error('Scheduled subscription expiry check failed');
             });
 
+        // Expire cancelled subscriptions daily at 1 AM
+        $schedule->command('subscriptions:expire-cancelled')
+            ->daily()
+            ->at('01:00')
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                Log::info('Cancelled subscriptions expiry check completed');
+            })
+            ->onFailure(function () {
+                Log::error('Cancelled subscriptions expiry check failed');
+            });
+
         // Auto-cancel pending payments older than 24 hours
         $schedule->call(function () {
             $expiredPending = \App\Models\Subscription::where('status', 'pending')

@@ -62,6 +62,7 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
     const [selectedDurations, setSelectedDurations] = useState<{ [key: number]: string }>({});
     const [error, setError] = useState<string>('');
     const [showPendingModal, setShowPendingModal] = useState(!!pendingPayment);
+    const [showCancelModal, setShowCancelModal] = useState(false);
 
     // Handle checkout data from props (direct from controller)
     useEffect(() => {
@@ -411,6 +412,28 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
         });
     };
 
+    const handleCancelSubscription = () => {
+        if (!userSubscription) return;
+
+        setLoading('cancel-subscription');
+        router.post('/subscriptions/cancel', {
+            subscription_id: userSubscription.id
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowCancelModal(false);
+                setError('');
+            },
+            onError: (errors: any) => {
+                setError(errors.message || 'Gagal membatalkan subscription');
+                setShowCancelModal(false);
+            },
+            onFinish: () => {
+                setLoading(null);
+            }
+        });
+    };
+
     const handleDurationChange = (packageId: number, duration: string) => {
         setSelectedDurations(prev => ({
             ...prev,
@@ -427,6 +450,29 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
     return (
         <AppLayout>
             <Head title="Paket Berlangganan" />
+            
+            {/* Flash Messages */}
+            {flash?.success && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+                    <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-start">
+                        <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>{flash.success}</span>
+                    </div>
+                </div>
+            )}
+
+            {flash?.error && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+                    <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-start">
+                        <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <span>{flash.error}</span>
+                    </div>
+                </div>
+            )}
             
             {/* Load Midtrans Snap */}
             <script 
@@ -471,6 +517,48 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
                 </div>
             )}
 
+            {/* Cancel Subscription Confirmation Modal */}
+            {showCancelModal && userSubscription && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <div className="text-center">
+                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                Batalkan Langganan?
+                            </h3>
+                            <p className="text-sm text-gray-500 mb-4">
+                                Anda yakin ingin membatalkan langganan paket <strong>{userSubscription.package?.name}</strong>?
+                            </p>
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
+                                <p className="text-xs text-yellow-800">
+                                    ⏰ <strong>Catatan:</strong> Anda masih dapat menggunakan fitur premium sampai <strong>{userSubscription.ends_at ? new Date(userSubscription.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'akhir periode'}</strong>
+                                </p>
+                            </div>
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={() => setShowCancelModal(false)}
+                                    disabled={loading === 'cancel-subscription'}
+                                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 disabled:opacity-50"
+                                >
+                                    Kembali
+                                </button>
+                                <button
+                                    onClick={handleCancelSubscription}
+                                    disabled={loading === 'cancel-subscription'}
+                                    className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50"
+                                >
+                                    {loading === 'cancel-subscription' ? 'Membatalkan...' : 'Ya, Batalkan'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -481,35 +569,59 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
 
                             {userSubscription && userSubscription.status === 'active' && (
                                 <div className={`mb-8 p-4 border rounded-lg ${
-                                    userSubscription.package?.price === 0 
-                                        ? 'bg-blue-50 border-blue-400 text-blue-800' 
-                                        : 'bg-green-100 border-green-400 text-green-700'
+                                    userSubscription.cancelled_at
+                                        ? 'bg-orange-50 border-orange-400 text-orange-800'
+                                        : userSubscription.package?.price === 0 
+                                            ? 'bg-blue-50 border-blue-400 text-blue-800' 
+                                            : 'bg-green-100 border-green-400 text-green-700'
                                 }`}>
                                     <div className="flex items-start justify-between">
-                                        <div>
-                                            <p className="font-medium">
-                                                {userSubscription.package?.price === 0 
-                                                    ? '🎁 Anda menggunakan paket gratis' 
-                                                    : '✅ Anda sudah memiliki subscription aktif'
-                                                }
-                                            </p>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-medium">
+                                                    {userSubscription.cancelled_at
+                                                        ? '⚠️ Langganan Akan Berakhir'
+                                                        : userSubscription.package?.price === 0 
+                                                            ? '🎁 Anda menggunakan paket gratis' 
+                                                            : '✅ Anda sudah memiliki subscription aktif'
+                                                    }
+                                                </p>
+                                                {userSubscription.cancelled_at && (
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-600 text-white">
+                                                        Dibatalkan
+                                                    </span>
+                                                )}
+                                            </div>
                                             <p className="text-sm mt-1">
                                                 Paket: <strong>{userSubscription.package?.name}</strong> | 
                                                 Berakhir: <strong>{userSubscription.ends_at ? new Date(userSubscription.ends_at).toLocaleDateString('id-ID') : 'Tidak terbatas'}</strong>
                                             </p>
-                                            {userSubscription.package?.price === 0 && (
+                                            {userSubscription.cancelled_at && (
+                                                <p className="text-sm mt-2 font-medium">
+                                                    ⏰ Anda masih dapat menggunakan fitur sampai tanggal berakhir.
+                                                </p>
+                                            )}
+                                            {userSubscription.package?.price === 0 && !userSubscription.cancelled_at && (
                                                 <p className="text-sm mt-2 font-medium">
                                                     💡 Upgrade ke paket berbayar untuk mendapatkan fitur lebih lengkap!
                                                 </p>
                                             )}
                                         </div>
-                                        {(userSubscription.package?.price ?? 0) > 0 && (
-                                            <div className="ml-4">
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
-                                                    Premium
-                                                </span>
-                                            </div>
-                                        )}
+                                        <div className="ml-4 flex items-center gap-2">
+                                            {(userSubscription.package?.price ?? 0) > 0 && !userSubscription.cancelled_at && (
+                                                <>
+                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
+                                                        Premium
+                                                    </span>
+                                                    <button
+                                                        onClick={() => setShowCancelModal(true)}
+                                                        className="px-3 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                                                    >
+                                                        Batalkan
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -659,8 +771,8 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
                                                 onClick={() => handleSubscribe(pkg)}
                                                 disabled={
                                                     loading === pkg.id.toString() || 
-                                                    isCurrentPackage ||
-                                                    ((userSubscription?.package?.price ?? 0) > 0 && pkg.price > 0) // Disable if both are paid packages
+                                                    isCurrentPackage
+                                                    // Allow upgrade/downgrade between different packages
                                                 }
                                                 className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
                                                     pkg.is_popular && !isCurrentPackage

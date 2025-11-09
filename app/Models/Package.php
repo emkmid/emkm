@@ -106,11 +106,13 @@ class Package extends Model
             }
             
             // Apply discount for longer durations
+            // 1 month = NO DISCOUNT (full price)
+            // 3+ months = GET DISCOUNT
             $discountMultipliers = [
-                '1_month' => 1.0,
-                '3_months' => 0.95, // 5% discount
-                '6_months' => 0.90, // 10% discount
-                '1_year' => 0.85,   // 15% discount
+                '1_month' => 1.0,    // NO DISCOUNT - pay full price
+                '3_months' => 0.90,  // 10% discount
+                '6_months' => 0.90,  // 10% discount  
+                '1_year' => 0.90,    // 10% discount
             ];
 
             $multiplier = $discountMultipliers[$duration] ?? 1.0;

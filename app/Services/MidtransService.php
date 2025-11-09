@@ -62,19 +62,33 @@ class MidtransService
                 ->first();
 
             if ($existingSubscription) {
-                // Allow upgrade from Free package to paid package
                 $currentPackage = $existingSubscription->package;
                 
-                if ($currentPackage->price == 0 && $package->price > 0) {
-                    // Will be handled in controller - cancel free subscription before creating new one
-                    \Log::info('Preparing upgrade from Free to paid package', [
+                // Prevent subscribing to the same package
+                if ($currentPackage->id === $package->id) {
+                    throw new \Exception("You already have an active {$currentPackage->name} subscription");
+                }
+                
+                // Allow upgrades (from lower price to higher price) or package changes
+                if ($package->price >= $currentPackage->price) {
+                    \Log::info('Preparing upgrade/change package', [
                         'user_id' => $user->id,
                         'from_package' => $currentPackage->name,
+                        'from_price' => $currentPackage->price,
                         'to_package' => $package->name,
+                        'to_price' => $package->price,
+                        'is_upgrade' => $package->price > $currentPackage->price,
                     ]);
+                    // Old subscription will be cancelled when new one is activated
                 } else {
-                    // Block if both are paid packages or trying to downgrade
-                    throw new \Exception("User already has an active " . $currentPackage->name . " subscription");
+                    // Downgrade - also allow but log as warning
+                    \Log::warning('User downgrading package', [
+                        'user_id' => $user->id,
+                        'from_package' => $currentPackage->name,
+                        'from_price' => $currentPackage->price,
+                        'to_package' => $package->name,
+                        'to_price' => $package->price,
+                    ]);
                 }
             }
 

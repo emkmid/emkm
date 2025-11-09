@@ -565,30 +565,39 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Cancel subscription
+     * Cancel subscription (with grace period)
+     * User can still use the subscription until it expires
      */
     public function cancel(Request $request)
     {
         $subscription = Auth::user()->subscriptions()
             ->where('status', 'active')
+            ->whereNull('cancelled_at') // Only allow cancelling subscriptions that haven't been cancelled
             ->first();
 
         if (!$subscription) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada subscription aktif.',
-            ], 400);
+            return back()->with('error', 'Tidak ada subscription aktif yang bisa dibatalkan.');
         }
 
+        // Mark as cancelled but keep active until ends_at
         $subscription->update([
-            'status' => 'cancelled',
             'cancelled_at' => now(),
+            // Status tetap 'active' - user masih bisa pakai sampai ends_at
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Subscription berhasil dibatalkan.',
+        \Log::info('Subscription cancelled with grace period', [
+            'subscription_id' => $subscription->id,
+            'user_id' => $subscription->user_id,
+            'package_id' => $subscription->package_id,
+            'cancelled_at' => $subscription->cancelled_at,
+            'ends_at' => $subscription->ends_at,
+            'grace_days' => $subscription->ends_at ? $subscription->ends_at->diffInDays(now()) : 0,
         ]);
+
+        return back()->with('success', 
+            'Subscription berhasil dibatalkan. Anda masih dapat menggunakan fitur sampai ' . 
+            ($subscription->ends_at ? $subscription->ends_at->format('d M Y') : 'masa berlaku habis') . '.'
+        );
     }
 
         /**
