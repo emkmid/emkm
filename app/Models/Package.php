@@ -117,8 +117,8 @@ class Package extends Model
 
             $multiplier = $discountMultipliers[$duration] ?? 1.0;
             
-            // Apply custom discount if set
-            if ($this->discount_percentage > 0) {
+            // Apply custom discount ONLY for 3+ months durations
+            if ($this->discount_percentage > 0 && $duration !== '1_month') {
                 if ($this->discount_percentage > 100) {
                     throw new \InvalidArgumentException("Invalid discount percentage: {$this->discount_percentage}%");
                 }

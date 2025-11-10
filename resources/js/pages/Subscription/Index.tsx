@@ -130,17 +130,19 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
         };
 
         const discountMultipliers: { [key: string]: number } = {
-            '1_month': 1.0,
-            '3_months': 0.95,
-            '6_months': 0.90,
-            '1_year': 0.85,
+            '1_month': 1.0,    // NO DISCOUNT for 1 month
+            '3_months': 0.90,  // 10% discount
+            '6_months': 0.90,  // 10% discount
+            '1_year': 0.90,    // 10% discount
         };
 
         const periodMultiplier = durationMultipliers[duration] || 1;
         const discountMultiplier = discountMultipliers[duration] || 1.0;
         
-        // Apply package-specific discount
-        const additionalDiscount = pkg.discount_percentage ? (pkg.discount_percentage / 100) : 0;
+        // Apply package-specific discount ONLY for 3+ months durations
+        const additionalDiscount = (pkg.discount_percentage && duration !== '1_month') 
+            ? (pkg.discount_percentage / 100) 
+            : 0;
         const finalMultiplier = discountMultiplier - additionalDiscount;
 
         return basePrice * periodMultiplier * finalMultiplier;
@@ -720,7 +722,7 @@ export default function SubscriptionIndex({ packages, userSubscription, featureC
                                                         <div className="text-sm text-gray-500 mt-2">
                                                             per {durationOptions.find(d => d.value === (selectedDurations[pkg.id] || '1_month'))?.label}
                                                         </div>
-                                                        {pkg.discount_percentage > 0 && (
+                                                        {pkg.discount_percentage > 0 && (selectedDurations[pkg.id] || '1_month') !== '1_month' && (
                                                             <div className="text-sm text-green-600 font-medium mt-1">
                                                                 Hemat {pkg.discount_percentage}%
                                                             </div>
