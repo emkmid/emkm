@@ -6,6 +6,7 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Article extends Model
 {
@@ -15,6 +16,8 @@ class Article extends Model
         'user_id','title','excerpt','content_html','meta','published_at', 'thumbnail_path', 'reading_time'
     ];
 
+    protected $appends = ['thumbnail_url'];
+
     public function sluggable(): array
     {
         return [
@@ -23,6 +26,24 @@ class Article extends Model
                 'onUpdate' => false,
             ]   
         ];
+    }
+
+    /**
+     * Get the full URL for the thumbnail
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if (!$this->thumbnail_path) {
+            return null;
+        }
+
+        // Check if it's already a full URL
+        if (filter_var($this->thumbnail_path, FILTER_VALIDATE_URL)) {
+            return $this->thumbnail_path;
+        }
+
+        // Return a relative URL so it works regardless of APP_URL/ngrok host and avoids mixed-content issues
+        return '/storage/' . ltrim($this->thumbnail_path, '/');
     }
 
     public function user(): BelongsTo {

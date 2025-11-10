@@ -49,7 +49,7 @@ export default function ArticlePage() {
                 {articles.data.length > 0 ? (
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         {articles.data.map((article) => (
-                            <Card>
+                            <Card key={article.id}>
                                 <CardHeader>
                                     <CardTitle>{article.title}</CardTitle>
                                     <CardDescription>{article.published_at}</CardDescription>

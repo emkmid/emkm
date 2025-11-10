@@ -29,11 +29,24 @@ use App\Http\Controllers\Transaction\ReceivableController;
 use App\Services\AccountingService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\Package;
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
+
+// Serve storage files (for ngrok / Windows Apache compatibility)
+Route::get('storage/{path}', function ($path) {
+    // Use public_direct disk (points to public/storage) so file serving works on Windows/Apache/ngrok
+    $file = Storage::disk('public_direct')->path($path);
+    
+    if (!file_exists($file)) {
+        abort(404);
+    }
+    
+    return response()->file($file);
+})->where('path', '.*')->name('storage.file');
 
 Route::get('/', function () {
     // Ambil semua package yang aktif, urutkan berdasarkan harga

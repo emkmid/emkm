@@ -15,7 +15,8 @@ class EducationController extends Controller
         $articles = Article::query()
             ->whereNotNull('published_at')
             ->latest('published_at')
-            ->select('id', 'title', 'slug', 'excerpt', 'published_at', 'created_at')
+            // include thumbnail_path so frontend can render thumbnails
+            ->select('id', 'title', 'slug', 'excerpt', 'published_at', 'created_at', 'thumbnail_path')
             ->paginate(12);
 
         return Inertia::render('education/article/index', compact('articles'));

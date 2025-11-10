@@ -15,6 +15,7 @@ interface ArticleFormProps {
         content_html?: string;
         published_at?: string;
         thumbnail_path?: string | null;
+        thumbnail_url?: string | null;
     };
     submitUrl: string;
     method?: 'post' | 'put' | 'patch';
@@ -30,7 +31,7 @@ export default function ArticleForm({ initialData = {}, submitUrl, method = 'pos
     });
 
     const [thumbnailPreview, setThumbnailPreview] = React.useState<string | null>(
-        initialData.thumbnail_path ? `/storage/${initialData.thumbnail_path}` : null,
+        initialData.thumbnail_url || null,
     );
 
     const submit = (e: React.FormEvent) => {

@@ -14,6 +14,7 @@ interface ArticleProps {
     content_html: string;
     published_at: string;
     thumbnail_path: string | null;
+    thumbnail_url: string | null;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -61,9 +62,9 @@ export default function ArticleShowPage() {
                     <CardHeader>
                         <h1 className="mb-2 text-3xl">{article.title}</h1>
                         {/* Tampilkan gambar thumbnail jika ada */}
-                        {article.thumbnail_path && (
+                        {article.thumbnail_url && (
                             <img
-                                src={`/storage/${article.thumbnail_path}`}
+                                src={article.thumbnail_url}
                                 alt={article.title}
                                 className="mb-4 h-auto w-full rounded-md object-cover"
                             />

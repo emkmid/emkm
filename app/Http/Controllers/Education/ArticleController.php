@@ -123,7 +123,7 @@ class ArticleController extends Controller
         // Only allow thumbnail upload if user has access
         if ($request->hasFile('thumbnail_path')) {
             if ($user->role === 'admin' || $this->featureService->hasAccess($user, 'articles.images')) {
-                $validatedData['thumbnail_path'] = $request->file('thumbnail_path')->store('article-images');
+                $validatedData['thumbnail_path'] = $request->file('thumbnail_path')->store('article-images', 'public_direct');
             } else {
                 return redirect()
                     ->back()
@@ -151,7 +151,10 @@ class ArticleController extends Controller
     {
         Gate::authorize('edit', $article);
         return Inertia::render('dashboard/admin/education/article/edit', [
-            'article' => $article->only('id','title','excerpt','content_html','slug','meta','published_at'),
+            'article' => array_merge(
+                $article->only('id','title','excerpt','content_html','slug','meta','published_at','thumbnail_path'),
+                ['thumbnail_url' => $article->thumbnail_url]
+            ),
         ]);
     }
 
@@ -178,9 +181,9 @@ class ArticleController extends Controller
 
         if ($request->hasFile('thumbnail_path')) {
             if ($article->thumbnail_path) {
-                Storage::delete($article->thumbnail_path);
+                Storage::disk('public_direct')->delete($article->thumbnail_path);
             }
-            $path = $request->file('thumbnail_path')->store('article-images');
+            $path = $request->file('thumbnail_path')->store('article-images', 'public_direct');
             $validatedData['thumbnail_path'] = $path;
         }
 

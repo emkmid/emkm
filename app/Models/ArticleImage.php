@@ -14,6 +14,8 @@ class ArticleImage extends Model
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
 
     public function url(): string {
-        return Storage::disk($this->disk)->url($this->path);
+        // Return a relative URL so it works regardless of APP_URL/ngrok host and avoids mixed-content issues
+        // Prefer serving from /storage/... which is backed by the public_direct disk
+        return '/storage/' . ltrim($this->path, '/');
     }
 }

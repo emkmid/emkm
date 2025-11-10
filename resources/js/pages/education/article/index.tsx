@@ -25,6 +25,7 @@ export default function Education() {
                 author?: string;
                 reading_time?: number;
                 category?: string;
+                thumbnail_url?: string | null;
             }[];
             links: { url: string | null; label: string; active: boolean }[];
         };
@@ -405,6 +406,15 @@ export default function Education() {
                                     >
                                         {/* Article Image Placeholder */}
                                         <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[#23BBB7]/20 to-[#23627C]/20">
+                                            {(article as any).thumbnail_url ? (
+                                                <img
+                                                    src={(article as any).thumbnail_url}
+                                                    alt={article.title}
+                                                    className="absolute inset-0 h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="absolute inset-0" />
+                                            )}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                                             <div className="absolute bottom-3 left-3">
                                                 <Badge variant="secondary" className="bg-white/90 text-[#23627C] backdrop-blur-sm">

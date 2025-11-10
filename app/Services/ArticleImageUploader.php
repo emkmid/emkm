@@ -11,7 +11,7 @@ class ArticleImageUploader
         abort_unless(in_array($file->getMimeType(), ['image/jpeg','image/png','image/webp','image/gif']), 422, 'Invalid image');
         abort_if($file->getSize() > 3 * 1024 * 1024, 422, 'Max 3MB');
 
-        $disk = 'public';
+        $disk = 'public_direct';
         $path = $file->store('articles/'.date('Y/m/d'), $disk);
 
         return ArticleImage::create([
