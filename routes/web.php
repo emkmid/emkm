@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\Package;
+use App\Models\User;
+use Laravel\Socialite\Facades\Socialite;
 
 Route::get('/', function () {
     // Ambil semua package yang aktif, urutkan berdasarkan harga
@@ -280,6 +282,28 @@ Route::get('test-subscriptions', function() {
 });
 
 require_once __DIR__.'/auth.php';
+
+// Google Login
+Route::get('/auth/google', function () {
+    return Socialite::driver('google')->redirect();
+});
+
+Route::get('/auth/google/callback', function () {
+    $googleUser = Socialite::driver('google')->stateless()->user();
+
+    $user = User::updateOrCreate(
+        ['email' => $googleUser->getEmail()],
+        [
+            'name' => $googleUser->getName(),
+            'google_id' => $googleUser->getId(),
+            'password' => bcrypt(str()->random(16)),
+        ]
+    );
+
+    Auth::login($user);
+
+    return redirect('/dashboard');
+});
 
 // Load test routes for development
 if (app()->environment(['local', 'staging'])) {

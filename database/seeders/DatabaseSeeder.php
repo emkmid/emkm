@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             \Database\Seeders\PackageSeeder::class,
             \Database\Seeders\SubscriptionSeeder::class,
+            \Database\Seeders\PackageFeatureSeeder::class
         ]);
     }
 }
