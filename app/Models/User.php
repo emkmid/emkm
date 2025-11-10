@@ -191,4 +191,17 @@ class User extends Authenticatable
         
         return $attributes;
     }
+
+    /**
+     * Override getDirty to exclude current_subscription from updates
+     */
+    public function getDirty()
+    {
+        $dirty = parent::getDirty();
+        
+        // Remove current_subscription as it's not a database column
+        unset($dirty['current_subscription']);
+        
+        return $dirty;
+    }
 }
