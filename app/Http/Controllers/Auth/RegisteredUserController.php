@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Package;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Services\OtpService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, OtpService $otpService): RedirectResponse
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -47,6 +48,7 @@ class RegisteredUserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'email_verified_at' => null, // Will be set after OTP verification
             ]);
 
             // Auto-assign Free package to new user
@@ -79,11 +81,23 @@ class RegisteredUserController extends Controller
 
             event(new Registered($user));
 
+            // Generate and send OTP
+            $otpResult = $otpService->generate(
+                email: $user->email,
+                type: 'email_verification',
+                user: $user
+            );
+
             DB::commit();
 
+            // Login user (they can use the app but with limited features until verified)
             Auth::login($user);
 
-            return redirect()->intended(route('dashboard', absolute: false));
+            // Redirect to OTP verification page
+            return redirect()->route('verification.notice')->with([
+                'otpSent' => $otpResult['success'],
+                'message' => $otpResult['message'],
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();

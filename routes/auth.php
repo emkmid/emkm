@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\OtpVerificationController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialLoginController;
@@ -46,8 +47,21 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('verify-email', EmailVerificationPromptController::class)
+    // OTP Verification Routes
+    Route::get('verify-otp', [OtpVerificationController::class, 'show'])
         ->name('verification.notice');
+
+    Route::post('verify-otp', [OtpVerificationController::class, 'verify'])
+        ->middleware('throttle:10,1') // Max 10 attempts per minute
+        ->name('otp.verify');
+
+    Route::post('resend-otp', [OtpVerificationController::class, 'resend'])
+        ->middleware('throttle:3,1') // Max 3 resends per minute
+        ->name('otp.resend');
+
+    // Legacy email verification routes (keep for compatibility)
+    Route::get('verify-email', EmailVerificationPromptController::class)
+        ->name('verification.notice.legacy');
 
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])

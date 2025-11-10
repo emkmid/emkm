@@ -59,7 +59,7 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified.email'])->group(function () {
     Route::prefix('dashboard')->group(function () {
         Route::get('/', function () {
             return Auth::user()->role === 'admin'
@@ -286,4 +286,5 @@ require_once __DIR__.'/auth.php';
 // Load test routes for development
 if (app()->environment(['local', 'staging'])) {
     require_once __DIR__.'/test.php';
+    require_once __DIR__.'/otp-test.php';
 }

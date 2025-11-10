@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:public/build/assets/input-rupiah-BNUNIGVj.js
-import{r as p,j as m}from"./app-CKCinfFZ.js";import{I}from"./input-Cv05gOWN.js";function x({id:o,value:e,onChange:u,placeholder:c,className:i}){const[a,r]=p.useState("Rp 0"),n=t=>"Rp "+t.toLocaleString("id-ID");p.useEffect(()=>{const t=parseInt(a.replace(/[^0-9]/g,""),10)||0;e!==t&&r(n(e))},[e]);const l=t=>{const g=t.target.value.replace(/[^0-9]/g,""),s=parseInt(g,10)||0;u(s),r(n(s))};return m.jsx(I,{id:o,type:"text",value:a,onChange:l,placeholder:c||"Rp 0",className:i})}export{x as I};
-========
-import{r as p,j as m}from"./app-jpjMCUhi.js";import{I}from"./input-DUSNNE1V.js";function x({id:o,value:e,onChange:u,placeholder:c,className:i}){const[a,r]=p.useState("Rp 0"),n=t=>"Rp "+t.toLocaleString("id-ID");p.useEffect(()=>{const t=parseInt(a.replace(/[^0-9]/g,""),10)||0;e!==t&&r(n(e))},[e]);const l=t=>{const g=t.target.value.replace(/[^0-9]/g,""),s=parseInt(g,10)||0;u(s),r(n(s))};return m.jsx(I,{id:o,type:"text",value:a,onChange:l,placeholder:c||"Rp 0",className:i})}export{x as I};
->>>>>>>> c2e01f8189afdceef304a81ca22a025e56ba51ec:public/build/assets/input-rupiah-D7xWJFfJ.js
