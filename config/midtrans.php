@@ -44,4 +44,16 @@ return [
     */
 
     'webhook_url' => env('APP_URL') . '/webhooks/midtrans',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Webhook Security
+    |--------------------------------------------------------------------------
+    |
+    | IP whitelist for webhook security in production.
+    | Set to false to disable IP checking (not recommended for production).
+    |
+    */
+
+    'webhook_ip_whitelist_enabled' => env('MIDTRANS_WEBHOOK_IP_CHECK', true),
 ];

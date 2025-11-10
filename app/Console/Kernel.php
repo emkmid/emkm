@@ -76,6 +76,17 @@ class Kernel extends ConsoleKernel
             }
         })->hourly()->name('auto-cancel-expired-payments');
 
+        // Cleanup pending payments (Midtrans 60 min expiry + buffer)
+        $schedule->command('payment:cleanup-pending --hours=2')
+            ->everyTwoHours()
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                Log::info('Pending payment cleanup completed');
+            })
+            ->onFailure(function () {
+                Log::error('Pending payment cleanup failed');
+            });
+
         // Clean up old notifications (older than 30 days)
         $schedule->call(function () {
             \App\Models\UserNotification::where('created_at', '<', now()->subDays(30))

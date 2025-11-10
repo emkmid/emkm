@@ -7,6 +7,7 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Notifications\SubscriptionExpiringNotification;
 use App\Notifications\SubscriptionExpiredNotification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 

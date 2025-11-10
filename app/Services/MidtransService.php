@@ -597,7 +597,8 @@ class MidtransService
                 // If payment is successful, set active dates
                 if ($newStatus === 'active') {
                     $updateData['starts_at'] = now();
-                    $updateData['expires_at'] = $this->calculateEndDate($subscription->interval);
+                    $updateData['activated_at'] = now();
+                    $updateData['ends_at'] = $this->calculateEndDate($subscription->interval);
                 }
 
                 $subscription->update($updateData);

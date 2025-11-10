@@ -32,6 +32,20 @@ class MidtransWebhookController extends Controller
         ]);
 
         try {
+            // IP Whitelist validation (Midtrans production IPs)
+            if (config('midtrans.is_production')) {
+                if (!$this->isFromMidtrans($request->ip())) {
+                    \Log::warning('Webhook from unauthorized IP', [
+                        'ip' => $request->ip(),
+                        'order_id' => $payload['order_id'] ?? 'unknown',
+                    ]);
+                    
+                    return response()->json([
+                        'error' => 'Unauthorized IP address'
+                    ], 403);
+                }
+            }
+
             // Basic validation
             $orderId = $payload['order_id'] ?? null;
             $statusCode = $payload['status_code'] ?? null;
@@ -207,5 +221,51 @@ class MidtransWebhookController extends Controller
             ]);
             return false;
         }
+    }
+
+    /**
+     * Check if request is from Midtrans IP addresses
+     */
+    private function isFromMidtrans(string $ip): bool
+    {
+        // Midtrans official IP addresses
+        $midtransIPs = [
+            '103.127.16.0/23',     // Midtrans main
+            '103.127.17.0/24',     // Midtrans backup
+            '103.208.23.0/24',     // Midtrans additional
+            '103.208.23.6',        // Specific IP
+            '127.0.0.1',           // Localhost for development
+            '::1',                 // IPv6 localhost
+        ];
+
+        foreach ($midtransIPs as $allowedIP) {
+            if (strpos($allowedIP, '/') !== false) {
+                // CIDR notation
+                if ($this->ipInRange($ip, $allowedIP)) {
+                    return true;
+                }
+            } else {
+                // Direct IP match
+                if ($ip === $allowedIP) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if IP is in CIDR range
+     */
+    private function ipInRange(string $ip, string $cidr): bool
+    {
+        list($subnet, $mask) = explode('/', $cidr);
+        
+        $ipLong = ip2long($ip);
+        $subnetLong = ip2long($subnet);
+        $maskLong = -1 << (32 - $mask);
+        
+        return ($ipLong & $maskLong) === ($subnetLong & $maskLong);
     }
 }

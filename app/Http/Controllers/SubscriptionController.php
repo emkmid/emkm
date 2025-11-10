@@ -298,9 +298,20 @@ class SubscriptionController extends Controller
             }
 
             // Only handle error responses if success is false
+            $errorMessages = [
+                'FREE_PACKAGE_NOT_SUPPORTED' => 'Paket gratis tidak memerlukan pembayaran. Silakan aktifkan langsung dari halaman paket.',
+                'MIDTRANS_API_ERROR' => 'Terjadi kesalahan pada sistem pembayaran. Silakan coba beberapa saat lagi.',
+                'INVALID_ARGUMENT' => $result['error'] ?? 'Data pembayaran tidak valid.',
+                'UNEXPECTED_ERROR' => 'Terjadi kesalahan yang tidak terduga. Tim kami telah diberitahu dan sedang menangani masalah ini.',
+            ];
+
+            $userFriendlyMessage = $errorMessages[$result['error_code'] ?? ''] 
+                ?? $result['error'] 
+                ?? 'Gagal membuat pembayaran. Silakan coba lagi.';
+
             $errorData = [
                 'success' => false,
-                'message' => $result['error'] ?? 'Gagal membuat pembayaran.',
+                'message' => $userFriendlyMessage,
                 'error_code' => $result['error_code'] ?? 'PAYMENT_CREATION_FAILED',
             ];
 
@@ -308,6 +319,7 @@ class SubscriptionController extends Controller
                 'user_id' => $user->id,
                 'package_id' => $package->id,
                 'error_data' => $errorData,
+                'original_error' => $result['error'] ?? null,
             ]);
 
             if ($request->header('X-Inertia')) {
