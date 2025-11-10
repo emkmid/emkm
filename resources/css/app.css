@@ -131,6 +131,10 @@
     --radius: 0.625rem;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 .dark {
     --background: #0f172a;
     --foreground: #ffffff;
@@ -254,17 +258,17 @@
 
 /* Toolbar wrapper */
 .trix-toolbar {
-    @apply border-border bg-card rounded-t-lg border px-2 py-1;
+    @apply rounded-t-lg border border-border bg-card px-2 py-1;
 }
 
 /* Button groups */
 .trix-button-group {
-    @apply bg-muted/50 inline-flex items-center gap-1 rounded-md p-1;
+    @apply inline-flex items-center gap-1 rounded-md bg-muted/50 p-1;
 }
 
 /* Buttons */
 .trix-button {
-    @apply text-foreground rounded-md px-2 py-1 transition-colors;
+    @apply rounded-md px-2 py-1 text-foreground transition-colors;
 }
 
 .trix-button:hover {
@@ -283,7 +287,7 @@
 
 /* Editor input area */
 .trix-content {
-    @apply border-border bg-background text-foreground min-h-[200px] rounded-b-lg border p-4 leading-relaxed;
+    @apply min-h-[200px] rounded-b-lg border border-border bg-background p-4 leading-relaxed text-foreground;
 }
 
 /* Placeholder */
@@ -293,7 +297,7 @@ trix-editor[placeholder]::before {
 
 /* Links */
 .trix-content a {
-    @apply text-primary hover:text-primary-foreground underline;
+    @apply text-primary underline hover:text-primary-foreground;
 }
 
 /* Headings */
