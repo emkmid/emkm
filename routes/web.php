@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\Package;
+use App\Models\User;
+use Laravel\Socialite\Facades\Socialite;
 
 Route::get('/', function () {
     // Ambil semua package yang aktif, urutkan berdasarkan harga

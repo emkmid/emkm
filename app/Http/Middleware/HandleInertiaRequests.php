@@ -45,19 +45,24 @@ class HandleInertiaRequests extends Middleware
         $featureAccess = [];
         
         if ($user) {
-            // Load current active subscription with package
-            $currentSubscription = $user->subscriptions()
-                ->where('status', 'active')
-                ->where(function($query) {
-                    $query->whereNull('expires_at')
-                          ->orWhere('expires_at', '>', now());
-                })
-                ->with('package')
-                ->latest('created_at')
-                ->first();
-            
-            // Set current subscription as an appended attribute
-            $user->setAttribute('current_subscription', $currentSubscription);
+            // Load current active subscription with package (only for non-admin users)
+            if ($user->role !== 'admin') {
+                $currentSubscription = $user->subscriptions()
+                    ->where('status', 'active')
+                    ->where(function($query) {
+                        $query->whereNull('expires_at')
+                              ->orWhere('expires_at', '>', now());
+                    })
+                    ->with('package')
+                    ->latest('created_at')
+                    ->first();
+                
+                // Set current subscription as an appended attribute
+                $user->setAttribute('current_subscription', $currentSubscription);
+            } else {
+                // Admin doesn't need subscription
+                $user->setAttribute('current_subscription', null);
+            }
             
             // Get unread notification count
             $unreadNotificationCount = $user->unreadNotifications()->count();

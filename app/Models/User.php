@@ -23,15 +23,6 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-
-        /**
-         * Attributes to append when serializing the model (so Inertia receives current subscription).
-         *
-         * @var array<int, string>
-         */
-        protected $appends = [
-            'current_subscription',
-        ];
     protected $fillable = [
         'name',
         'email',
@@ -96,6 +87,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Debt::class);
     }
+
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
+    }
+
     public function receivables()
     {
         return $this->hasMany(Receivable::class);
@@ -161,10 +158,56 @@ class User extends Authenticatable
 
     /**
      * Accessor used by Inertia share to include the current subscription with package relation.
+     * Note: This is set dynamically in HandleInertiaRequests middleware, not from database
      */
     public function getCurrentSubscriptionAttribute()
     {
-        // eager load package on the subscription for frontend convenience
-        return $this->subscriptions()->whereIn('status', ['active', 'trial'])->latest('starts_at')->with('package')->first();
+        // Check if it's already been set (from middleware)
+        if (isset($this->attributes['current_subscription'])) {
+            return $this->attributes['current_subscription'];
+        }
+        
+        // Otherwise, load it fresh
+        return $this->subscriptions()
+            ->whereIn('status', ['active', 'trial'])
+            ->latest('starts_at')
+            ->with('package')
+            ->first();
+    }
+
+    /**
+     * Mutator to prevent current_subscription from being saved to database
+     */
+    public function setCurrentSubscriptionAttribute($value)
+    {
+        // Store in attributes array but won't be saved to database
+        // because it's not in fillable or database columns
+        $this->attributes['current_subscription'] = $value;
+    }
+
+    /**
+     * Get auditable attributes, excluding virtual attributes
+     */
+    protected function getAuditableAttributes()
+    {
+        $attributes = $this->getAttributes();
+        
+        // Exclude virtual/appended attributes that don't exist in database
+        unset($attributes['current_subscription']);
+        
+        return $attributes;
+    }
+
+    /**
+     * Override getDirty to exclude current_subscription from updates
+     */
+    public function getDirty()
+    {
+        $dirty = parent::getDirty();
+        
+        // Remove current_subscription as it's not a database column
+        unset($dirty['current_subscription']);
+        
+        return $dirty;
     }
 }

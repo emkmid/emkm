@@ -139,9 +139,9 @@ export default function Register() {
 
                                 {/* Garis dengan tulisan "atau" */}
                                 <div className="flex w-full items-center">
-                                    <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
-                                    <span className="px-3 text-sm text-gray-500 dark:text-gray-400">atau</span>
-                                    <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+                                    <div className="flex-grow border-t border-gray-300"></div>
+                                    <span className="px-3 text-sm text-gray-500">atau</span>
+                                    <div className="flex-grow border-t border-gray-300"></div>
                                 </div>
 
                                 {/* Tombol Google */}

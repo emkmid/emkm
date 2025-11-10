@@ -36,7 +36,9 @@ class DatabaseSeeder extends Seeder
         // Packages and a test subscription
         $this->call([
             \Database\Seeders\PackageSeeder::class,
+            \Database\Seeders\PackageFeatureSeeder::class,
             \Database\Seeders\SubscriptionSeeder::class,
+            \Database\Seeders\PackageFeatureSeeder::class
         ]);
     }
 }

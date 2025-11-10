@@ -94,46 +94,46 @@ export default function Education() {
                             >
                                 Home
                             </Link>
-                            <a
-                                href="#"
+                            <Link
+                                href={route('home') + '#fitur'}
                                 className={`text-base font-medium transition ${
                                     scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
                                 }`}
                             >
                                 Fitur
-                            </a>
-                            <a
-                                href="#"
+                            </Link>
+                            <Link
+                                href={route('home') + '#about'}
                                 className={`text-base font-medium transition ${
                                     scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
                                 }`}
                             >
                                 About
-                            </a>
-                            <a
-                                href="#"
+                            </Link>
+                            <Link
+                                href={route('home') + '#pricing'}
                                 className={`text-base font-medium transition ${
                                     scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
                                 }`}
                             >
                                 Pricing
-                            </a>
-                            <a
-                                href="#"
+                            </Link>
+                            <Link
+                                href={route('home') + '#team'}
                                 className={`text-base font-medium transition ${
                                     scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
                                 }`}
                             >
                                 Team
-                            </a>
-                            <a
-                                href="#"
+                            </Link>
+                            <Link
+                                href={route('home') + '#contact'}
                                 className={`text-base font-medium transition ${
                                     scrolled ? 'text-gray-800 hover:text-[#23627C]' : 'text-gray-800 hover:text-[#23627C]'
                                 }`}
                             >
                                 Contact
-                            </a>
+                            </Link>
                             <Link
                                 href={route('education.article.index')}
                                 className={`text-base font-medium transition ${
@@ -198,41 +198,41 @@ export default function Education() {
                             >
                                 Home
                             </Link>
-                            <a
-                                href="#"
+                            <Link
+                                href={route('home') + '#fitur'}
                                 onClick={() => setIsOpen(false)}
                                 className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
                             >
                                 Fitur
-                            </a>
-                            <a
-                                href="#"
+                            </Link>
+                            <Link
+                                href={route('home') + '#about'}
                                 onClick={() => setIsOpen(false)}
                                 className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
                             >
                                 About
-                            </a>
-                            <a
-                                href="#"
+                            </Link>
+                            <Link
+                                href={route('home') + '#pricing'}
                                 onClick={() => setIsOpen(false)}
                                 className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
                             >
                                 Pricing
-                            </a>
-                            <a
-                                href="#"
+                            </Link>
+                            <Link
+                                href={route('home') + '#team'}
                                 onClick={() => setIsOpen(false)}
                                 className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
                             >
                                 Team
-                            </a>
-                            <a
-                                href="#"
+                            </Link>
+                            <Link
+                                href={route('home') + '#contact'}
                                 onClick={() => setIsOpen(false)}
                                 className="text-base font-medium text-gray-800 transition hover:text-[#23627C]"
                             >
                                 Contact
-                            </a>
+                            </Link>
                             <Link
                                 href={route('education.article.index')}
                                 onClick={() => setIsOpen(false)}

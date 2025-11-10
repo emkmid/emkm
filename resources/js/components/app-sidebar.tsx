@@ -1,7 +1,7 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { type MainNavItem, NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Bell, Book, BookOpen, Building2, Calculator, CreditCard, FileText, LayoutGrid, NotebookText, Package, Users, UserSquare, Settings } from 'lucide-react';
@@ -155,6 +155,8 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
+    const { state } = useSidebar();
+    
     // Get current subscription info from backend
     const userSubscription = ((auth?.user as any)?.current_subscription as any);
     
@@ -203,8 +205,12 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch className="flex items-center justify-center">
-                                <img src="/images/emkm.png" className="h-7 w-auto" alt="E-MKM" />
+                            <Link href="/" className="flex items-center justify-center gap-2">
+                                {state === 'collapsed' ? (
+                                    <img src="/images/emkm_small.png" className="h-8 w-8" alt="E-MKM" />
+                                ) : (
+                                    <img src="/images/emkm.png" className="h-7 w-auto" alt="E-MKM" />
+                                )}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
