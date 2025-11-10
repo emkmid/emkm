@@ -1,12 +1,12 @@
+import AppLogo from '@/components/app-logo';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowRight, AtSign, Lock, User } from 'lucide-react';
 import { useEffect, type FormEventHandler } from 'react';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import AppLogo from '@/components/app-logo';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -45,7 +45,7 @@ export default function Register() {
             </div>
 
             <div className="flex items-center justify-center p-6" style={{ backgroundColor: '#D3EDFF' }}>
-                <Card className="w-full max-w-md animate-in fade-in-50 slide-in-from-bottom-8 duration-700">
+                <Card className="w-full max-w-md duration-700 animate-in fade-in-50 slide-in-from-bottom-8">
                     <CardHeader className="text-center">
                         <CardTitle className="text-2xl font-bold tracking-tight text-[#23627C]">Buat Akun Baru</CardTitle>
                         <CardDescription>Isi data di bawah ini untuk memulai perjalanan Anda.</CardDescription>
@@ -136,6 +136,39 @@ export default function Register() {
                                     Sudah punya akun? Masuk
                                     <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </Link>
+
+                                {/* Garis dengan tulisan "atau" */}
+                                <div className="flex w-full items-center">
+                                    <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+                                    <span className="px-3 text-sm text-gray-500 dark:text-gray-400">atau</span>
+                                    <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+                                </div>
+
+                                {/* Tombol Google */}
+                                <button
+                                    onClick={() => (window.location.href = '/auth/google/redirect')}
+                                    className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-2 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 48 48">
+                                        <path
+                                            fill="#EA4335"
+                                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.24 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.71 12.19 17.82 9.5 24 9.5z"
+                                        />
+                                        <path
+                                            fill="#4285F4"
+                                            d="M46.1 24.55c0-1.57-.14-3.09-.39-4.55H24v9.02h12.65c-.55 2.96-2.18 5.47-4.63 7.15l7.15 5.52C43.82 37.89 46.1 31.88 46.1 24.55z"
+                                        />
+                                        <path
+                                            fill="#FBBC05"
+                                            d="M10.54 28.41c-.5-1.48-.78-3.06-.78-4.69 0-1.63.28-3.21.78-4.69l-7.98-6.19C.94 15.34 0 19.06 0 23.72c0 4.66.94 8.38 2.56 11.88l7.98-6.19z"
+                                        />
+                                        <path
+                                            fill="#34A853"
+                                            d="M24 47.44c6.47 0 11.9-2.13 15.87-5.78l-7.15-5.52c-2.02 1.36-4.67 2.16-8.72 2.16-6.18 0-11.29-3.69-13.46-9.02l-7.98 6.19C6.51 42.62 14.62 47.44 24 47.44z"
+                                        />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Login dengan Google</span>
+                                </button>
                             </div>
                         </form>
                     </CardContent>
