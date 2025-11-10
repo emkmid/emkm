@@ -223,15 +223,23 @@ export default function Welcome({ packages }: WelcomeProps) {
 
                         {/* Action Buttons (Desktop) */}
                         <div className="hidden items-center space-x-4 sm:flex">
-                            <Link href="/login" className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition">
-                                Sign In
-                            </Link>
-                            <Link
-                                href="/register"
-                                className="rounded-md border border-[#23627C] bg-white px-5 py-2 text-base font-medium text-[#23627C] transition hover:bg-[#23627C] hover:text-white"
-                            >
-                                Sign Up
-                            </Link>
+                            {auth.user ? (
+                                <Link href="/dashboard" className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition hover:bg-[#1a8f85]">
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link href="/login" className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition">
+                                        Sign In
+                                    </Link>
+                                    <Link
+                                        href="/register"
+                                        className="rounded-md border border-[#23627C] bg-white px-5 py-2 text-base font-medium text-[#23627C] transition hover:bg-[#23627C] hover:text-white"
+                                    >
+                                        Sign Up
+                                    </Link>
+                                </>
+                            )}
                         </div>
 
                         {/* Hamburger Button (Mobile) */}
@@ -281,15 +289,23 @@ export default function Welcome({ packages }: WelcomeProps) {
 
                             {/* Mobile Action Buttons */}
                             <div className="flex flex-col space-y-3 pt-4">
-                                <Link href="/login" className="rounded-md bg-primary px-6 py-2 text-base font-medium text-white transition">
-                                    Sign In
-                                </Link>
-                                <Link
-                                    href="/register"
-                                    className="rounded-md border border-[#23627C] bg-white/80 px-6 py-2 text-base font-medium text-[#23627C] transition hover:bg-[#23627C] hover:text-white"
-                                >
-                                    Sign Up
-                                </Link>
+                                {auth.user ? (
+                                    <Link href="/dashboard" className="rounded-md bg-primary px-6 py-2 text-base font-medium text-white transition hover:bg-[#1a8f85]">
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <Link href="/login" className="rounded-md bg-primary px-6 py-2 text-base font-medium text-white transition">
+                                            Sign In
+                                        </Link>
+                                        <Link
+                                            href="/register"
+                                            className="rounded-md border border-[#23627C] bg-white/80 px-6 py-2 text-base font-medium text-[#23627C] transition hover:bg-[#23627C] hover:text-white"
+                                        >
+                                            Sign Up
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         </nav>
                     </div>

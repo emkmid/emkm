@@ -227,14 +227,20 @@ export default function ArticleShow() {
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                         <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                            <Link href="#" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
+                            <Link 
+                                href={route('home') + '#about'} 
+                                className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200"
+                            >
                                 Tentang Kami
                             </Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                         <NavigationMenuLink asChild className="hover:bg-[#23627C]">
-                            <Link href="#" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200">
+                            <Link 
+                                href={route('home') + '#fitur'} 
+                                className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200"
+                            >
                                 Fitur
                             </Link>
                         </NavigationMenuLink>
@@ -242,7 +248,7 @@ export default function ArticleShow() {
                     <NavigationMenuItem>
                         <NavigationMenuLink asChild className="hover:bg-[#23627C]">
                             <Link
-                                href="#harga"
+                                href={route('home') + '#pricing'}
                                 className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-200"
                             >
                                 Harga
