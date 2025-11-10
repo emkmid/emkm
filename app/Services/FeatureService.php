@@ -20,6 +20,11 @@ class FeatureService
             $package = Package::where('name', 'Free')->first();
         }
 
+        // If still no package (database not seeded), deny access
+        if (!$package) {
+            return false;
+        }
+
         return $package->hasFeature($featureKey);
     }
 
@@ -33,6 +38,11 @@ class FeatureService
         
         if (!$package) {
             $package = Package::where('name', 'Free')->first();
+        }
+
+        // If still no package (database not seeded), return 0 (not allowed)
+        if (!$package) {
+            return 0;
         }
 
         return $package->getFeatureLimit($featureKey) ?? 0;
@@ -111,6 +121,11 @@ class FeatureService
         
         if (!$package) {
             $package = Package::where('name', 'Free')->first();
+        }
+
+        // If still no package (database not seeded), return empty array
+        if (!$package) {
+            return [];
         }
 
         $features = $package->featureLimits()
