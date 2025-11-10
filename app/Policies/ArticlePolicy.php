@@ -10,14 +10,16 @@ class ArticlePolicy
 {
     public function edit(User $user, Article $article)
     {
-        return $user->id === $article->user_id;
+        // Admin can edit all articles, or user can edit their own
+        return $user->role === 'admin' || $user->id === $article->user_id;
     }
     /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Article $article): bool
     {
-        return $user->id === $article->user_id;
+        // Admin can update all articles, or user can update their own
+        return $user->role === 'admin' || $user->id === $article->user_id;
     }
 
     /**
@@ -25,6 +27,7 @@ class ArticlePolicy
      */
     public function delete(User $user, Article $article): bool
     {
-        return $user->id === $article->user_id;
+        // Admin can delete all articles, or user can delete their own
+        return $user->role === 'admin' || $user->id === $article->user_id;
     }
 }

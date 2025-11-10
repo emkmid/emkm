@@ -40,6 +40,19 @@ class ArticleController extends Controller
     {
         $user = auth()->user();
 
+        // Admin bypass - admin can create unlimited articles
+        if ($user->role === 'admin') {
+            return Inertia::render('dashboard/admin/education/article/create', [
+                'canUploadImages' => true,
+                'quota' => [
+                    'current' => 0,
+                    'limit' => -1,
+                    'remaining' => -1,
+                    'is_unlimited' => true,
+                ],
+            ]);
+        }
+
         // Check if user has access to create articles
         if (!$this->featureService->hasAccess($user, 'articles.create')) {
             return redirect()
@@ -87,17 +100,20 @@ class ArticleController extends Controller
     {
         $user = $request->user();
 
-        // Double check feature access
-        if (!$this->featureService->hasAccess($user, 'articles.create')) {
-            abort(403, 'Anda tidak memiliki akses ke fitur ini.');
-        }
+        // Admin bypass - admin can create unlimited articles
+        if ($user->role !== 'admin') {
+            // Double check feature access
+            if (!$this->featureService->hasAccess($user, 'articles.create')) {
+                abort(403, 'Anda tidak memiliki akses ke fitur ini.');
+            }
 
-        // Check limit again
-        $articleCount = $user->articles()->count();
-        if ($this->featureService->hasReachedLimit($user, 'articles.max_count', $articleCount)) {
-            return redirect()
-                ->back()
-                ->with('error', 'Limit artikel tercapai. Upgrade untuk membuat lebih banyak artikel.');
+            // Check limit again
+            $articleCount = $user->articles()->count();
+            if ($this->featureService->hasReachedLimit($user, 'articles.max_count', $articleCount)) {
+                return redirect()
+                    ->back()
+                    ->with('error', 'Limit artikel tercapai. Upgrade untuk membuat lebih banyak artikel.');
+            }
         }
 
         $validatedData = $request->validated();
@@ -106,7 +122,7 @@ class ArticleController extends Controller
 
         // Only allow thumbnail upload if user has access
         if ($request->hasFile('thumbnail_path')) {
-            if ($this->featureService->hasAccess($user, 'articles.images')) {
+            if ($user->role === 'admin' || $this->featureService->hasAccess($user, 'articles.images')) {
                 $validatedData['thumbnail_path'] = $request->file('thumbnail_path')->store('article-images');
             } else {
                 return redirect()
