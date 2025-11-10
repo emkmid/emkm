@@ -146,7 +146,7 @@ export default function Register() {
 
                                 {/* Tombol Google */}
                                 <button
-                                    onClick={() => (window.location.href = '/auth/google')}
+                                    onClick={() => (window.location.href = '/auth/google/redirect')}
                                     className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-2 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
                                 >
                                     <svg width="20" height="20" viewBox="0 0 48 48">
