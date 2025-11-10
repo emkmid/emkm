@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\PackageSeeder::class,
             \Database\Seeders\PackageFeatureSeeder::class,
             \Database\Seeders\SubscriptionSeeder::class,
+            \Database\Seeders\PackageFeatureSeeder::class
         ]);
     }
 }
