@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('event'); // created, updated, deleted, restored
             $table->string('auditable_type'); // Model class
-            $table->unsignedBigInteger('auditable_id'); // Model ID
+            $table->string('auditable_id'); // Model ID (string untuk support UUID)
             $table->text('old_values')->nullable(); // JSON
             $table->text('new_values')->nullable(); // JSON
             $table->string('ip_address', 45)->nullable();
