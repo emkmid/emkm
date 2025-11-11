@@ -52,32 +52,32 @@ class RegisteredUserController extends Controller
             ]);
 
             // Auto-assign Free package to new user
-            $freePackage = Package::where('name', 'Free')
-                ->where('is_active', true)
-                ->first();
+            // $freePackage = Package::where('name', 'Free')
+            //     ->where('is_active', true)
+            //     ->first();
 
-            if ($freePackage) {
-                Subscription::create([
-                    'user_id' => $user->id,
-                    'package_id' => $freePackage->id,
-                    'provider' => 'internal',
-                    'status' => 'active',
-                    'price_cents' => 0,
-                    'currency' => 'IDR',
-                    'interval' => '1_year',
-                    'starts_at' => now(),
-                    'ends_at' => now()->addYear(),
-                ]);
+            // if ($freePackage) {
+            //     Subscription::create([
+            //         'user_id' => $user->id,
+            //         'package_id' => $freePackage->id,
+            //         'provider' => 'internal',
+            //         'status' => 'active',
+            //         'price_cents' => 0,
+            //         'currency' => 'IDR',
+            //         'interval' => '1_year',
+            //         'starts_at' => now(),
+            //         'ends_at' => now()->addYear(),
+            //     ]);
 
-                Log::info('Free package auto-assigned to new user', [
-                    'user_id' => $user->id,
-                    'package_id' => $freePackage->id,
-                ]);
-            } else {
-                Log::warning('Free package not found for auto-assignment', [
-                    'user_id' => $user->id,
-                ]);
-            }
+            //     Log::info('Free package auto-assigned to new user', [
+            //         'user_id' => $user->id,
+            //         'package_id' => $freePackage->id,
+            //     ]);
+            // } else {
+            //     Log::warning('Free package not found for auto-assignment', [
+            //         'user_id' => $user->id,
+            //     ]);
+            // }
 
             event(new Registered($user));
 
@@ -105,10 +105,11 @@ class RegisteredUserController extends Controller
             Log::error('User registration failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'email' => $request->email,
             ]);
 
             return back()->withErrors([
-                'email' => 'Registration failed. Please try again.',
+                'email' => 'Registration failed: ' . $e->getMessage(),
             ])->withInput($request->except('password', 'password_confirmation'));
         }
     }

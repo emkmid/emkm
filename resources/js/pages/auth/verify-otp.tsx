@@ -207,6 +207,23 @@ export default function VerifyOtp({ email, name, status }: VerifyOtpProps) {
                                     <RefreshCw className="mr-2 h-4 w-4" />
                                     {resendForm.processing ? 'Mengirim...' : 'Kirim Ulang Kode'}
                                 </Button>
+
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    className="w-full"
+                                    onClick={() => {
+                                        if (confirm('Apakah Anda yakin ingin membatalkan registrasi dan menggunakan email lain?')) {
+                                            router.post(route('otp.cancel'), {}, {
+                                                onSuccess: () => {
+                                                    window.location.href = route('register');
+                                                },
+                                            });
+                                        }
+                                    }}
+                                >
+                                    Gunakan Email Lain
+                                </Button>
                             </div>
 
                             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">

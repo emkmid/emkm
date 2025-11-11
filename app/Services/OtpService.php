@@ -55,7 +55,7 @@ class OtpService
         // Send email
         try {
             Mail::to($email)->send(new OtpMail($code, $user?->name ?? 'User', $type));
-            
+
             // Hit rate limiter
             RateLimiter::hit($rateLimitKey, $decayMinutes * 60);
 
@@ -66,15 +66,27 @@ class OtpService
                 'expires_in_minutes' => config('otp.expiry_minutes'),
             ];
         } catch (\Exception $e) {
-            // Log error
-            \Log::error('Failed to send OTP email: ' . $e->getMessage());
-            
-            // Delete the OTP code if email fails
-            $otp->delete();
-            
+            // Log error with full context for debugging
+            \Log::error('Failed to send OTP email', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'email' => $email,
+                'user_id' => $user?->id,
+            ]);
+
+            // Don't delete OTP here; keep it so user can request resend without regenerating
+            // $otp->delete();
+
+            $message = 'Gagal mengirim kode OTP. Silakan coba lagi.';
+
+            // Provide a more detailed message in local environment
+            if (config('app.env') === 'local') {
+                $message .= ' (' . $e->getMessage() . ')';
+            }
+
             return [
                 'success' => false,
-                'message' => 'Gagal mengirim kode OTP. Silakan coba lagi.',
+                'message' => $message,
             ];
         }
     }

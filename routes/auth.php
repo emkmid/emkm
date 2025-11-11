@@ -59,6 +59,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:3,1') // Max 3 resends per minute
         ->name('otp.resend');
 
+    Route::post('cancel-registration', [OtpVerificationController::class, 'cancel'])
+        ->name('otp.cancel');
+
     // Legacy email verification routes (keep for compatibility)
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice.legacy');

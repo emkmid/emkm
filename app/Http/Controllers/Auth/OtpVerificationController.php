@@ -90,4 +90,27 @@ class OtpVerificationController extends Controller
             'message' => $result['message'],
         ]);
     }
+
+    /**
+     * Cancel registration and delete unverified user.
+     */
+    public function cancel(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        // Only allow if not verified
+        if ($user->email_verified_at !== null) {
+            return redirect()->route('dashboard');
+        }
+
+        // Logout first to avoid audit issues
+        Auth::logout();
+
+        // Delete user directly from database to avoid model events
+        \DB::table('users')->where('id', $user->id)->delete();
+
+        return redirect()->route('register')->with([
+            'message' => 'Registrasi dibatalkan. Silakan daftar dengan email yang benar.',
+        ]);
+    }
 }

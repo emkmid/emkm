@@ -4,6 +4,8 @@ namespace App\Traits;
 
 use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 trait Auditable
 {
@@ -48,17 +50,38 @@ trait Auditable
         $oldValues = collect($oldValues)->except($hiddenFields)->toArray();
         $newValues = collect($newValues)->except($hiddenFields)->toArray();
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'event' => $event,
-            'auditable_type' => get_class($model),
-            'auditable_id' => $model->id,
-            'old_values' => $oldValues,
-            'new_values' => $newValues,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'url' => request()->fullUrl(),
-        ]);
+        // Determine current authenticated user id safely. If the session
+        // still references a deleted user (rare race from manual DB deletes),
+        // avoid using that id to prevent foreign key constraint errors.
+        $currentUserId = Auth::id();
+
+        if ($currentUserId !== null) {
+            $exists = DB::table('users')->where('id', $currentUserId)->exists();
+            if (! $exists) {
+                $currentUserId = null;
+            }
+        }
+
+        try {
+            AuditLog::create([
+                'user_id' => $currentUserId,
+                'event' => $event,
+                'auditable_type' => get_class($model),
+                'auditable_id' => $model->id,
+                'old_values' => $oldValues,
+                'new_values' => $newValues,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'url' => request()->fullUrl(),
+            ]);
+        } catch (\Exception $e) {
+            // Audit failure should never block the primary action.
+            Log::warning('AuditLog create failed: ' . $e->getMessage(), [
+                'event' => $event,
+                'auditable_type' => get_class($model),
+                'auditable_id' => $model->id,
+            ]);
+        }
     }
 
     /**
