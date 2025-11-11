@@ -1,0 +1,1 @@
+import{j as e,L as s}from"./app-L9aY0gQS.js";function t(){return e.jsx(s,{href:"/",className:"flex items-center gap-2.5",children:e.jsx("img",{src:"/images/emkm.png",className:"h-12 w-auto",alt:"E-MKM"})})}export{t as A};
