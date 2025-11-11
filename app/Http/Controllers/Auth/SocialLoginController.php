@@ -28,6 +28,9 @@ class SocialLoginController extends Controller
             ]
         );
 
+        $user->email_verified_at = now();
+        $user->save();
+
         Auth::login($user);
 
         return redirect('/dashboard');
