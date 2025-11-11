@@ -1,3 +1,4 @@
+import AdBanner from '@/components/add-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -156,7 +157,10 @@ export default function Education() {
                                 </Link>
                             ) : (
                                 <>
-                                    <Link href={route('login')} className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition">
+                                    <Link
+                                        href={route('login')}
+                                        className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition"
+                                    >
                                         Sign In
                                     </Link>
                                     <Link
@@ -344,6 +348,9 @@ export default function Education() {
                         </div>
                     </div>
                 </section>
+
+                {/* Iklan AdSense */}
+                <AdBanner />
 
                 {/* Enhanced Stat Bar */}
                 <section className="border-y bg-white py-12 shadow-sm">

@@ -1,8 +1,7 @@
-import { Navbar } from '@/components/navbar';
+import AdBanner from '@/components/add-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { SkipLink } from '@/components/ui/skip-link';
 import { useArticleInteraction } from '@/hooks/useArticleInteraction';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -290,7 +289,10 @@ export default function ArticleShow() {
                                 </Link>
                             ) : (
                                 <>
-                                    <Link href={route('login')} className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition">
+                                    <Link
+                                        href={route('login')}
+                                        className="rounded-md bg-primary px-5 py-2 text-base font-medium text-white transition"
+                                    >
                                         Sign In
                                     </Link>
                                     <Link
@@ -391,9 +393,8 @@ export default function ArticleShow() {
                         </nav>
                     </div>
                 </header>
-
                 {/* Back Button - add top margin to avoid overlapping fixed navbar and tidy spacing */}
-                <section className="border-b bg-white py-4 mt-20">
+                <section className="mt-20 border-b bg-white py-4">
                     <div className="container mx-auto max-w-4xl px-4">
                         <Link
                             href={route('education.article.index')}
@@ -404,7 +405,6 @@ export default function ArticleShow() {
                         </Link>
                     </div>
                 </section>
-
                 {/* Article Header */}
                 <header className="relative bg-gradient-to-b from-[#F8FBFF] to-white py-12">
                     <div className="container mx-auto max-w-4xl px-4">
@@ -445,7 +445,6 @@ export default function ArticleShow() {
                         </div>
                     </div>
                 </header>
-
                 {/* Featured Image */}
                 {article.featured_image && (
                     <section className="bg-white" data-aos="fade-up">
@@ -457,7 +456,8 @@ export default function ArticleShow() {
                         </div>
                     </section>
                 )}
-
+                {/* Banner */}
+                <AdBanner />
                 {/* Main Content */}
                 <main className="py-12">
                     <div className="container mx-auto max-w-4xl px-4">
@@ -726,7 +726,6 @@ export default function ArticleShow() {
                         </div>
                     </div>
                 </main>
-
                 {/* Article Navigation */}
                 <section className="border-t bg-gray-50 py-8">
                     <div className="container mx-auto max-w-4xl px-4">
@@ -761,7 +760,6 @@ export default function ArticleShow() {
                         </div>
                     </div>
                 </section>
-
                 {/* Enhanced Footer */}
                 <footer className="border-t bg-gradient-to-r from-slate-50 to-blue-50">
                     <div className="mx-auto w-full max-w-screen-xl p-4 py-12 lg:py-16">

@@ -20,6 +20,10 @@
             })();
         </script>
 
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6031172361214159" crossorigin="anonymous"></script>
+
+        <meta name="google-adsense-account" content="ca-pub-6031172361214159">
+
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
